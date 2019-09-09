@@ -2,26 +2,30 @@ package ecsched
 
 import (
 	"fmt"
+	"io"
+	"io/ioutil"
 	"strings"
+
+	"github.com/ghodss/yaml"
 )
 
 type BaseConfig struct {
-	Region    string `yaml:"regison"`
-	Cluster   string `yaml:"cluster"`
-	Role      string `yaml:"role"`
-	AccountID string `yaml:"-"`
+	Region    string `json:"region"`
+	Cluster   string `json:"cluster"`
+	Role      string `json:"role"`
+	AccountID string `json:"-"`
 }
 
 type Config struct {
 	*BaseConfig
-	Rules []*Rule `yaml:"rules"`
+	Rules []*Rule `json:"rules"`
 }
 
 type Rule struct {
-	Name               string `yaml:"name"`
-	Description        string `yaml:"description"`
-	ScheduleExpression string `yaml:"scheduleExpression"`
-	Disable            bool   `yaml:"disable"` // ENABLE | DISABLE
+	Name               string `json:"name"`
+	Description        string `json:"description"`
+	ScheduleExpression string `json:"scheduleExpression"`
+	Disable            bool   `json:"disable"` // ENABLE | DISABLE
 	*Target
 	// Targets []Target
 
@@ -29,16 +33,16 @@ type Rule struct {
 }
 
 type Target struct {
-	TargetID           string               `yaml:"targetId,omitempty"`
-	TaskDefinition     string               `yaml:"taskDefinition"`
-	TaskCount          uint                 `yaml:"taskCount,omitempty"`
-	ContainerOverrides []*ContainerOverride `yaml:"containerOverrides"`
+	TargetID           string               `json:"targetId,omitempty"`
+	TaskDefinition     string               `json:"taskDefinition"`
+	TaskCount          uint                 `json:"taskCount,omitempty"`
+	ContainerOverrides []*ContainerOverride `json:"containerOverrides"`
 }
 
 type ContainerOverride struct {
-	Name        string            `yaml:"name"`
-	Command     []string          `yaml:"command"`
-	Environment map[string]string `yaml:"environment"`
+	Name        string            `json:"name"`
+	Command     []string          `json:"command"` // ,flow
+	Environment map[string]string `json:"environment"`
 }
 
 func (r *Rule) targetID() string {
@@ -71,4 +75,16 @@ func (r *Rule) taskDefinitionArn() string {
 		return r.TaskDefinition
 	}
 	return fmt.Sprintf("arn:aws:ecs:%s:%s:task-definition/%s", r.Region, r.AccountID, r.TaskDefinition)
+}
+
+func LoadConfig(r io.Reader) (*Config, error) {
+	c := Config{}
+	bs, err := ioutil.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
+	if err := yaml.Unmarshal(bs, &c); err != nil {
+		return nil, err
+	}
+	return &c, nil
 }
