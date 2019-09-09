@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/cloudwatchevents"
 	"github.com/ghodss/yaml"
 )
 
@@ -59,6 +61,13 @@ func (r *Rule) taskCount() uint {
 	return r.TaskCount
 }
 
+func (r *Rule) roleARN() string {
+	if strings.HasPrefix(r.Role, "arn:") {
+		return r.Role
+	}
+	return fmt.Sprintf("arn:aws:iam::%s:role/%s", r.AccountID, r.Role)
+}
+
 func (r *Rule) ruleARN() string {
 	return fmt.Sprintf("arn:aws:events:%s:%s:rule/%s", r.Region, r.AccountID, r.Name)
 }
@@ -77,6 +86,41 @@ func (r *Rule) taskDefinitionArn() string {
 	return fmt.Sprintf("arn:aws:ecs:%s:%s:task-definition/%s", r.Region, r.AccountID, r.TaskDefinition)
 }
 
+func (r *Rule) state() string {
+	if r.Disable {
+		return "DISABLED"
+	}
+	return "ENABLED"
+}
+
+func (r *Rule) mergeBaseConfig(bc *BaseConfig) {
+	if r.BaseConfig == nil {
+		r.BaseConfig = bc
+		return
+	}
+	if r.Region == "" {
+		r.Region = bc.Region
+	}
+	if r.Role == "" {
+		r.Role = bc.Role
+	}
+	if r.Cluster == "" {
+		r.Cluster = bc.Cluster
+	}
+	if r.AccountID == "" {
+		r.AccountID = bc.AccountID
+	}
+}
+
+func (r *Rule) PutRuleInput() *cloudwatchevents.PutRuleInput {
+	return &cloudwatchevents.PutRuleInput{
+		Description:        aws.String(r.Description),
+		Name:               aws.String(r.Name),
+		RoleArn:            aws.String(r.roleARN()),
+		ScheduleExpression: aws.String(r.ScheduleExpression),
+		State:              aws.String(r.state()),
+	}
+}
 func LoadConfig(r io.Reader) (*Config, error) {
 	c := Config{}
 	bs, err := ioutil.ReadAll(r)
