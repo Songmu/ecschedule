@@ -8,6 +8,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudwatchevents"
+	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/ghodss/yaml"
 )
 
@@ -37,7 +38,7 @@ type Rule struct {
 type Target struct {
 	TargetID           string               `json:"targetId,omitempty"`
 	TaskDefinition     string               `json:"taskDefinition"`
-	TaskCount          uint                 `json:"taskCount,omitempty"`
+	TaskCount          int64                `json:"taskCount,omitempty"`
 	ContainerOverrides []*ContainerOverride `json:"containerOverrides"`
 }
 
@@ -47,18 +48,18 @@ type ContainerOverride struct {
 	Environment map[string]string `json:"environment"`
 }
 
-func (r *Rule) targetID() string {
+func (ta *Target) targetID(r *Rule) string {
 	if r.TargetID == "" {
 		return r.Name
 	}
-	return r.TargetID
+	return ta.TargetID
 }
 
-func (r *Rule) taskCount() uint {
-	if r.TaskCount == 0 {
+func (ta *Target) taskCount() int64 {
+	if ta.TaskCount < 1 {
 		return 1
 	}
-	return r.TaskCount
+	return ta.TaskCount
 }
 
 func (r *Rule) roleARN() string {
@@ -72,14 +73,14 @@ func (r *Rule) ruleARN() string {
 	return fmt.Sprintf("arn:aws:events:%s:%s:rule/%s", r.Region, r.AccountID, r.Name)
 }
 
-func (r *Rule) targetARN() string {
+func (ta *Target) targetARN(r *Rule) string {
 	if strings.HasPrefix(r.Cluster, "arn:") {
 		return r.Cluster
 	}
 	return fmt.Sprintf("arn:aws:ecs:%s:%s:cluster/%s", r.Region, r.AccountID, r.Cluster)
 }
 
-func (r *Rule) taskDefinitionArn() string {
+func (ta *Target) taskDefinitionArn(r *Rule) string {
 	if strings.HasPrefix(r.TaskDefinition, "arn:") {
 		return r.TaskDefinition
 	}
@@ -121,6 +122,40 @@ func (r *Rule) PutRuleInput() *cloudwatchevents.PutRuleInput {
 		State:              aws.String(r.state()),
 	}
 }
+
+func (r *Rule) target() *cloudwatchevents.Target {
+	var containerOverrides []*ecs.ContainerOverride
+	for _, co := range r.ContainerOverrides {
+		var kvPairs []*ecs.KeyValuePair
+		for k, v := range co.Environment {
+			kvPairs = append(kvPairs, &ecs.KeyValuePair{
+				Name:  aws.String(k),
+				Value: aws.String(v),
+			})
+		}
+		var cmds []*string
+		for _, s := range co.Command {
+			cmds = append(cmds, aws.String(s))
+		}
+		containerOverrides = append(containerOverrides, &ecs.ContainerOverride{
+			Name:        aws.String(co.Name),
+			Command:     cmds,
+			Environment: kvPairs,
+		})
+	}
+
+	return &cloudwatchevents.Target{
+		Id:      aws.String(r.targetID(r)),
+		Arn:     aws.String(r.targetARN(r)),
+		RoleArn: aws.String(r.roleARN()),
+		EcsParameters: &cloudwatchevents.EcsParameters{
+			TaskDefinitionArn: aws.String(r.taskDefinitionArn(r)),
+			TaskCount:         aws.Int64(r.taskCount()),
+		},
+		Input: aws.String("sss"),
+	}
+}
+
 func LoadConfig(r io.Reader) (*Config, error) {
 	c := Config{}
 	bs, err := ioutil.ReadAll(r)
