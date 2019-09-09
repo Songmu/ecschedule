@@ -123,6 +123,13 @@ func (r *Rule) PutRuleInput() *cloudwatchevents.PutRuleInput {
 	}
 }
 
+func (r *Rule) PutTargetsInput() *cloudwatchevents.PutTargetsInput {
+	return &cloudwatchevents.PutTargetsInput{
+		Rule:    aws.String(r.Name),
+		Targets: []*cloudwatchevents.Target{r.target()},
+	}
+}
+
 func (r *Rule) target() *cloudwatchevents.Target {
 	var containerOverrides []*ecs.ContainerOverride
 	for _, co := range r.ContainerOverrides {
