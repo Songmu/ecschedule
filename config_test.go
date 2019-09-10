@@ -19,4 +19,7 @@ func TestLoadConfig(t *testing.T) {
 		t.Errorf("error shoud be nil, but: %s", err)
 	}
 	pp.Println(c)
+	r := c.Rules[0]
+	r.mergeBaseConfig(c.BaseConfig)
+	pp.Println(r.target())
 }

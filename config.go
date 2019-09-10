@@ -1,6 +1,7 @@
 package ecsched
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -8,7 +9,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudwatchevents"
-	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/ghodss/yaml"
 )
 
@@ -130,27 +130,41 @@ func (r *Rule) PutTargetsInput() *cloudwatchevents.PutTargetsInput {
 	}
 }
 
+type containerOverridesJSON struct {
+	ContainerOverrides []*containerOverrideJSON `json:"containerOverrides"`
+}
+
+type containerOverrideJSON struct {
+	Name        string    `json:"name"`
+	Command     []string  `json:"command"`
+	Environment []*kvPair `json:"environment"`
+}
+
+type kvPair struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
 func (r *Rule) target() *cloudwatchevents.Target {
-	var containerOverrides []*ecs.ContainerOverride
+	if r.Target == nil {
+		return nil
+	}
+	coj := &containerOverridesJSON{}
 	for _, co := range r.ContainerOverrides {
-		var kvPairs []*ecs.KeyValuePair
+		var kvPairs []*kvPair
 		for k, v := range co.Environment {
-			kvPairs = append(kvPairs, &ecs.KeyValuePair{
-				Name:  aws.String(k),
-				Value: aws.String(v),
+			kvPairs = append(kvPairs, &kvPair{
+				Name:  k,
+				Value: v,
 			})
 		}
-		var cmds []*string
-		for _, s := range co.Command {
-			cmds = append(cmds, aws.String(s))
-		}
-		containerOverrides = append(containerOverrides, &ecs.ContainerOverride{
-			Name:        aws.String(co.Name),
-			Command:     cmds,
+		coj.ContainerOverrides = append(coj.ContainerOverrides, &containerOverrideJSON{
+			Name:        co.Name,
+			Command:     co.Command,
 			Environment: kvPairs,
 		})
 	}
-
+	bs, _ := json.Marshal(coj)
 	return &cloudwatchevents.Target{
 		Id:      aws.String(r.targetID(r)),
 		Arn:     aws.String(r.targetARN(r)),
@@ -159,7 +173,7 @@ func (r *Rule) target() *cloudwatchevents.Target {
 			TaskDefinitionArn: aws.String(r.taskDefinitionArn(r)),
 			TaskCount:         aws.Int64(r.taskCount()),
 		},
-		Input: aws.String("sss"),
+		Input: aws.String(string(bs)),
 	}
 }
 
