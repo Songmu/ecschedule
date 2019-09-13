@@ -158,8 +158,10 @@ RuleList:
 		case 1:
 			ru.Target = targets[0]
 		default:
-			ru.Target = targets[0]
-			ru.Targets = targets[1:]
+			// not supported multiple target yet
+			continue RuleList
+			// ru.Target = targets[0]
+			// ru.Targets = targets[1:]
 		}
 		rules = append(rules, ru)
 	}

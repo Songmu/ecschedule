@@ -1,6 +1,6 @@
 region: us-east-1
 cluster: api
-role: ecsEventRole
+role: ecsEventsRole
 rules:
 - name: hoge-task-name
   description: hoge description

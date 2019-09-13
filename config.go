@@ -30,7 +30,7 @@ type Rule struct {
 	ScheduleExpression string `json:"scheduleExpression"`
 	Disable            bool   `json:"disable,omitempty"` // ENABLE | DISABLE
 	*Target
-	Targets []*Target `json:"targets,omitempty"`
+	// Targets []*Target `json:"targets,omitempty"`
 
 	*BaseConfig
 }
