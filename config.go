@@ -12,14 +12,16 @@ import (
 	"github.com/ghodss/yaml"
 )
 
+const defaultRole = "ecsEventsRole"
+
 type BaseConfig struct {
 	Region    string `json:"region"`
 	Cluster   string `json:"cluster"`
-	Role      string `json:"role"`
 	AccountID string `json:"-"`
 }
 
 type Config struct {
+	Role string `json:"role,omitempty"`
 	*BaseConfig
 	Rules []*Rule `json:"rules"`
 }
@@ -40,6 +42,7 @@ type Target struct {
 	TaskDefinition     string               `json:"taskDefinition"`
 	TaskCount          int64                `json:"taskCount,omitempty"`
 	ContainerOverrides []*ContainerOverride `json:"containerOverrides,omitempty"`
+	Role               string               `json:"role,omitempty"`
 }
 
 type ContainerOverride struct {
@@ -66,7 +69,11 @@ func (r *Rule) roleARN() string {
 	if strings.HasPrefix(r.Role, "arn:") {
 		return r.Role
 	}
-	return fmt.Sprintf("arn:aws:iam::%s:role/%s", r.AccountID, r.Role)
+	role := r.Role
+	if role == "" {
+		role = defaultRole
+	}
+	return fmt.Sprintf("arn:aws:iam::%s:role/%s", r.AccountID, role)
 }
 
 func (r *Rule) ruleARN() string {
@@ -94,7 +101,7 @@ func (r *Rule) state() string {
 	return "ENABLED"
 }
 
-func (r *Rule) mergeBaseConfig(bc *BaseConfig) {
+func (r *Rule) mergeBaseConfig(bc *BaseConfig, role string) {
 	if r.BaseConfig == nil {
 		r.BaseConfig = bc
 		return
@@ -103,7 +110,7 @@ func (r *Rule) mergeBaseConfig(bc *BaseConfig) {
 		r.Region = bc.Region
 	}
 	if r.Role == "" {
-		r.Role = bc.Role
+		r.Role = role
 	}
 	if r.Cluster == "" {
 		r.Cluster = bc.Cluster

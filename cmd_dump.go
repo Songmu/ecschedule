@@ -58,15 +58,20 @@ func (cd *cmdDump) run(ctx context.Context, argv []string, outStream, errStream 
 	if *cluster == "" {
 		*cluster = c.Cluster
 	}
-	if *role == "" { // TODO: ecsEventsRole by default?
-		*role = c.Role
+	if c.Role == "" {
+		c.Role = *role
 	}
-	if *region == "" || *cluster == "" || *role == "" {
-		return fmt.Errorf("all of region, cluster and role are should be specified")
+	if *role == "" {
+		*role = c.Role
+		if *role == "" {
+			*role = defaultRole
+		}
+	}
+	if *region == "" || *cluster == "" {
+		return fmt.Errorf("region and cluster are must be specified")
 	}
 	c.Region = *region
 	c.Cluster = *cluster
-	c.Role = *role
 	sess, err := NewAWSSession(*region)
 	if err != nil {
 		return err
@@ -81,10 +86,14 @@ func (cd *cmdDump) run(ctx context.Context, argv []string, outStream, errStream 
 	if err != nil {
 		return err
 	}
-	var rules []*Rule
-	ruleArnPrefix := fmt.Sprintf("arn:aws:events:%s:%s:rule/", *region, accountID)
-	clusterArn := fmt.Sprintf("arn:aws:ecs:%s:%s:cluster/%s", *region, accountID, *cluster)
-	taskDefArnPrefix := fmt.Sprintf("arn:aws:%s:%s:task-definition/", *region, accountID)
+	var (
+		rules            []*Rule
+		ruleArnPrefix    = fmt.Sprintf("arn:aws:events:%s:%s:rule/", *region, accountID)
+		clusterArn       = fmt.Sprintf("arn:aws:ecs:%s:%s:cluster/%s", *region, accountID, *cluster)
+		taskDefArnPrefix = fmt.Sprintf("arn:aws:%s:%s:task-definition/", *region, accountID)
+		roleArnPrefix    = fmt.Sprintf("arn:aws:iam::%s:role/", accountID)
+		roleArn          = fmt.Sprintf("%s%s", roleArnPrefix, *role)
+	)
 RuleList:
 	for _, r := range ruleList.Rules {
 		if !strings.HasPrefix(*r.Arn, ruleArnPrefix) {
@@ -111,6 +120,10 @@ RuleList:
 				continue RuleList
 			}
 			target := &Target{TargetID: targetID}
+
+			if role := *t.RoleArn; role != roleArn {
+				target.Role = strings.TrimPrefix(role, roleArnPrefix)
+			}
 
 			taskCount := *ecsParams.TaskCount
 			if taskCount != 1 {
@@ -142,7 +155,6 @@ RuleList:
 					Environment: env,
 				})
 			}
-			// TODO: assign Role
 			target.ContainerOverrides = contOverrides
 			targets = append(targets, target)
 		}
