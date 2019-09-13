@@ -28,9 +28,9 @@ type Rule struct {
 	Name               string `json:"name"`
 	Description        string `json:"description"`
 	ScheduleExpression string `json:"scheduleExpression"`
-	Disable            bool   `json:"disable"` // ENABLE | DISABLE
+	Disable            bool   `json:"disable,omitempty"` // ENABLE | DISABLE
 	*Target
-	// Targets []Target
+	Targets []*Target `json:"targets,omitempty"`
 
 	*BaseConfig
 }
@@ -39,13 +39,13 @@ type Target struct {
 	TargetID           string               `json:"targetId,omitempty"`
 	TaskDefinition     string               `json:"taskDefinition"`
 	TaskCount          int64                `json:"taskCount,omitempty"`
-	ContainerOverrides []*ContainerOverride `json:"containerOverrides"`
+	ContainerOverrides []*ContainerOverride `json:"containerOverrides,omitempty"`
 }
 
 type ContainerOverride struct {
 	Name        string            `json:"name"`
 	Command     []string          `json:"command"` // ,flow
-	Environment map[string]string `json:"environment"`
+	Environment map[string]string `json:"environment,omitempty"`
 }
 
 func (ta *Target) targetID(r *Rule) string {
