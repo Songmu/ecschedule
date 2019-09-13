@@ -58,7 +58,7 @@ func (cd *cmdDump) run(ctx context.Context, argv []string, outStream, errStream 
 	if *cluster == "" {
 		*cluster = c.Cluster
 	}
-	if *role == "" {
+	if *role == "" { // TODO: ecsEventsRole by default?
 		*role = c.Role
 	}
 	if *region == "" || *cluster == "" || *role == "" {
@@ -142,6 +142,7 @@ RuleList:
 					Environment: env,
 				})
 			}
+			// TODO: assign Role
 			target.ContainerOverrides = contOverrides
 			targets = append(targets, target)
 		}
