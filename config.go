@@ -149,8 +149,7 @@ func (r *Rule) PutTargetsInput() *cloudwatchevents.PutTargetsInput {
 }
 
 func (r *Rule) Apply(ctx context.Context) error {
-	return fmt.Errorf("not implemented")
-	sess, err := NewAWSSession(r.Region)
+	sess, err := NewAWSSession()
 	if err != nil {
 		return err
 	}
@@ -209,7 +208,7 @@ func (r *Rule) target() *cloudwatchevents.Target {
 	}
 }
 
-func LoadConfig(r io.Reader) (*Config, error) {
+func LoadConfig(r io.Reader, accountID string) (*Config, error) {
 	c := Config{}
 	bs, err := ioutil.ReadAll(r)
 	if err != nil {
@@ -218,6 +217,7 @@ func LoadConfig(r io.Reader) (*Config, error) {
 	if err := yaml.Unmarshal(bs, &c); err != nil {
 		return nil, err
 	}
+	c.AccountID = accountID
 	for _, r := range c.Rules {
 		r.mergeBaseConfig(c.BaseConfig, c.Role)
 	}

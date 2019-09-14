@@ -20,7 +20,6 @@ func (cd *cmdApply) description() string {
 }
 
 func (cd *cmdApply) run(ctx context.Context, argv []string, outStream, errStream io.Writer) error {
-	return nil
 	fs := flag.NewFlagSet("ecsched apply", flag.ContinueOnError)
 	fs.SetOutput(errStream)
 	var (
@@ -34,14 +33,15 @@ func (cd *cmdApply) run(ctx context.Context, argv []string, outStream, errStream
 	if *rule == "" {
 		return errors.New("-rule option required")
 	}
-	c := getConfig(ctx)
+	a := getApp(ctx)
+	c := a.Config
 	if *conf != "" {
 		f, err := os.Open(*conf)
 		if err != nil {
 			return err
 		}
 		defer f.Close()
-		c, err = LoadConfig(f)
+		c, err = LoadConfig(f, a.AccountID)
 		if err != nil {
 			return err
 		}

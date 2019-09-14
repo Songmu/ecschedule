@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudwatchevents"
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/ghodss/yaml"
@@ -36,14 +37,16 @@ func (cd *cmdDump) run(ctx context.Context, argv []string, outStream, errStream 
 	if err := fs.Parse(argv); err != nil {
 		return err
 	}
-	c := getConfig(ctx)
+	a := getApp(ctx)
+	c := a.Config
+	accountID := a.AccountID
 	if *conf != "" {
 		f, err := os.Open(*conf)
 		if err != nil {
 			return err
 		}
 		defer f.Close()
-		c, err = LoadConfig(f)
+		c, err = LoadConfig(f, a.AccountID)
 		if err != nil {
 			return err
 		}
@@ -71,16 +74,9 @@ func (cd *cmdDump) run(ctx context.Context, argv []string, outStream, errStream 
 	}
 	c.Region = *region
 	c.Cluster = *cluster
-	sess, err := NewAWSSession(*region)
-	if err != nil {
-		return err
-	}
-	accountID, err := GetAWSAccountID(sess)
-	if err != nil {
-		return err
-	}
-	c.AccountID = accountID
-	svc := cloudwatchevents.New(sess)
+
+	sess := a.Session
+	svc := cloudwatchevents.New(sess, &aws.Config{Region: region})
 	ruleList, err := svc.ListRulesWithContext(ctx, &cloudwatchevents.ListRulesInput{})
 	if err != nil {
 		return err

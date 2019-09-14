@@ -14,7 +14,7 @@ func TestLoadConfig(t *testing.T) {
 	}
 	defer f.Close()
 
-	c, err := LoadConfig(f)
+	c, err := LoadConfig(f, "")
 	if err != nil {
 		t.Errorf("error shoud be nil, but: %s", err)
 	}

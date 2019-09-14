@@ -1,19 +1,29 @@
 package ecsched
 
-import "context"
+import (
+	"context"
+
+	"github.com/aws/aws-sdk-go/aws/session"
+)
 
 type contextKey string
 
-const configKey contextKey = "config"
+const appKey contextKey = "app"
 
-func setConfig(ctx context.Context, c *Config) context.Context {
-	return context.WithValue(ctx, configKey, c)
+type app struct {
+	Config    *Config
+	AccountID string
+	Session   *session.Session
 }
 
-func getConfig(ctx context.Context) *Config {
-	iface := ctx.Value(configKey)
-	if c, ok := iface.(*Config); ok {
-		return c
+func setApp(ctx context.Context, a *app) context.Context {
+	return context.WithValue(ctx, appKey, a)
+}
+
+func getApp(ctx context.Context) *app {
+	iface := ctx.Value(appKey)
+	if a, ok := iface.(*app); ok {
+		return a
 	}
 	return nil
 }

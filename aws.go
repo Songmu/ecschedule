@@ -4,13 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sts"
 )
 
-func NewAWSSession(region string) (*session.Session, error) {
-	return session.NewSession(&aws.Config{Region: aws.String(region)})
+func NewAWSSession() (*session.Session, error) {
+	return session.NewSession()
 }
 
 func GetAWSAccountID(sess *session.Session) (string, error) {

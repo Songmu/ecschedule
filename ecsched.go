@@ -27,19 +27,31 @@ func Run(argv []string, outStream, errStream io.Writer) error {
 	if *ver {
 		return printVersion(outStream)
 	}
-	ctx := context.Background()
+	sess, err := NewAWSSession()
+	if err != nil {
+		return err
+	}
+	accountID, err := GetAWSAccountID(sess)
+	if err != nil {
+		return err
+	}
+	a := &app{
+		AccountID: accountID,
+		Session:   sess,
+	}
 	if *conf != "" {
 		f, err := os.Open(*conf)
 		if err != nil {
 			return err
 		}
 		defer f.Close()
-		c, err := LoadConfig(f)
+		c, err := LoadConfig(f, a.AccountID)
 		if err != nil {
 			return err
 		}
-		setConfig(ctx, c)
+		a.Config = c
 	}
+	ctx := setApp(context.Background(), a)
 	argv = fs.Args()
 	if len(argv) < 1 {
 		return fmt.Errorf("no subcommand specified")
