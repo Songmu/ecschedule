@@ -144,8 +144,8 @@ type containerOverridesJSON struct {
 
 type containerOverrideJSON struct {
 	Name        string    `json:"name"`
-	Command     []string  `json:"command"`
-	Environment []*kvPair `json:"environment"`
+	Command     []string  `json:"command,omitempty"`
+	Environment []*kvPair `json:"environment,omitempty"`
 }
 
 type kvPair struct {
