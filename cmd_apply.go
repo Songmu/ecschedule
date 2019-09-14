@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+
+	"github.com/k0kubun/pp"
 )
 
 type cmdApply struct{}
@@ -23,8 +25,9 @@ func (cd *cmdApply) run(ctx context.Context, argv []string, outStream, errStream
 	fs := flag.NewFlagSet("ecsched apply", flag.ContinueOnError)
 	fs.SetOutput(errStream)
 	var (
-		conf = fs.String("conf", "", "configuration")
-		rule = fs.String("rule", "", "rule")
+		conf   = fs.String("conf", "", "configuration")
+		rule   = fs.String("rule", "", "rule")
+		dryRun = fs.Bool("dry-run", false, "dry run")
 		// all  = fs.Bool("all", false, "apply all rules")
 	)
 	if err := fs.Parse(argv); err != nil {
@@ -49,6 +52,10 @@ func (cd *cmdApply) run(ctx context.Context, argv []string, outStream, errStream
 	ru := c.GetRuleByName(*rule)
 	if ru == nil {
 		return fmt.Errorf("no rules found for %s", *rule)
+	}
+	if *dryRun {
+		pp.Println(ru)
+		return nil
 	}
 	return ru.Apply(ctx, a.Session)
 }
