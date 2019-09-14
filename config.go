@@ -1,6 +1,7 @@
 package ecsched
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -145,6 +146,10 @@ func (r *Rule) PutTargetsInput() *cloudwatchevents.PutTargetsInput {
 		Rule:    aws.String(r.Name),
 		Targets: []*cloudwatchevents.Target{r.target()},
 	}
+}
+
+func (r *Rule) Apply(ctx context.Context) error {
+	return fmt.Errorf("not implemented")
 }
 
 type containerOverridesJSON struct {

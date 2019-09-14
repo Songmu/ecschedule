@@ -59,6 +59,7 @@ func printVersion(out io.Writer) error {
 var (
 	subCommands = []runner{
 		&cmdDump{},
+		&cmdApply{},
 	}
 	dispatch          = make(map[string]runner, len(subCommands))
 	maxSubcommandName int

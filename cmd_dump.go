@@ -28,7 +28,7 @@ func (cd *cmdDump) run(ctx context.Context, argv []string, outStream, errStream 
 	fs := flag.NewFlagSet("ecsched dump", flag.ContinueOnError)
 	fs.SetOutput(errStream)
 	var (
-		conf    = fs.String("conf", "", "configuration") // TODO --config is beter?
+		conf    = fs.String("conf", "", "configuration")
 		region  = fs.String("region", "", "region")
 		cluster = fs.String("cluster", "", "cluster")
 		role    = fs.String("role", "", "role")
