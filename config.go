@@ -30,7 +30,7 @@ type Rule struct {
 	Name               string `json:"name"`
 	Description        string `json:"description"`
 	ScheduleExpression string `json:"scheduleExpression"`
-	Disable            bool   `json:"disable,omitempty"` // ENABLE | DISABLE
+	Disabled           bool   `json:"disabled,omitempty"` // ENABLE | DISABLE
 	*Target
 	// Targets []*Target `json:"targets,omitempty"`
 
@@ -95,7 +95,7 @@ func (ta *Target) taskDefinitionArn(r *Rule) string {
 }
 
 func (r *Rule) state() string {
-	if r.Disable {
+	if r.Disabled {
 		return "DISABLED"
 	}
 	return "ENABLED"

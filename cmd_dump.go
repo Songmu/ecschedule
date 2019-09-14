@@ -29,7 +29,6 @@ func (cd *cmdDump) run(ctx context.Context, argv []string, outStream, errStream 
 	fs.SetOutput(errStream)
 	var (
 		conf    = fs.String("conf", "", "configuration") // TODO --config is beter?
-		write   = fs.Bool("w", false, "overwrite configuration file")
 		region  = fs.String("region", "", "region")
 		cluster = fs.String("cluster", "", "cluster")
 		role    = fs.String("role", "", "role")
@@ -90,7 +89,7 @@ func (cd *cmdDump) run(ctx context.Context, argv []string, outStream, errStream 
 		rules            []*Rule
 		ruleArnPrefix    = fmt.Sprintf("arn:aws:events:%s:%s:rule/", *region, accountID)
 		clusterArn       = fmt.Sprintf("arn:aws:ecs:%s:%s:cluster/%s", *region, accountID, *cluster)
-		taskDefArnPrefix = fmt.Sprintf("arn:aws:%s:%s:task-definition/", *region, accountID)
+		taskDefArnPrefix = fmt.Sprintf("arn:aws:ecs:%s:%s:task-definition/", *region, accountID)
 		roleArnPrefix    = fmt.Sprintf("arn:aws:iam::%s:role/", accountID)
 		roleArn          = fmt.Sprintf("%s%s", roleArnPrefix, *role)
 	)
@@ -129,11 +128,7 @@ RuleList:
 			if taskCount != 1 {
 				target.TaskCount = taskCount
 			}
-			taskDef := *ecsParams.TaskDefinitionArn
-			if strings.HasPrefix(taskDef, taskDefArnPrefix) {
-				taskDef = strings.TrimPrefix(taskDef, taskDefArnPrefix)
-			}
-			target.TaskDefinition = taskDef
+			target.TaskDefinition = strings.TrimPrefix(*ecsParams.TaskDefinitionArn, taskDefArnPrefix)
 
 			taskOv := &ecs.TaskOverride{}
 			if err := json.Unmarshal([]byte(*t.Input), taskOv); err != nil {
@@ -162,7 +157,7 @@ RuleList:
 			Name:               *r.Name,
 			Description:        *r.Description,
 			ScheduleExpression: *r.ScheduleExpression,
-			Disable:            *r.State == "DISABLED",
+			Disabled:           *r.State == "DISABLED",
 		}
 		switch len(targets) {
 		case 0:
@@ -183,6 +178,5 @@ RuleList:
 		return err
 	}
 	fmt.Fprint(outStream, string(bs))
-	_ = write
 	return nil
 }
