@@ -26,6 +26,15 @@ type Config struct {
 	Rules []*Rule `json:"rules"`
 }
 
+func (c *Config) GetRuleByName(name string) *Rule {
+	for _, r := range c.Rules {
+		if r.Name == name {
+			return r
+		}
+	}
+	return nil
+}
+
 type Rule struct {
 	Name               string `json:"name"`
 	Description        string `json:"description"`
