@@ -20,6 +20,5 @@ func TestLoadConfig(t *testing.T) {
 	}
 	pp.Println(c)
 	r := c.Rules[0]
-	r.mergeBaseConfig(c.BaseConfig)
 	pp.Println(r.target())
 }

@@ -102,15 +102,16 @@ func (r *Rule) state() string {
 }
 
 func (r *Rule) mergeBaseConfig(bc *BaseConfig, role string) {
+	if r.Role == "" {
+		// XXX care multiple target
+		r.Role = role
+	}
 	if r.BaseConfig == nil {
 		r.BaseConfig = bc
 		return
 	}
 	if r.Region == "" {
 		r.Region = bc.Region
-	}
-	if r.Role == "" {
-		r.Role = role
 	}
 	if r.Cluster == "" {
 		r.Cluster = bc.Cluster
@@ -192,6 +193,9 @@ func LoadConfig(r io.Reader) (*Config, error) {
 	}
 	if err := yaml.Unmarshal(bs, &c); err != nil {
 		return nil, err
+	}
+	for _, r := range c.Rules {
+		r.mergeBaseConfig(c.BaseConfig, c.Role)
 	}
 	return &c, nil
 }
