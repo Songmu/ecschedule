@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudwatchevents"
 	"github.com/ghodss/yaml"
 )
@@ -148,16 +149,12 @@ func (r *Rule) PutTargetsInput() *cloudwatchevents.PutTargetsInput {
 	}
 }
 
-func (r *Rule) Apply(ctx context.Context) error {
-	sess, err := NewAWSSession()
-	if err != nil {
-		return err
-	}
-	svc := cloudwatchevents.New(sess)
+func (r *Rule) Apply(ctx context.Context, sess *session.Session) error {
+	svc := cloudwatchevents.New(sess, &aws.Config{Region: aws.String(r.Region)})
 	if _, err := svc.PutRule(r.PutRuleInput()); err != nil {
 		return err
 	}
-	_, err = svc.PutTargets(r.PutTargetsInput())
+	_, err := svc.PutTargets(r.PutTargetsInput())
 	return err
 }
 

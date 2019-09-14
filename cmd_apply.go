@@ -50,5 +50,5 @@ func (cd *cmdApply) run(ctx context.Context, argv []string, outStream, errStream
 	if ru == nil {
 		return fmt.Errorf("no rules found for %s", *rule)
 	}
-	return ru.Apply(ctx)
+	return ru.Apply(ctx, a.Session)
 }
