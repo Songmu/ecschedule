@@ -2,6 +2,7 @@ package ecsched
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -29,6 +30,9 @@ func (cd *cmdApply) run(ctx context.Context, argv []string, outStream, errStream
 	)
 	if err := fs.Parse(argv); err != nil {
 		return err
+	}
+	if *rule == "" {
+		return errors.New("-rule option required")
 	}
 	c := getConfig(ctx)
 	if *conf != "" {

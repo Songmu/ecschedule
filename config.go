@@ -150,6 +150,16 @@ func (r *Rule) PutTargetsInput() *cloudwatchevents.PutTargetsInput {
 
 func (r *Rule) Apply(ctx context.Context) error {
 	return fmt.Errorf("not implemented")
+	sess, err := NewAWSSession(r.Region)
+	if err != nil {
+		return err
+	}
+	svc := cloudwatchevents.New(sess)
+	if _, err := svc.PutRule(r.PutRuleInput()); err != nil {
+		return err
+	}
+	_, err = svc.PutTargets(r.PutTargetsInput())
+	return err
 }
 
 type containerOverridesJSON struct {
