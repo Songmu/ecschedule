@@ -211,6 +211,10 @@ func LoadConfig(r io.Reader, accountID string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+	bs, err = envReplacer(bs)
+	if err != nil {
+		return nil, err
+	}
 	if err := yaml.Unmarshal(bs, &c); err != nil {
 		return nil, err
 	}

@@ -10,4 +10,4 @@ rules:
   - name: container1
     command: ["subcmd", "argument"]
     environment:
-      HOGE_ENV: HOGEGE
+      HOGE_ENV: {{ env "DUMMY_HOGE_ENV" "HOGEGE" }}
