@@ -158,6 +158,10 @@ func (r *Rule) Apply(ctx context.Context, sess *session.Session) error {
 	return err
 }
 
+func (r *Rule) Run(ctx context.Context, sess *session.Session, noWait bool) error {
+	return fmt.Errorf("not implemented")
+}
+
 type containerOverridesJSON struct {
 	ContainerOverrides []*containerOverrideJSON `json:"containerOverrides"`
 }

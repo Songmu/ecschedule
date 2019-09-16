@@ -8,28 +8,26 @@ import (
 	"io"
 	"log"
 	"os"
-
-	"github.com/ghodss/yaml"
 )
 
-type cmdApply struct{}
+type cmdRun struct{}
 
-func (cd *cmdApply) name() string {
-	return "apply"
+func (cd *cmdRun) name() string {
+	return "run"
 }
 
-func (cd *cmdApply) description() string {
-	return "apply the rule"
+func (cd *cmdRun) description() string {
+	return "run the rule"
 }
 
-func (cd *cmdApply) run(ctx context.Context, argv []string, outStream, errStream io.Writer) (err error) {
-	fs := flag.NewFlagSet("ecsched apply", flag.ContinueOnError)
+func (cd *cmdRun) run(ctx context.Context, argv []string, outStream, errStream io.Writer) (err error) {
+	fs := flag.NewFlagSet("ecsched run", flag.ContinueOnError)
 	fs.SetOutput(errStream)
 	var (
 		conf   = fs.String("conf", "", "configuration")
 		rule   = fs.String("rule", "", "rule")
 		dryRun = fs.Bool("dry-run", false, "dry run")
-		// all  = fs.Bool("all", false, "apply all rules")
+		noWait = fs.Bool("no-wait", false, "exit immediately after starting the rule")
 	)
 	if err := fs.Parse(argv); err != nil {
 		return err
@@ -58,19 +56,14 @@ func (cd *cmdApply) run(ctx context.Context, argv []string, outStream, errStream
 	if *dryRun {
 		dryRunSuffix = " (dry-run)"
 	}
-	log.Printf("applying the rule %q%s", *rule, dryRunSuffix)
+	log.Printf("running the rule %q%s", *rule, dryRunSuffix)
 	defer func() {
 		if err == nil {
-			for _, v := range ru.ContainerOverrides {
-				// mask environment variables
-				v.Environment = nil
-			}
-			bs, _ := yaml.Marshal(ru)
-			log.Printf("following rule applied%s\n%s", dryRunSuffix, string(bs))
+			log.Printf("Run the rule %q completed!%s", ru.Name, dryRunSuffix)
 		}
 	}()
 	if *dryRun {
 		return nil
 	}
-	return ru.Apply(ctx, a.Session)
+	return ru.Run(ctx, a.Session, *noWait)
 }

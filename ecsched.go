@@ -73,6 +73,7 @@ var (
 	subCommands = []runner{
 		&cmdDump{},
 		&cmdApply{},
+		&cmdRun{},
 	}
 	dispatch          = make(map[string]runner, len(subCommands))
 	maxSubcommandName int
