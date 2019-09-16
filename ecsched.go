@@ -14,6 +14,7 @@ const cmdName = "ecsched"
 // Run the ecsched
 func Run(argv []string, outStream, errStream io.Writer) error {
 	log.SetOutput(errStream)
+	log.SetPrefix(fmt.Sprintf("[%s] ", cmdName))
 	fs := flag.NewFlagSet(
 		fmt.Sprintf("%s (v%s rev:%s)", cmdName, version, revision), flag.ContinueOnError)
 	fs.SetOutput(errStream)
