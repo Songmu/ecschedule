@@ -2,9 +2,8 @@ package ecsched
 
 import (
 	"os"
+	"reflect"
 	"testing"
-
-	"github.com/k0kubun/pp"
 )
 
 func TestLoadConfig(t *testing.T) {
@@ -14,11 +13,52 @@ func TestLoadConfig(t *testing.T) {
 	}
 	defer f.Close()
 
-	c, err := LoadConfig(f, "")
+	c, err := LoadConfig(f, "334")
 	if err != nil {
 		t.Errorf("error shoud be nil, but: %s", err)
 	}
-	pp.Println(c)
-	r := c.Rules[0]
-	pp.Println(r.target())
+
+	expect := &Config{
+		Role: "ecsEventsRole",
+		BaseConfig: &BaseConfig{
+			Region:    "us-east-1",
+			Cluster:   "api",
+			AccountID: "334",
+		},
+		Rules: []*Rule{
+			&Rule{
+				Name:               "hoge-task-name",
+				Description:        "hoge description",
+				ScheduleExpression: "cron(0 0 * * ? *)",
+				Disabled:           false,
+				Target: &Target{
+					TargetID:       "",
+					TaskDefinition: "task1",
+					TaskCount:      0,
+					ContainerOverrides: []*ContainerOverride{
+						&ContainerOverride{
+							Name: "container1",
+							Command: []string{
+								"subcmd",
+								"argument",
+							},
+							Environment: map[string]string{
+								"HOGE_ENV": "HOGEGE",
+							},
+						},
+					},
+					Role: "ecsEventsRole",
+				},
+				BaseConfig: &BaseConfig{
+					Region:    "us-east-1",
+					Cluster:   "api",
+					AccountID: "334",
+				},
+			},
+		},
+	}
+
+	if !reflect.DeepEqual(c, expect) {
+		t.Errorf("unexpected output: %#v", c)
+	}
 }
