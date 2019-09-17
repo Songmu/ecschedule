@@ -141,7 +141,7 @@ RuleList:
 					env[*kv.Name] = *kv.Value
 				}
 				contOverrides = append(contOverrides, &ContainerOverride{
-					Name:        *r.Name,
+					Name:        *co.Name,
 					Command:     cmd,
 					Environment: env,
 				})
