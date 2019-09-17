@@ -11,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudwatchevents"
+	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/ghodss/yaml"
 )
 
@@ -159,6 +160,46 @@ func (r *Rule) Apply(ctx context.Context, sess *session.Session) error {
 }
 
 func (r *Rule) Run(ctx context.Context, sess *session.Session, noWait bool) error {
+	return fmt.Errorf("not implemented")
+	svc := ecs.New(sess, &aws.Config{Region: aws.String(r.Region)})
+	var contaierOverrides []*ecs.ContainerOverride
+	for _, co := range r.ContainerOverrides {
+		var (
+			kvPairs []*ecs.KeyValuePair
+			command []*string
+		)
+		for k, v := range co.Environment {
+			kvPairs = append(kvPairs, &ecs.KeyValuePair{
+				Name:  aws.String(k),
+				Value: aws.String(v),
+			})
+		}
+		for _, v := range co.Command {
+			command = append(command, aws.String(v))
+		}
+		contaierOverrides = append(contaierOverrides, &ecs.ContainerOverride{
+			Name:        aws.String(co.Name),
+			Environment: kvPairs,
+			Command:     command,
+		})
+	}
+
+	out, err := svc.RunTaskWithContext(ctx,
+		&ecs.RunTaskInput{
+			Cluster:        aws.String(r.Cluster),
+			TaskDefinition: aws.String(r.taskDefinitionArn(r)),
+			Overrides: &ecs.TaskOverride{
+				ContainerOverrides: contaierOverrides,
+			},
+			Count: aws.Int64(r.taskCount()),
+		})
+	if err != nil {
+		return err
+	}
+	if len(out.Failures) > 0 {
+		f := out.Failures[0]
+		return fmt.Errorf("failed to Task. Arn: %q: %s", *f.Arn, *f.Reason)
+	}
 	return fmt.Errorf("not implemented")
 }
 
