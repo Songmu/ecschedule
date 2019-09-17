@@ -66,7 +66,7 @@ func (cd *cmdApply) run(ctx context.Context, argv []string, outStream, errStream
 				v.Environment = nil
 			}
 			bs, _ := yaml.Marshal(ru)
-			log.Printf("following rule applied%s\n%s", dryRunSuffix, string(bs))
+			log.Printf("✅ following rule applied%s\n%s", dryRunSuffix, string(bs))
 		}
 	}()
 	if *dryRun {
