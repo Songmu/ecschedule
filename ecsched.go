@@ -15,9 +15,17 @@ const cmdName = "ecsched"
 func Run(argv []string, outStream, errStream io.Writer) error {
 	log.SetOutput(errStream)
 	log.SetPrefix(fmt.Sprintf("[%s] ", cmdName))
+	nameAndVer := fmt.Sprintf("%s (v%s rev:%s)", cmdName, version, revision)
 	fs := flag.NewFlagSet(
 		fmt.Sprintf("%s (v%s rev:%s)", cmdName, version, revision), flag.ContinueOnError)
 	fs.SetOutput(errStream)
+	fs.Usage = func() {
+		fmt.Fprintf(fs.Output(), "Usage of %s:\n", nameAndVer)
+		fs.PrintDefaults()
+		fmt.Fprintf(fs.Output(), "\nCommands:\n")
+		formatCommands(fs.Output())
+	}
+
 	var (
 		conf = fs.String("conf", "", "configuration")
 		ver  = fs.Bool("version", false, "display version")
@@ -91,9 +99,9 @@ func init() {
 }
 
 func formatCommands(out io.Writer) {
-	format := fmt.Sprintf("    %%-%ds  %%\n", maxSubcommandName)
+	format := fmt.Sprintf("  %%-%ds  %%s\n", maxSubcommandName)
 	for _, r := range subCommands {
-		fmt.Fprint(out, format, r.name(), r.description())
+		fmt.Fprintf(out, format, r.name(), r.description())
 	}
 }
 
