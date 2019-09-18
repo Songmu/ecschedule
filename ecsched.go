@@ -65,7 +65,7 @@ func Run(argv []string, outStream, errStream io.Writer) error {
 	if len(argv) < 1 {
 		return fmt.Errorf("no subcommand specified")
 	}
-	rnr, ok := dispatch[argv[0]]
+	rnr, ok := cmder.dispatch[argv[0]]
 	if !ok {
 		return fmt.Errorf("unknown subcommand: %s", argv[0])
 	}
@@ -77,30 +77,43 @@ func printVersion(out io.Writer) error {
 	return err
 }
 
-var (
-	subCommands = []runner{
-		&cmdDump{},
-		&cmdApply{},
-		&cmdRun{},
-	}
-	dispatch          = make(map[string]runner, len(subCommands))
-	maxSubcommandName int
-)
+type commander struct {
+	cmdNames             []string
+	dispatch             map[string]runner
+	maxSubcommandNameLen int
+}
 
-func init() {
-	for _, r := range subCommands {
+func (co *commander) register(rnrs ...runner) {
+	for _, r := range rnrs {
 		n := r.name()
-		l := len(n)
-		if l > maxSubcommandName {
-			maxSubcommandName = l
+		if co.dispatch == nil {
+			co.dispatch = map[string]runner{}
 		}
-		dispatch[n] = r
+		if _, ok := co.dispatch[n]; ok {
+			log.Fatalf("subcommand %q already registered", n)
+		}
+		co.dispatch[n] = r
+		co.cmdNames = append(co.cmdNames, n)
+		if co.maxSubcommandNameLen < len(n) {
+			co.maxSubcommandNameLen = len(n)
+		}
 	}
 }
 
+var cmder = &commander{}
+
+func init() {
+	cmder.register(
+		&cmdApply{},
+		&cmdDump{},
+		&cmdRun{},
+	)
+}
+
 func formatCommands(out io.Writer) {
-	format := fmt.Sprintf("  %%-%ds  %%s\n", maxSubcommandName)
-	for _, r := range subCommands {
+	format := fmt.Sprintf("  %%-%ds  %%s\n", cmder.maxSubcommandNameLen)
+	for _, n := range cmder.cmdNames {
+		r := cmder.dispatch[n]
 		fmt.Fprintf(out, format, r.name(), r.description())
 	}
 }
