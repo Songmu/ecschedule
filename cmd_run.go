@@ -27,7 +27,7 @@ func (cd *cmdRun) run(ctx context.Context, argv []string, outStream, errStream i
 		conf   = fs.String("conf", "", "configuration")
 		rule   = fs.String("rule", "", "rule")
 		dryRun = fs.Bool("dry-run", false, "dry run")
-		noWait = fs.Bool("no-wait", false, "exit immediately after starting the rule")
+		// noWait = fs.Bool("no-wait", false, "exit immediately after starting the rule")
 	)
 	if err := fs.Parse(argv); err != nil {
 		return err
@@ -59,11 +59,11 @@ func (cd *cmdRun) run(ctx context.Context, argv []string, outStream, errStream i
 	log.Printf("running the rule %q%s", *rule, dryRunSuffix)
 	defer func() {
 		if err == nil {
-			log.Printf("Run the rule %q completed!%s", ru.Name, dryRunSuffix)
+			log.Printf("✅ ran the rule %q%s", ru.Name, dryRunSuffix)
 		}
 	}()
 	if *dryRun {
 		return nil
 	}
-	return ru.Run(ctx, a.Session, *noWait)
+	return ru.Run(ctx, a.Session, true)
 }

@@ -160,7 +160,6 @@ func (r *Rule) Apply(ctx context.Context, sess *session.Session) error {
 }
 
 func (r *Rule) Run(ctx context.Context, sess *session.Session, noWait bool) error {
-	return fmt.Errorf("not implemented")
 	svc := ecs.New(sess, &aws.Config{Region: aws.String(r.Region)})
 	var contaierOverrides []*ecs.ContainerOverride
 	for _, co := range r.ContainerOverrides {
@@ -200,7 +199,9 @@ func (r *Rule) Run(ctx context.Context, sess *session.Session, noWait bool) erro
 		f := out.Failures[0]
 		return fmt.Errorf("failed to Task. Arn: %q: %s", *f.Arn, *f.Reason)
 	}
-	return fmt.Errorf("not implemented")
+	// TODO: Wait for task termination if `noWait` flag is false
+	//       (Is it necessary?)
+	return nil
 }
 
 type containerOverridesJSON struct {
