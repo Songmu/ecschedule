@@ -30,6 +30,6 @@ jobs:
         go test ./...
     - name: coverage
       run: |
-        GO111MODULE=off GOBIN=$(pwd)/bin go get github.com/mattn/goveralls
+        GO111MODULE=off GOBIN=$(pwd)/bin go get github.com/jderusse/goveralls
         bin/goveralls
-      if: "matrix.os == 'ubuntu-latest' && matrix.go-version == '1.13.x'"
+      if: "github.event_name == 'push' && matrix.os == 'ubuntu-latest' && matrix.go-version == '1.13.x'"
