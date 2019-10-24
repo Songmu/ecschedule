@@ -28,14 +28,15 @@ jobs:
     - name: test
       run: |
         go test -coverprofile coverage.out ./...
-    - name: prepare-coverage
-      run: |
-        GO111MODULE=off GOBIN=$(pwd)/bin go get github.com/ricallinson/covfmt
-        mkdir coverage
-        cat coverage.out | bin/covfmt > ./coverage/lcov.info
+    - name: Convert coverage to lcov
+      uses: jandelgado/gcov2lcov-action@v1.0.0
+      with:
+          infile: coverage.out
+          outfile: coverage.lcov
       if: "github.event_name == 'push' && matrix.os == 'ubuntu-latest' && matrix.go-version == '1.13.x'"
     - name: Coveralls
       uses: coverallsapp/github-action@master
       with:
         github-token: ${{ secrets.github_token }}
+        path-to-lcov: coverage.lcov
       if: "github.event_name == 'push' && matrix.os == 'ubuntu-latest' && matrix.go-version == '1.13.x'"
