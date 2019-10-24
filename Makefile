@@ -15,36 +15,27 @@ deps:
 .PHONY: devel-deps
 devel-deps: deps
 	GO111MODULE=off go get ${u} \
+	  golang.org/x/lint/golint                  \
 	  github.com/Songmu/godzil/cmd/godzil       \
 	  github.com/Songmu/goxz/cmd/goxz           \
 	  github.com/Songmu/gocredits/cmd/gocredits \
 	  github.com/tcnksm/ghr
-
-.PHONY: test-tools
-test-tools:
-	GO111MODULE=off go get ${u}  \
-	  golang.org/x/lint/golint   \
-	  github.com/mattn/goveralls
 
 .PHONY: test
 test:
 	go test
 
 .PHONY: lint
-lint: test-tools
+lint: devel-deps
 	golint -set_exit_status
-
-.PHONY: cover
-cover: devel-deps
-	goveralls
 
 .PHONY: build
 build: deps
 	go build -ldflags=$(BUILD_LDFLAGS) ./cmd/ecsched
 
 .PHONY: install
-install: build
-	mv ecsched "$(shell go env GOPATH)/bin/"
+install:
+	go install -ldflags=$(BUILD_LDFLAGS) ./cmd/ecsched
 
 .PHONY: bump
 bump: devel-deps
