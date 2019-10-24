@@ -8,10 +8,12 @@ import (
 	"github.com/aws/aws-sdk-go/service/sts"
 )
 
+// NewAWSSession return new AWS session
 func NewAWSSession() (*session.Session, error) {
 	return session.NewSession()
 }
 
+// GetAWSAccountID returns id
 func GetAWSAccountID(sess *session.Session) (string, error) {
 	svc := sts.New(sess)
 	input := &sts.GetCallerIdentityInput{}
