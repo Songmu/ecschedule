@@ -1,12 +1,12 @@
 (WIP) ecsched
 =======
 
-[![Test Status](https://github.com/Songmu/ecsched/workflows/test/badge.svg?branch=master)][travis]
+[![Test Status](https://github.com/Songmu/ecsched/workflows/test/badge.svg?branch=master)][actions]
 [![Coverage Status](https://coveralls.io/repos/Songmu/ecsched/badge.svg?branch=master)][coveralls]
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)][license]
 [![GoDoc](https://godoc.org/github.com/Songmu/ecsched?status.svg)][godoc]
 
-[travis]: https://travis-ci.org/Songmu/ecsched
+[actions]: https://github.com/Songmu/ecsched/actions?workflow=test
 [coveralls]: https://coveralls.io/r/Songmu/ecsched?branch=master
 [license]: https://github.com/Songmu/ecsched/blob/master/LICENSE
 [godoc]: https://godoc.org/github.com/Songmu/ecsched
