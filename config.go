@@ -9,18 +9,21 @@ import (
 
 const defaultRole = "ecsEventsRole"
 
+// BaseConfig baseconfig
 type BaseConfig struct {
 	Region    string `json:"region"`
 	Cluster   string `json:"cluster"`
 	AccountID string `json:"-"`
 }
 
+// Config config
 type Config struct {
 	Role string `json:"role,omitempty"`
 	*BaseConfig
 	Rules []*Rule `json:"rules"`
 }
 
+// GetRuleByName gets rule by name
 func (c *Config) GetRuleByName(name string) *Rule {
 	for _, r := range c.Rules {
 		if r.Name == name {
@@ -30,6 +33,7 @@ func (c *Config) GetRuleByName(name string) *Rule {
 	return nil
 }
 
+// LoadConfig loads config
 func LoadConfig(r io.Reader, accountID string) (*Config, error) {
 	c := Config{}
 	bs, err := ioutil.ReadAll(r)

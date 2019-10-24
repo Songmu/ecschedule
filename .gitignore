@@ -1,4 +1,5 @@
 .*
 !.gitignore
 !.travis.yml
+!.github
 dist/

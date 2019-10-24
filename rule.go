@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ecs"
 )
 
+// Rule the rule
 type Rule struct {
 	Name               string `json:"name"`
 	Description        string `json:"description"`
@@ -23,6 +24,7 @@ type Rule struct {
 	*BaseConfig
 }
 
+// Target cluster
 type Target struct {
 	TargetID           string               `json:"targetId,omitempty"`
 	TaskDefinition     string               `json:"taskDefinition"`
@@ -31,6 +33,7 @@ type Target struct {
 	Role               string               `json:"role,omitempty"`
 }
 
+// ContainerOverride overrids container
 type ContainerOverride struct {
 	Name        string            `json:"name"`
 	Command     []string          `json:"command"` // ,flow
@@ -107,6 +110,7 @@ func (r *Rule) mergeBaseConfig(bc *BaseConfig, role string) {
 	}
 }
 
+// PutRuleInput puts rule input
 func (r *Rule) PutRuleInput() *cloudwatchevents.PutRuleInput {
 	return &cloudwatchevents.PutRuleInput{
 		Description:        aws.String(r.Description),
@@ -117,6 +121,7 @@ func (r *Rule) PutRuleInput() *cloudwatchevents.PutRuleInput {
 	}
 }
 
+// PutTargetsInput puts targets input
 func (r *Rule) PutTargetsInput() *cloudwatchevents.PutTargetsInput {
 	return &cloudwatchevents.PutTargetsInput{
 		Rule:    aws.String(r.Name),
@@ -171,6 +176,7 @@ func (r *Rule) target() *cloudwatchevents.Target {
 	}
 }
 
+// Apply the rule
 func (r *Rule) Apply(ctx context.Context, sess *session.Session) error {
 	svc := cloudwatchevents.New(sess, &aws.Config{Region: aws.String(r.Region)})
 	if _, err := svc.PutRule(r.PutRuleInput()); err != nil {
@@ -180,6 +186,7 @@ func (r *Rule) Apply(ctx context.Context, sess *session.Session) error {
 	return err
 }
 
+// Run the rule
 func (r *Rule) Run(ctx context.Context, sess *session.Session, noWait bool) error {
 	svc := ecs.New(sess, &aws.Config{Region: aws.String(r.Region)})
 	var contaierOverrides []*ecs.ContainerOverride
