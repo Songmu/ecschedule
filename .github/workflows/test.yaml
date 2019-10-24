@@ -31,5 +31,5 @@ jobs:
     - name: coverage
       run: |
         GO111MODULE=off GOBIN=$(pwd)/bin go get github.com/mattn/goveralls
-        goveralls
-      if: "matrix.os == 'ubuntu-latest'"
+        bin/goveralls
+      if: "matrix.os == 'ubuntu-latest' && matrix.go-version == '1.13.x'"
