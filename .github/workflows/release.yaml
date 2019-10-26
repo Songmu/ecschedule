@@ -8,6 +8,7 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    if: "github.event.ref_type == 'tag'"
     steps:
     - name: setup go
       uses: actions/setup-go@v1
