@@ -14,30 +14,30 @@ import (
 
 // Rule the rule
 type Rule struct {
-	Name               string `json:"name"`
-	Description        string `json:"description"`
-	ScheduleExpression string `json:"scheduleExpression"`
-	Disabled           bool   `json:"disabled,omitempty"` // ENABLE | DISABLE
-	*Target
-	// Targets []*Target `json:"targets,omitempty"`
+	Name               string `yaml:"name"`
+	Description        string `yaml:"description"`
+	ScheduleExpression string `yaml:"scheduleExpression"`
+	Disabled           bool   `yaml:"disabled,omitempty"` // ENABLE | DISABLE
+	*Target            `yaml:",inline"`
+	// Targets []*Target `yaml:"targets,omitempty"`
 
-	*BaseConfig
+	*BaseConfig `yaml:",inline,omitempty"`
 }
 
 // Target cluster
 type Target struct {
-	TargetID           string               `json:"targetId,omitempty"`
-	TaskDefinition     string               `json:"taskDefinition"`
-	TaskCount          int64                `json:"taskCount,omitempty"`
-	ContainerOverrides []*ContainerOverride `json:"containerOverrides,omitempty"`
-	Role               string               `json:"role,omitempty"`
+	TargetID           string               `yaml:"targetId,omitempty"`
+	TaskDefinition     string               `yaml:"taskDefinition"`
+	TaskCount          int64                `yaml:"taskCount,omitempty"`
+	ContainerOverrides []*ContainerOverride `yaml:"containerOverrides,omitempty"`
+	Role               string               `yaml:"role,omitempty"`
 }
 
 // ContainerOverride overrids container
 type ContainerOverride struct {
-	Name        string            `json:"name"`
-	Command     []string          `json:"command"` // ,flow
-	Environment map[string]string `json:"environment,omitempty"`
+	Name        string            `yaml:"name"`
+	Command     []string          `yaml:"command,flow"` // ,flow
+	Environment map[string]string `yaml:"environment,omitempty"`
 }
 
 func (ta *Target) targetID(r *Rule) string {
@@ -130,18 +130,18 @@ func (r *Rule) PutTargetsInput() *cloudwatchevents.PutTargetsInput {
 }
 
 type containerOverridesJSON struct {
-	ContainerOverrides []*containerOverrideJSON `json:"containerOverrides"`
+	ContainerOverrides []*containerOverrideJSON `yaml:"containerOverrides"`
 }
 
 type containerOverrideJSON struct {
-	Name        string    `json:"name"`
-	Command     []string  `json:"command,omitempty"`
-	Environment []*kvPair `json:"environment,omitempty"`
+	Name        string    `yaml:"name"`
+	Command     []string  `yaml:"command,omitempty"`
+	Environment []*kvPair `yaml:"environment,omitempty"`
 }
 
 type kvPair struct {
-	Name  string `json:"name"`
-	Value string `json:"value"`
+	Name  string `yaml:"name"`
+	Value string `yaml:"value"`
 }
 
 func (r *Rule) target() *cloudwatchevents.Target {

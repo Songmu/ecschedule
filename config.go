@@ -11,16 +11,16 @@ const defaultRole = "ecsEventsRole"
 
 // BaseConfig baseconfig
 type BaseConfig struct {
-	Region    string `json:"region"`
-	Cluster   string `json:"cluster"`
-	AccountID string `json:"-"`
+	Region    string `yaml:"region"`
+	Cluster   string `yaml:"cluster"`
+	AccountID string `yaml:"-"`
 }
 
 // Config config
 type Config struct {
-	Role string `json:"role,omitempty"`
-	*BaseConfig
-	Rules []*Rule `json:"rules"`
+	Role        string `yaml:"role,omitempty"`
+	*BaseConfig `yaml:""`
+	Rules       []*Rule `yaml:"rules"`
 }
 
 // GetRuleByName gets rule by name

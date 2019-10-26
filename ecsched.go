@@ -25,7 +25,6 @@ func Run(argv []string, outStream, errStream io.Writer) error {
 		fmt.Fprintf(fs.Output(), "\nCommands:\n")
 		formatCommands(fs.Output())
 	}
-
 	var (
 		conf = fs.String("conf", "", "configuration")
 		ver  = fs.Bool("version", false, "display version")
