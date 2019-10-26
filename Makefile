@@ -54,4 +54,4 @@ upload:
 	ghr v$(VERSION) dist/v$(VERSION)
 
 .PHONY: release
-release: bump crossbuild upload
+release: crossbuild upload
