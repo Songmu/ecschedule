@@ -1,4 +1,4 @@
-name: test
+name: release
 on:
   push:
     branches:
@@ -19,7 +19,7 @@ jobs:
         fetch-depth: 1
     - name: release
       env:
-        GITHUB_TOEKN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         export GOBIN=$(pwd)/bin
         PATH=$GOBIN:$PATH make release
