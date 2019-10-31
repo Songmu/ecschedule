@@ -19,7 +19,7 @@ type BaseConfig struct {
 // Config config
 type Config struct {
 	Role        string `yaml:"role,omitempty"`
-	*BaseConfig `yaml:""`
+	*BaseConfig `yaml:",inline"`
 	Rules       []*Rule `yaml:"rules"`
 }
 
