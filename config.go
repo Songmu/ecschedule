@@ -4,7 +4,7 @@ import (
 	"io"
 	"io/ioutil"
 
-	"github.com/ghodss/yaml"
+	"github.com/goccy/go-yaml"
 )
 
 const defaultRole = "ecsEventsRole"

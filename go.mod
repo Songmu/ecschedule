@@ -4,7 +4,6 @@ go 1.12
 
 require (
 	github.com/aws/aws-sdk-go v1.25.23
-	github.com/ghodss/yaml v1.0.0
 	github.com/go-playground/locales v0.13.0 // indirect
 	github.com/go-playground/universal-translator v0.16.0 // indirect
 	github.com/goccy/go-yaml v0.0.0-20191031052822-e3eec3c68794
