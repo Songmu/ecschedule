@@ -12,7 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudwatchevents"
 	"github.com/aws/aws-sdk-go/service/ecs"
-	"github.com/ghodss/yaml"
+	"github.com/goccy/go-yaml"
 )
 
 type cmdDump struct{}
