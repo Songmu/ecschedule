@@ -130,18 +130,18 @@ func (r *Rule) PutTargetsInput() *cloudwatchevents.PutTargetsInput {
 }
 
 type containerOverridesJSON struct {
-	ContainerOverrides []*containerOverrideJSON `yaml:"containerOverrides"`
+	ContainerOverrides []*containerOverrideJSON `json:"containerOverrides"`
 }
 
 type containerOverrideJSON struct {
-	Name        string    `yaml:"name"`
-	Command     []string  `yaml:"command,omitempty"`
-	Environment []*kvPair `yaml:"environment,omitempty"`
+	Name        string    `json:"name"`
+	Command     []string  `json:"command,omitempty"`
+	Environment []*kvPair `json:"environment,omitempty"`
 }
 
 type kvPair struct {
-	Name  string `yaml:"name"`
-	Value string `yaml:"value"`
+	Name  string `json:"name"`
+	Value string `json:"value"`
 }
 
 func (r *Rule) target() *cloudwatchevents.Target {
