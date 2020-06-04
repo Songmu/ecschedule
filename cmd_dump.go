@@ -149,9 +149,13 @@ RuleList:
 			target.ContainerOverrides = contOverrides
 			targets = append(targets, target)
 		}
+		var desc string
+		if r.Description != nil {
+			desc = *r.Description
+		}
 		ru := &Rule{
 			Name:               *r.Name,
-			Description:        *r.Description,
+			Description:        desc,
 			ScheduleExpression: *r.ScheduleExpression,
 			Disabled:           *r.State == "DISABLED",
 		}
