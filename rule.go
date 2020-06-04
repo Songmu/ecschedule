@@ -15,7 +15,7 @@ import (
 // Rule the rule
 type Rule struct {
 	Name               string `yaml:"name"`
-	Description        string `yaml:"description"`
+	Description        string `yaml:"description,omitempty"`
 	ScheduleExpression string `yaml:"scheduleExpression"`
 	Disabled           bool   `yaml:"disabled,omitempty"` // ENABLE | DISABLE
 	*Target            `yaml:",inline"`
