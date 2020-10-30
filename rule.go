@@ -4,12 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudwatchevents"
 	"github.com/aws/aws-sdk-go/service/ecs"
+	"github.com/goccy/go-yaml"
 )
 
 // Rule the rule
@@ -176,8 +178,32 @@ func (r *Rule) target() *cloudwatchevents.Target {
 	}
 }
 
+var envReg = regexp.MustCompile(`ecsched::<([^>]+)>`)
+
+func (r *Rule) validateEnv() error {
+	bs, err := yaml.Marshal(r)
+	if err != nil {
+		return err
+	}
+	m := envReg.FindAllSubmatch(bs, -1)
+	if len(m) > 1 {
+		if len(m) == 1 {
+			return fmt.Errorf("environment variable %s is not defined", string(m[0][1]))
+		}
+		var envs []string
+		for _, v := range m {
+			envs = append(envs, string(v[1]))
+		}
+		return fmt.Errorf("environment variables %s are not defined", strings.Join(envs, " and "))
+	}
+	return nil
+}
+
 // Apply the rule
 func (r *Rule) Apply(ctx context.Context, sess *session.Session) error {
+	if err := r.validateEnv(); err != nil {
+		return err
+	}
 	svc := cloudwatchevents.New(sess, &aws.Config{Region: aws.String(r.Region)})
 	if _, err := svc.PutRule(r.PutRuleInput()); err != nil {
 		return err
@@ -188,6 +214,9 @@ func (r *Rule) Apply(ctx context.Context, sess *session.Session) error {
 
 // Run the rule
 func (r *Rule) Run(ctx context.Context, sess *session.Session, noWait bool) error {
+	if err := r.validateEnv(); err != nil {
+		return err
+	}
 	svc := ecs.New(sess, &aws.Config{Region: aws.String(r.Region)})
 	var contaierOverrides []*ecs.ContainerOverride
 	for _, co := range r.ContainerOverrides {
