@@ -6,7 +6,6 @@ import (
 	"bytes"
 	"fmt"
 	"os"
-	"strings"
 	"text/template"
 
 	"github.com/pkg/errors"
@@ -31,7 +30,7 @@ func init() {
 			if v, ok := os.LookupEnv(key); ok {
 				return v
 			}
-			panic(fmt.Sprintf("environment variable %s is not defined", key))
+			return fmt.Sprintf("ecsched::<%s>", key)
 		},
 	})
 }
@@ -43,11 +42,6 @@ func envReplacer(data []byte) ([]byte, error) {
 	}
 	buf := &bytes.Buffer{}
 	if err = t.Execute(buf, nil); err != nil {
-		// Go 1.12 text/template catches a panic raised in user-defined function.
-		// https://golang.org/doc/go1.12#text/template
-		if strings.Index(err.Error(), "must_env: environment variable") != -1 {
-			panic(err)
-		}
 		return nil, errors.Wrap(err, "template attach failed")
 	}
 	return buf.Bytes(), nil

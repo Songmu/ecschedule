@@ -26,7 +26,7 @@ func TestLoadConfig(t *testing.T) {
 			AccountID: "334",
 		},
 		Rules: []*Rule{
-			&Rule{
+			{
 				Name:               "hoge-task-name",
 				Description:        "hoge description",
 				ScheduleExpression: "cron(0 0 * * ? *)",
@@ -36,7 +36,7 @@ func TestLoadConfig(t *testing.T) {
 					TaskDefinition: "task1",
 					TaskCount:      0,
 					ContainerOverrides: []*ContainerOverride{
-						&ContainerOverride{
+						{
 							Name: "container1",
 							Command: []string{
 								"subcmd",
@@ -60,5 +60,27 @@ func TestLoadConfig(t *testing.T) {
 
 	if !reflect.DeepEqual(c, expect) {
 		t.Errorf("unexpected output: %#v", c)
+	}
+}
+
+func TestLoadConfig_mustEnv(t *testing.T) {
+	f, err := os.Open("testdata/sample2.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+
+	c, err := LoadConfig(f, "335")
+	if err != nil {
+		t.Errorf("error shoud be nil, but: %s", err)
+	}
+
+	ru := c.GetRuleByName("hoge-task-name")
+	err = ru.validateEnv()
+	if err == nil {
+		t.Errorf("error should be occurred but nil")
+	}
+	if g, e := err.Error(), "environment variable DUMMY_HOGE_ENV is not defined"; g != e {
+		t.Errorf("error shoud be %q, but: %q", e, g)
 	}
 }
