@@ -186,7 +186,7 @@ func (r *Rule) validateEnv() error {
 		return err
 	}
 	m := envReg.FindAllSubmatch(bs, -1)
-	if len(m) > 1 {
+	if len(m) > 0 {
 		if len(m) == 1 {
 			return fmt.Errorf("environment variable %s is not defined", string(m[0][1]))
 		}

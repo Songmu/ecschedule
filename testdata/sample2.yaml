@@ -1,0 +1,13 @@
+region: us-east-1
+cluster: api
+role: ecsEventsRole
+rules:
+- name: hoge-task-name
+  description: hoge description
+  scheduleExpression: cron(0 0 * * ? *)
+  taskDefinition: task1
+  containerOverrides:
+  - name: container1
+    command: ["subcmd", "argument"]
+    environment:
+      HOGE_ENV: {{ must_env "DUMMY_HOGE_ENV" }}
