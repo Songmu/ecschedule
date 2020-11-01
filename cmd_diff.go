@@ -1,0 +1,65 @@
+package ecsched
+
+import (
+	"context"
+	"errors"
+	"flag"
+	"fmt"
+	"io"
+	"os"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/cloudwatchevents"
+)
+
+type cmdDiff struct{}
+
+func (cd *cmdDiff) name() string {
+	return "diff"
+}
+
+func (cd *cmdDiff) description() string {
+	return "diff of the rule with remote"
+}
+
+func (cd *cmdDiff) run(ctx context.Context, argv []string, outStream, errStream io.Writer) (err error) {
+	fs := flag.NewFlagSet("ecsched apply", flag.ContinueOnError)
+	fs.SetOutput(errStream)
+	var (
+		conf = fs.String("conf", "", "configuration")
+		rule = fs.String("rule", "", "rule")
+		// all  = fs.Bool("all", false, "apply all rules")
+	)
+	if err := fs.Parse(argv); err != nil {
+		return err
+	}
+	if *rule == "" {
+		return errors.New("-rule option required")
+	}
+	a := getApp(ctx)
+	c := a.Config
+	if *conf != "" {
+		f, err := os.Open(*conf)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+		c, err = LoadConfig(f, a.AccountID)
+		if err != nil {
+			return err
+		}
+	}
+	ru := c.GetRuleByName(*rule)
+	if ru == nil {
+		return fmt.Errorf("no rules found for %s", *rule)
+	}
+
+	sess := a.Session
+	svc := cloudwatchevents.New(sess, &aws.Config{Region: &c.Region})
+	ruleList, err := svc.ListRulesWithContext(ctx, &cloudwatchevents.ListRulesInput{
+		NamePrefix: rule,
+	})
+	_ = ruleList
+
+	return nil
+}

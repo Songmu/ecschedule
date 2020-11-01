@@ -82,95 +82,25 @@ func (cd *cmdDump) run(ctx context.Context, argv []string, outStream, errStream 
 		return err
 	}
 	var (
-		rules            []*Rule
-		ruleArnPrefix    = fmt.Sprintf("arn:aws:events:%s:%s:rule/", *region, accountID)
-		clusterArn       = fmt.Sprintf("arn:aws:ecs:%s:%s:cluster/%s", *region, accountID, *cluster)
-		taskDefArnPrefix = fmt.Sprintf("arn:aws:ecs:%s:%s:task-definition/", *region, accountID)
-		roleArnPrefix    = fmt.Sprintf("arn:aws:iam::%s:role/", accountID)
-		roleArn          = fmt.Sprintf("%s%s", roleArnPrefix, *role)
-	)
-RuleList:
-	for _, r := range ruleList.Rules {
-		if !strings.HasPrefix(*r.Arn, ruleArnPrefix) {
-			continue
+		rules         []*Rule
+		roleArnPrefix = fmt.Sprintf("arn:aws:iam::%s:role/", accountID)
+		rg            = &ruleGetter{
+			svc:              svc,
+			ruleArnPrefix:    fmt.Sprintf("arn:aws:events:%s:%s:rule/", *region, accountID),
+			clusterArn:       fmt.Sprintf("arn:aws:ecs:%s:%s:cluster/%s", *region, accountID, *cluster),
+			taskDefArnPrefix: fmt.Sprintf("arn:aws:ecs:%s:%s:task-definition/", *region, accountID),
+			roleArnPrefix:    roleArnPrefix,
+			roleArn:          fmt.Sprintf("%s%s", roleArnPrefix, *role),
 		}
-		ta, err := svc.ListTargetsByRuleWithContext(ctx, &cloudwatchevents.ListTargetsByRuleInput{
-			Rule: r.Name,
-		})
+	)
+	for _, r := range ruleList.Rules {
+		ru, err := rg.getRule(ctx, r)
 		if err != nil {
 			return err
 		}
-		var targets []*Target
-		for _, t := range ta.Targets {
-			if *t.Arn != clusterArn {
-				continue RuleList
-			}
-			targetID := *t.Id
-			if targetID == *r.Name {
-				targetID = ""
-			}
-			ecsParams := t.EcsParameters
-			if ecsParams == nil {
-				// ignore rule which have some non ecs targets
-				continue RuleList
-			}
-			target := &Target{TargetID: targetID}
-
-			if role := *t.RoleArn; role != roleArn {
-				target.Role = strings.TrimPrefix(role, roleArnPrefix)
-			}
-
-			taskCount := *ecsParams.TaskCount
-			if taskCount != 1 {
-				target.TaskCount = taskCount
-			}
-			target.TaskDefinition = strings.TrimPrefix(*ecsParams.TaskDefinitionArn, taskDefArnPrefix)
-
-			taskOv := &ecs.TaskOverride{}
-			if err := json.Unmarshal([]byte(*t.Input), taskOv); err != nil {
-				return err
-			}
-			var contOverrides []*ContainerOverride
-			for _, co := range taskOv.ContainerOverrides {
-				var cmd []string
-				for _, c := range co.Command {
-					cmd = append(cmd, *c)
-				}
-				env := map[string]string{}
-				for _, kv := range co.Environment {
-					env[*kv.Name] = *kv.Value
-				}
-				contOverrides = append(contOverrides, &ContainerOverride{
-					Name:        *co.Name,
-					Command:     cmd,
-					Environment: env,
-				})
-			}
-			target.ContainerOverrides = contOverrides
-			targets = append(targets, target)
+		if ru != nil {
+			rules = append(rules, ru)
 		}
-		var desc string
-		if r.Description != nil {
-			desc = *r.Description
-		}
-		ru := &Rule{
-			Name:               *r.Name,
-			Description:        desc,
-			ScheduleExpression: *r.ScheduleExpression,
-			Disabled:           *r.State == "DISABLED",
-		}
-		switch len(targets) {
-		case 0:
-			continue RuleList
-		case 1:
-			ru.Target = targets[0]
-		default:
-			// not supported multiple target yet
-			continue RuleList
-			// ru.Target = targets[0]
-			// ru.Targets = targets[1:]
-		}
-		rules = append(rules, ru)
 	}
 	c.Rules = rules
 	bs, err := yaml.Marshal(c)
@@ -179,4 +109,93 @@ RuleList:
 	}
 	fmt.Fprint(outStream, string(bs))
 	return nil
+}
+
+type ruleGetter struct {
+	svc                                                                 *cloudwatchevents.CloudWatchEvents
+	clusterArn, ruleArnPrefix, taskDefArnPrefix, roleArnPrefix, roleArn string
+}
+
+func (rg *ruleGetter) getRule(ctx context.Context, r *cloudwatchevents.Rule) (*Rule, error) {
+	if !strings.HasPrefix(*r.Arn, rg.ruleArnPrefix) {
+		return nil, nil
+	}
+
+	ta, err := rg.svc.ListTargetsByRuleWithContext(ctx, &cloudwatchevents.ListTargetsByRuleInput{
+		Rule: r.Name,
+	})
+	if err != nil {
+		return nil, err
+	}
+	var targets []*Target
+	for _, t := range ta.Targets {
+		if *t.Arn != rg.clusterArn {
+			return nil, nil
+		}
+		targetID := *t.Id
+		if targetID == *r.Name {
+			targetID = ""
+		}
+		ecsParams := t.EcsParameters
+		if ecsParams == nil {
+			// ignore rule which have some non ecs targets
+			return nil, nil
+		}
+		target := &Target{TargetID: targetID}
+
+		if role := *t.RoleArn; role != rg.roleArn {
+			target.Role = strings.TrimPrefix(role, rg.roleArnPrefix)
+		}
+
+		taskCount := *ecsParams.TaskCount
+		if taskCount != 1 {
+			target.TaskCount = taskCount
+		}
+		target.TaskDefinition = strings.TrimPrefix(*ecsParams.TaskDefinitionArn, rg.taskDefArnPrefix)
+
+		taskOv := &ecs.TaskOverride{}
+		if err := json.Unmarshal([]byte(*t.Input), taskOv); err != nil {
+			return nil, err
+		}
+		var contOverrides []*ContainerOverride
+		for _, co := range taskOv.ContainerOverrides {
+			var cmd []string
+			for _, c := range co.Command {
+				cmd = append(cmd, *c)
+			}
+			env := map[string]string{}
+			for _, kv := range co.Environment {
+				env[*kv.Name] = *kv.Value
+			}
+			contOverrides = append(contOverrides, &ContainerOverride{
+				Name:        *co.Name,
+				Command:     cmd,
+				Environment: env,
+			})
+		}
+		target.ContainerOverrides = contOverrides
+		targets = append(targets, target)
+	}
+	var desc string
+	if r.Description != nil {
+		desc = *r.Description
+	}
+	ru := &Rule{
+		Name:               *r.Name,
+		Description:        desc,
+		ScheduleExpression: *r.ScheduleExpression,
+		Disabled:           *r.State == "DISABLED",
+	}
+	switch len(targets) {
+	case 0:
+		return nil, nil
+	case 1:
+		ru.Target = targets[0]
+	default:
+		// not supported multiple target yet
+		return nil, nil
+		// ru.Target = targets[0]
+		// ru.Targets = targets[1:]
+	}
+	return ru, nil
 }
