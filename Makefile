@@ -39,8 +39,8 @@ build: deps
 install:
 	go install -ldflags=$(BUILD_LDFLAGS) ./cmd/ecsched
 
-.PHONY: bump
-bump: devel-deps
+.PHONY: release
+release: devel-deps
 	godzil release
 
 CREDITS: go.sum devel-deps
@@ -54,6 +54,3 @@ crossbuild: CREDITS
 .PHONY: upload
 upload:
 	ghr v$(VERSION) dist/v$(VERSION)
-
-.PHONY: release
-release: crossbuild upload
