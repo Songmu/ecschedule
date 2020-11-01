@@ -75,12 +75,26 @@ func (cd *cmdDump) run(ctx context.Context, argv []string, outStream, errStream 
 	c.Region = *region
 	c.Cluster = *cluster
 
-	sess := a.Session
-	svc := cloudwatchevents.New(sess, &aws.Config{Region: region})
-	ruleList, err := svc.ListRulesWithContext(ctx, &cloudwatchevents.ListRulesInput{})
-	if err != nil {
-		return err
+	var (
+		sess        = a.Session
+		svc         = cloudwatchevents.New(sess, &aws.Config{Region: region})
+		remoteRules []*cloudwatchevents.Rule
+		nextToken   *string
+	)
+	for {
+		r, err := svc.ListRulesWithContext(ctx, &cloudwatchevents.ListRulesInput{
+			NextToken: nextToken,
+		})
+		if err != nil {
+			return err
+		}
+		remoteRules = append(remoteRules, r.Rules...)
+		if r.NextToken == nil {
+			break
+		}
+		nextToken = r.NextToken
 	}
+
 	var (
 		rules         []*Rule
 		roleArnPrefix = fmt.Sprintf("arn:aws:iam::%s:role/", accountID)
@@ -93,7 +107,7 @@ func (cd *cmdDump) run(ctx context.Context, argv []string, outStream, errStream 
 			roleArn:          fmt.Sprintf("%s%s", roleArnPrefix, *role),
 		}
 	)
-	for _, r := range ruleList.Rules {
+	for _, r := range remoteRules {
 		ru, err := rg.getRule(ctx, r)
 		if err != nil {
 			return err
