@@ -14,12 +14,14 @@ deps:
 
 .PHONY: devel-deps
 devel-deps: deps
-	GO111MODULE=off go get ${u} \
-	  golang.org/x/lint/golint                  \
-	  github.com/Songmu/godzil/cmd/godzil       \
-	  github.com/Songmu/goxz/cmd/goxz           \
-	  github.com/Songmu/gocredits/cmd/gocredits \
-	  github.com/tcnksm/ghr
+	sh -c '\
+      tmpdir=$$(mktemp -d); \
+      cd $$tmpdir; \
+      go get ${u} \
+        golang.org/x/lint/golint            \
+        github.com/Songmu/godzil/cmd/godzil \
+        github.com/tcnksm/ghr; \
+      rm -rf $$tmpdir'
 
 .PHONY: test
 test:
@@ -42,11 +44,11 @@ bump: devel-deps
 	godzil release
 
 CREDITS: go.sum devel-deps
-	gocredits -w
+	godzil credits -w
 
 .PHONY: crossbuild
 crossbuild: CREDITS
-	goxz -pv=v$(VERSION) -build-ldflags=$(BUILD_LDFLAGS) \
+	godzil crossbuild -pv=v$(VERSION) -build-ldflags=$(BUILD_LDFLAGS) \
       -os=linux,darwin -d=./dist/v$(VERSION) ./cmd/*
 
 .PHONY: upload
