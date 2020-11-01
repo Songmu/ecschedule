@@ -106,6 +106,7 @@ func init() {
 		&cmdApply{},
 		&cmdDump{},
 		&cmdRun{},
+		&cmdDiff{},
 	)
 }
 
