@@ -22,7 +22,7 @@ func (cd *cmdApply) description() string {
 	return "apply the rule"
 }
 
-func (cd *cmdApply) run(ctx context.Context, argv []string, outStream, errStream io.Writer) (err error) {
+func (cd *cmdApply) run(ctx context.Context, argv []string, outStream, errStream io.Writer) error {
 	fs := flag.NewFlagSet("ecsched apply", flag.ContinueOnError)
 	fs.SetOutput(errStream)
 	var (
@@ -59,18 +59,14 @@ func (cd *cmdApply) run(ctx context.Context, argv []string, outStream, errStream
 		dryRunSuffix = " (dry-run)"
 	}
 	log.Printf("applying the rule %q%s", *rule, dryRunSuffix)
-	defer func() {
-		if err == nil {
-			for _, v := range ru.ContainerOverrides {
-				// mask environment variables
-				v.Environment = nil
-			}
-			bs, _ := yaml.Marshal(ru)
-			log.Printf("✅ following rule applied%s\n%s", dryRunSuffix, string(bs))
-		}
-	}()
-	if *dryRun {
-		return nil
+	if err := ru.Apply(ctx, a.Session, *dryRun); err != nil {
+		return err
 	}
-	return ru.Apply(ctx, a.Session)
+	for _, v := range ru.ContainerOverrides {
+		// mask environment variables
+		v.Environment = nil
+	}
+	bs, _ := yaml.Marshal(ru)
+	log.Printf("✅ following rule applied%s\n%s", dryRunSuffix, string(bs))
+	return nil
 }

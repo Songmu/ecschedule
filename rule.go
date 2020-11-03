@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"regexp"
 	"strings"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudwatchevents"
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/goccy/go-yaml"
+	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
 // Rule the rule
@@ -200,15 +202,35 @@ func (r *Rule) validateEnv() error {
 }
 
 // Apply the rule
-func (r *Rule) Apply(ctx context.Context, sess *session.Session) error {
+func (r *Rule) Apply(ctx context.Context, sess *session.Session, dryRun bool) error {
 	if err := r.validateEnv(); err != nil {
 		return err
 	}
 	svc := cloudwatchevents.New(sess, &aws.Config{Region: aws.String(r.Region)})
+
+	from, to, err := r.diff(ctx, svc)
+	if err != nil {
+		return err
+	}
+	if from == to {
+		log.Println("💡 skip applying. no differences")
+		return nil
+	}
+
+	var dryRunSuffix string
+	if dryRun {
+		dryRunSuffix = " (dry-run)"
+	}
+	dmp := diffmatchpatch.New()
+	diffs := dmp.DiffMain(from, to, false)
+	log.Printf("💡 applying following changes%s\n%s", dryRunSuffix, dmp.DiffPrettyText(diffs))
+	if dryRun {
+		return nil
+	}
 	if _, err := svc.PutRule(r.PutRuleInput()); err != nil {
 		return err
 	}
-	_, err := svc.PutTargets(r.PutTargetsInput())
+	_, err = svc.PutTargets(r.PutTargetsInput())
 	return err
 }
 
