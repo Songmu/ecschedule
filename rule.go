@@ -260,3 +260,55 @@ func (r *Rule) Run(ctx context.Context, sess *session.Session, noWait bool) erro
 	//       (Is it necessary?)
 	return nil
 }
+
+func (r *Rule) diff(ctx context.Context, cw *cloudwatchevents.CloudWatchEvents, c *Config) (from, to string, err error) {
+	rule := aws.String(r.Name)
+
+	origBc := r.BaseConfig
+	r.BaseConfig = nil
+	defer func() { r.BaseConfig = origBc }()
+	bs, err := yaml.Marshal(r)
+	if err != nil {
+		return "", "", err
+	}
+	localRuleYaml := string(bs)
+
+	role := c.Role
+	if role == "" {
+		role = defaultRole
+	}
+	ruleList, err := cw.ListRulesWithContext(ctx, &cloudwatchevents.ListRulesInput{
+		NamePrefix: rule,
+	})
+
+	var (
+		roleArnPrefix = fmt.Sprintf("arn:aws:iam::%s:role/", c.AccountID)
+		rg            = &ruleGetter{
+			svc:              cw,
+			ruleArnPrefix:    fmt.Sprintf("arn:aws:events:%s:%s:rule/", c.Region, c.AccountID),
+			clusterArn:       fmt.Sprintf("arn:aws:ecs:%s:%s:cluster/%s", c.Region, c.AccountID, c.Cluster),
+			taskDefArnPrefix: fmt.Sprintf("arn:aws:ecs:%s:%s:task-definition/", c.Region, c.AccountID),
+			roleArnPrefix:    roleArnPrefix,
+			roleArn:          fmt.Sprintf("%s%s", roleArnPrefix, role),
+		}
+		remoteRuleYaml string
+	)
+	for _, r := range ruleList.Rules {
+		if *r.Name != *rule {
+			continue
+		}
+		ru, err := rg.getRule(ctx, r)
+		if err != nil {
+			return "", "", err
+		}
+		if ru != nil {
+			bs, err := yaml.Marshal(ru)
+			if err != nil {
+				return "", "", err
+			}
+			remoteRuleYaml = string(bs)
+			break
+		}
+	}
+	return remoteRuleYaml, localRuleYaml, nil
+}
