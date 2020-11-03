@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.1.0](https://github.com/Songmu/ecsched/compare/v0.0.2...v0.1.0) (2020-11-04)
+
+* update documents [#14](https://github.com/Songmu/ecsched/pull/14) ([Songmu](https://github.com/Songmu))
+* define type runnerImpl and refacter [#13](https://github.com/Songmu/ecsched/pull/13) ([Songmu](https://github.com/Songmu))
+* display diff before applying [#12](https://github.com/Songmu/ecsched/pull/12) ([Songmu](https://github.com/Songmu))
+
 ## [v0.0.2](https://github.com/Songmu/ecsched/compare/v0.0.1...v0.0.2) (2020-11-02)
 
 * update deps [#11](https://github.com/Songmu/ecsched/pull/11) ([Songmu](https://github.com/Songmu))
