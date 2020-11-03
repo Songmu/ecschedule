@@ -55,10 +55,9 @@ func (cd *cmdDiff) run(ctx context.Context, argv []string, outStream, errStream 
 		return fmt.Errorf("no rules found for %s", *rule)
 	}
 
-	c.AccountID = a.AccountID
 	sess := a.Session
 	svc := cloudwatchevents.New(sess, &aws.Config{Region: &c.Region})
-	from, to, err := ru.diff(ctx, svc, c)
+	from, to, err := ru.diff(ctx, svc)
 	if err != nil {
 		return err
 	}

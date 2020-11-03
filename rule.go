@@ -261,19 +261,19 @@ func (r *Rule) Run(ctx context.Context, sess *session.Session, noWait bool) erro
 	return nil
 }
 
-func (r *Rule) diff(ctx context.Context, cw *cloudwatchevents.CloudWatchEvents, c *Config) (from, to string, err error) {
+func (r *Rule) diff(ctx context.Context, cw *cloudwatchevents.CloudWatchEvents) (from, to string, err error) {
 	rule := aws.String(r.Name)
 
-	origBc := r.BaseConfig
+	c := r.BaseConfig
 	r.BaseConfig = nil
-	defer func() { r.BaseConfig = origBc }()
+	defer func() { r.BaseConfig = c }()
 	bs, err := yaml.Marshal(r)
 	if err != nil {
 		return "", "", err
 	}
 	localRuleYaml := string(bs)
 
-	role := c.Role
+	role := r.Role
 	if role == "" {
 		role = defaultRole
 	}
