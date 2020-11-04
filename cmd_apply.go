@@ -22,13 +22,13 @@ var cmdApply = &runnerImpl{
 			conf   = fs.String("conf", "", "configuration")
 			rule   = fs.String("rule", "", "rule")
 			dryRun = fs.Bool("dry-run", false, "dry run")
-			// all  = fs.Bool("all", false, "apply all rules")
+			all    = fs.Bool("all", false, "apply all rules")
 		)
 		if err := fs.Parse(argv); err != nil {
 			return err
 		}
-		if *rule == "" {
-			return errors.New("-rule option required")
+		if !*all && *rule == "" {
+			return errors.New("-rule or -all option required")
 		}
 		a := getApp(ctx)
 		c := a.Config
@@ -43,24 +43,35 @@ var cmdApply = &runnerImpl{
 				return err
 			}
 		}
-		ru := c.GetRuleByName(*rule)
-		if ru == nil {
-			return fmt.Errorf("no rules found for %s", *rule)
+
+		var ruleNames []string
+		if !*all {
+			ruleNames = append(ruleNames, *rule)
+		} else {
+			for _, r := range c.Rules {
+				ruleNames = append(ruleNames, r.Name)
+			}
 		}
-		var dryRunSuffix string
-		if *dryRun {
-			dryRunSuffix = " (dry-run)"
+		for _, rule := range ruleNames {
+			ru := c.GetRuleByName(rule)
+			if ru == nil {
+				return fmt.Errorf("no rules found for %s", rule)
+			}
+			var dryRunSuffix string
+			if *dryRun {
+				dryRunSuffix = " (dry-run)"
+			}
+			log.Printf("applying the rule %q%s", rule, dryRunSuffix)
+			if err := ru.Apply(ctx, a.Session, *dryRun); err != nil {
+				return err
+			}
+			for _, v := range ru.ContainerOverrides {
+				// mask environment variables
+				v.Environment = nil
+			}
+			bs, _ := yaml.Marshal(ru)
+			log.Printf("✅ following rule applied%s\n%s", dryRunSuffix, string(bs))
 		}
-		log.Printf("applying the rule %q%s", *rule, dryRunSuffix)
-		if err := ru.Apply(ctx, a.Session, *dryRun); err != nil {
-			return err
-		}
-		for _, v := range ru.ContainerOverrides {
-			// mask environment variables
-			v.Environment = nil
-		}
-		bs, _ := yaml.Marshal(ru)
-		log.Printf("✅ following rule applied%s\n%s", dryRunSuffix, string(bs))
 		return nil
 	},
 }
