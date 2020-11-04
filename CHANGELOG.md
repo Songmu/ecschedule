@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.1.1](https://github.com/Songmu/ecsched/compare/v0.1.0...v0.1.1) (2020-11-04)
+
+* implement diff -all option [#16](https://github.com/Songmu/ecsched/pull/16) ([Songmu](https://github.com/Songmu))
+* implement apply -all option [#15](https://github.com/Songmu/ecsched/pull/15) ([Songmu](https://github.com/Songmu))
+
 ## [v0.1.0](https://github.com/Songmu/ecsched/compare/v0.0.2...v0.1.0) (2020-11-04)
 
 * update documents [#14](https://github.com/Songmu/ecsched/pull/14) ([Songmu](https://github.com/Songmu))
