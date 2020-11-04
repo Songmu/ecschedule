@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -22,13 +23,13 @@ var cmdDiff = &runnerImpl{
 		var (
 			conf = fs.String("conf", "", "configuration")
 			rule = fs.String("rule", "", "rule")
-			// all  = fs.Bool("all", false, "apply all rules")
+			all  = fs.Bool("all", false, "apply all rules")
 		)
 		if err := fs.Parse(argv); err != nil {
 			return err
 		}
-		if *rule == "" {
-			return errors.New("-rule option required")
+		if !*all && *rule == "" {
+			return errors.New("-rule or -all option required")
 		}
 		a := getApp(ctx)
 		c := a.Config
@@ -43,20 +44,30 @@ var cmdDiff = &runnerImpl{
 				return err
 			}
 		}
-		ru := c.GetRuleByName(*rule)
-		if ru == nil {
-			return fmt.Errorf("no rules found for %s", *rule)
-		}
 
-		sess := a.Session
-		svc := cloudwatchevents.New(sess, &aws.Config{Region: &c.Region})
-		from, to, err := ru.diff(ctx, svc)
-		if err != nil {
-			return err
+		var ruleNames []string
+		if !*all {
+			ruleNames = append(ruleNames, *rule)
+		} else {
+			for _, r := range c.Rules {
+				ruleNames = append(ruleNames, r.Name)
+			}
 		}
-		dmp := diffmatchpatch.New()
-		diffs := dmp.DiffMain(from, to, false)
-		_, err = fmt.Fprint(outStream, dmp.DiffPrettyText(diffs))
-		return err
+		for _, rule := range ruleNames {
+			ru := c.GetRuleByName(rule)
+			if ru == nil {
+				return fmt.Errorf("no rules found for %s", rule)
+			}
+			sess := a.Session
+			svc := cloudwatchevents.New(sess, &aws.Config{Region: &c.Region})
+			from, to, err := ru.diff(ctx, svc)
+			if err != nil {
+				return err
+			}
+			dmp := diffmatchpatch.New()
+			diffs := dmp.DiffMain(from, to, false)
+			log.Printf("💡 diff of the rule %q\n%s", rule, dmp.DiffPrettyText(diffs))
+		}
+		return nil
 	},
 }
