@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.1.2](https://github.com/Songmu/ecsched/compare/v0.1.1...v0.1.2) (2020-11-09)
+
+* fix error handling of ListRules [#17](https://github.com/Songmu/ecsched/pull/17) ([Songmu](https://github.com/Songmu))
+
 ## [v0.1.1](https://github.com/Songmu/ecsched/compare/v0.1.0...v0.1.1) (2020-11-04)
 
 * implement diff -all option [#16](https://github.com/Songmu/ecsched/pull/16) ([Songmu](https://github.com/Songmu))
