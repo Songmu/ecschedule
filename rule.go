@@ -302,6 +302,9 @@ func (r *Rule) diff(ctx context.Context, cw *cloudwatchevents.CloudWatchEvents) 
 	ruleList, err := cw.ListRulesWithContext(ctx, &cloudwatchevents.ListRulesInput{
 		NamePrefix: rule,
 	})
+	if err != nil {
+		return "", "", err
+	}
 
 	var (
 		roleArnPrefix = fmt.Sprintf("arn:aws:iam::%s:role/", c.AccountID)
