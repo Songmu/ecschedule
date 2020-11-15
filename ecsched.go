@@ -7,6 +7,8 @@ import (
 	"io"
 	"log"
 	"os"
+
+	"github.com/aws/aws-sdk-go/aws/session"
 )
 
 const cmdName = "ecschedule"
@@ -35,7 +37,7 @@ func Run(argv []string, outStream, errStream io.Writer) error {
 	if *ver {
 		return printVersion(outStream)
 	}
-	sess, err := NewAWSSession()
+	sess, err := session.NewSession()
 	if err != nil {
 		return err
 	}

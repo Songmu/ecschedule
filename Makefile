@@ -53,4 +53,4 @@ crossbuild: CREDITS
 
 .PHONY: upload
 upload:
-	ghr v$(VERSION) dist/v$(VERSION)
+	ghr -body="$$(./godzil changelog --latest -F markdown)" v$(VERSION) dist/v$(VERSION)
