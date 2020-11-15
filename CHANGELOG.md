@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.2.0](https://github.com/Songmu/ecschedule/compare/v0.1.2...v0.2.0) (2020-11-15)
+
+* update deps [#19](https://github.com/Songmu/ecschedule/pull/19) ([Songmu](https://github.com/Songmu))
+* rename to ecschedule from ecsched [#18](https://github.com/Songmu/ecschedule/pull/18) ([Songmu](https://github.com/Songmu))
+
 ## [v0.1.2](https://github.com/Songmu/ecschedule/compare/v0.1.1...v0.1.2) (2020-11-09)
 
 * fix error handling of ListRules [#17](https://github.com/Songmu/ecschedule/pull/17) ([Songmu](https://github.com/Songmu))
