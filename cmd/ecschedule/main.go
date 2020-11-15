@@ -5,12 +5,12 @@ import (
 	"log"
 	"os"
 
-	"github.com/Songmu/ecsched"
+	"github.com/Songmu/ecschedule"
 )
 
 func main() {
 	log.SetFlags(0)
-	err := ecsched.Run(os.Args[1:], os.Stdout, os.Stderr)
+	err := ecschedule.Run(os.Args[1:], os.Stdout, os.Stderr)
 	if err != nil && err != flag.ErrHelp {
 		log.Printf("💢 %s\n", err)
 		exitCode := 1

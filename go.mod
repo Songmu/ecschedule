@@ -1,4 +1,4 @@
-module github.com/Songmu/ecsched
+module github.com/Songmu/ecschedule
 
 go 1.14
 

@@ -1,6 +1,6 @@
 // copied from github.com/kayac/go-config
 
-package ecsched
+package ecschedule
 
 import (
 	"bytes"
@@ -30,7 +30,7 @@ func init() {
 			if v, ok := os.LookupEnv(key); ok {
 				return v
 			}
-			return fmt.Sprintf("ecsched::<%s>", key)
+			return fmt.Sprintf("ecschedule::<%s>", key)
 		},
 	})
 }

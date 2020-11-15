@@ -1,6 +1,6 @@
 VERSION = $(shell godzil show-version)
 CURRENT_REVISION = $(shell git rev-parse --short HEAD)
-BUILD_LDFLAGS = "-s -w -X github.com/Songmu/ecsched.revision=$(CURRENT_REVISION)"
+BUILD_LDFLAGS = "-s -w -X github.com/Songmu/ecschedule.revision=$(CURRENT_REVISION)"
 ifdef update
   u=-u
 endif
@@ -33,11 +33,11 @@ lint: devel-deps
 
 .PHONY: build
 build: deps
-	go build -ldflags=$(BUILD_LDFLAGS) ./cmd/ecsched
+	go build -ldflags=$(BUILD_LDFLAGS) ./cmd/ecschedule
 
 .PHONY: install
 install:
-	go install -ldflags=$(BUILD_LDFLAGS) ./cmd/ecsched
+	go install -ldflags=$(BUILD_LDFLAGS) ./cmd/ecschedule
 
 .PHONY: release
 release: devel-deps

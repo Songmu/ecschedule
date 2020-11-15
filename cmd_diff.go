@@ -1,4 +1,4 @@
-package ecsched
+package ecschedule
 
 import (
 	"context"
@@ -18,7 +18,7 @@ var cmdDiff = &runnerImpl{
 	name:        "diff",
 	description: "diff of the rule with remote",
 	run: func(ctx context.Context, argv []string, outStream, errStream io.Writer) (err error) {
-		fs := flag.NewFlagSet("ecsched apply", flag.ContinueOnError)
+		fs := flag.NewFlagSet("ecschedule apply", flag.ContinueOnError)
 		fs.SetOutput(errStream)
 		var (
 			conf = fs.String("conf", "", "configuration")
