@@ -1,4 +1,4 @@
-package ecsched
+package ecschedule
 
 import (
 	"context"
@@ -14,7 +14,7 @@ var cmdRun = &runnerImpl{
 	name:        "run",
 	description: "run the rule",
 	run: func(ctx context.Context, argv []string, outStream, errStream io.Writer) (err error) {
-		fs := flag.NewFlagSet("ecsched run", flag.ContinueOnError)
+		fs := flag.NewFlagSet("ecschedule run", flag.ContinueOnError)
 		fs.SetOutput(errStream)
 		var (
 			conf   = fs.String("conf", "", "configuration")

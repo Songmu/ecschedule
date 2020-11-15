@@ -1,4 +1,4 @@
-package ecsched
+package ecschedule
 
 import (
 	"context"
@@ -9,9 +9,9 @@ import (
 	"os"
 )
 
-const cmdName = "ecsched"
+const cmdName = "ecschedule"
 
-// Run the ecsched
+// Run the ecschedule
 func Run(argv []string, outStream, errStream io.Writer) error {
 	log.SetOutput(errStream)
 	log.SetPrefix(fmt.Sprintf("[%s] ", cmdName))

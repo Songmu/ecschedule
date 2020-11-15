@@ -1,4 +1,4 @@
-package ecsched
+package ecschedule
 
 import (
 	"context"
@@ -180,7 +180,7 @@ func (r *Rule) target() *cloudwatchevents.Target {
 	}
 }
 
-var envReg = regexp.MustCompile(`ecsched::<([^>]+)>`)
+var envReg = regexp.MustCompile(`ecschedule::<([^>]+)>`)
 
 func (r *Rule) validateEnv() error {
 	bs, err := yaml.Marshal(r)

@@ -1,4 +1,4 @@
-package ecsched
+package ecschedule
 
 import (
 	"io"

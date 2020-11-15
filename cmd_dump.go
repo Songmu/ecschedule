@@ -1,4 +1,4 @@
-package ecsched
+package ecschedule
 
 import (
 	"context"
@@ -16,7 +16,7 @@ var cmdDump = &runnerImpl{
 	name:        "dump",
 	description: "dump tasks",
 	run: func(ctx context.Context, argv []string, outStream, errStream io.Writer) error {
-		fs := flag.NewFlagSet("ecsched dump", flag.ContinueOnError)
+		fs := flag.NewFlagSet("ecschedule dump", flag.ContinueOnError)
 		fs.SetOutput(errStream)
 		var (
 			conf    = fs.String("conf", "", "configuration")

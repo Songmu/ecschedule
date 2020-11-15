@@ -1,25 +1,25 @@
-ecsched
+ecschedule
 =======
 
-[![Test Status](https://github.com/Songmu/ecsched/workflows/test/badge.svg?branch=main)][actions]
+[![Test Status](https://github.com/Songmu/ecschedule/workflows/test/badge.svg?branch=main)][actions]
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)][license]
-[![GoDoc](https://godoc.org/github.com/Songmu/ecsched?status.svg)][godoc]
+[![GoDoc](https://godoc.org/github.com/Songmu/ecschedule?status.svg)][godoc]
 
-[actions]: https://github.com/Songmu/ecsched/actions?workflow=test
-[license]: https://github.com/Songmu/ecsched/blob/main/LICENSE
-[godoc]: https://godoc.org/github.com/Songmu/ecsched
+[actions]: https://github.com/Songmu/ecschedule/actions?workflow=test
+[license]: https://github.com/Songmu/ecschedule/blob/main/LICENSE
+[godoc]: https://godoc.org/github.com/Songmu/ecschedule
 
-ecsched is a tool to manage ECS Scheduled Tasks.
+ecschedule is a tool to manage ECS Scheduled Tasks.
 
 ## Synopsis
 
 ```command
-% ecsched [dump|apply|run|diff] -conf ecsched.yaml -rule $ruleName
+% ecschedule [dump|apply|run|diff] -conf ecschedule.yaml -rule $ruleName
 ```
 
 ## Description
 
-The ecsched manages ECS Schedule tasks using a YAML configuration file like following.
+The ecschedule manages ECS Schedule tasks using a YAML configuration file like following.
 
 ```yaml
 region: us-east-1
@@ -46,7 +46,7 @@ cluster: clusterName
 ## Installation
 
 ```console
-% go get github.com/Songmu/ecsched/cmd/ecsched
+% go get github.com/Songmu/ecschedule/cmd/ecschedule
 ```
 
 ## Quick Start
@@ -54,7 +54,7 @@ cluster: clusterName
 ### dump configuration YAML
 
 ```console
-% ecsched dump --cluster clusterName --region us-east-1 > ecsched.yaml
+% ecschedule dump --cluster clusterName --region us-east-1 > ecschedule.yaml
 ```
 
 edit and adjust configuration file after it.
@@ -62,13 +62,13 @@ edit and adjust configuration file after it.
 ### apply new or updated rule
 
 ```console
-% ecsched -conf ecsched.yaml apply -rule $ruleName
+% ecschedule -conf ecschedule.yaml apply -rule $ruleName
 ```
 
 Before you apply it, you can check the diff in the following way.
 
 ```console
-% ecsched -conf ecsched.yaml diff -rule $ruleName
+% ecschedule -conf ecschedule.yaml diff -rule $ruleName
 ```
 
 ## Functions
