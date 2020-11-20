@@ -30,11 +30,15 @@ type Rule struct {
 
 // Target cluster
 type Target struct {
-	TargetID           string               `yaml:"targetId,omitempty"`
-	TaskDefinition     string               `yaml:"taskDefinition"`
-	TaskCount          int64                `yaml:"taskCount,omitempty"`
-	ContainerOverrides []*ContainerOverride `yaml:"containerOverrides,omitempty"`
-	Role               string               `yaml:"role,omitempty"`
+	TargetID             string                `yaml:"targetId,omitempty"`
+	TaskDefinition       string                `yaml:"taskDefinition"`
+	TaskCount            int64                 `yaml:"taskCount,omitempty"`
+	ContainerOverrides   []*ContainerOverride  `yaml:"containerOverrides,omitempty"`
+	Role                 string                `yaml:"role,omitempty"`
+	Group                string                `yaml:"group,omitempty"`
+	LaunchType           string                `yaml:"launch_type,omitempty"`
+	PlatformVersion      string                `yaml:"platform_version,omitempty"`
+	NetworkConfiguration *NetworkConfiguration `yaml:"network_configuration,omitempty"`
 }
 
 // ContainerOverride overrids container
@@ -42,6 +46,33 @@ type ContainerOverride struct {
 	Name        string            `yaml:"name"`
 	Command     []string          `yaml:"command,flow"` // ,flow
 	Environment map[string]string `yaml:"environment,omitempty"`
+}
+
+// NetworkConfiguration represents ECS network configuration
+type NetworkConfiguration struct {
+	AwsVpcConfiguration *AwsVpcConfiguration `yaml:"aws_vpc_configuration"`
+}
+
+// AwsVpcConfiguration represents AWS VPC configuration
+type AwsVpcConfiguration struct {
+	Subnets        []string `yaml:"subnets"`
+	SecurityGroups []string `yaml:"security_groups,omitempty"`
+	AssinPublicIP  string   `yaml:"assign_public_ip,omitempty"`
+}
+
+func (nc *NetworkConfiguration) ecsParameters() *cloudwatchevents.NetworkConfiguration {
+	awsVpcConf := &cloudwatchevents.AwsVpcConfiguration{
+		Subnets: aws.StringSlice(nc.AwsVpcConfiguration.Subnets),
+	}
+	if sgs := nc.AwsVpcConfiguration.SecurityGroups; len(sgs) > 0 {
+		awsVpcConf.SecurityGroups = aws.StringSlice(sgs)
+	}
+	if as := nc.AwsVpcConfiguration.AssinPublicIP; as != "" {
+		awsVpcConf.AssignPublicIp = aws.String(as)
+	}
+	return &cloudwatchevents.NetworkConfiguration{
+		AwsvpcConfiguration: awsVpcConf,
+	}
 }
 
 func (ta *Target) targetID(r *Rule) string {
@@ -92,6 +123,27 @@ func (r *Rule) state() string {
 		return "DISABLED"
 	}
 	return "ENABLED"
+}
+
+func (r *Rule) ecsParameters() *cloudwatchevents.EcsParameters {
+	p := cloudwatchevents.EcsParameters{
+		TaskDefinitionArn: aws.String(r.taskDefinitionArn(r)),
+		TaskCount:         aws.Int64(r.taskCount()),
+	}
+	ta := r.Target
+	if ta.Group != "" {
+		p.Group = aws.String(ta.Group)
+	}
+	if ta.LaunchType != "" {
+		p.LaunchType = aws.String(ta.LaunchType)
+	}
+	if ta.PlatformVersion != "" {
+		p.PlatformVersion = aws.String(ta.PlatformVersion)
+	}
+	if nc := ta.NetworkConfiguration; nc != nil {
+		p.NetworkConfiguration = nc.ecsParameters()
+	}
+	return &p
 }
 
 func (r *Rule) mergeBaseConfig(bc *BaseConfig, role string) {
@@ -169,14 +221,11 @@ func (r *Rule) target() *cloudwatchevents.Target {
 	}
 	bs, _ := json.Marshal(coj)
 	return &cloudwatchevents.Target{
-		Id:      aws.String(r.targetID(r)),
-		Arn:     aws.String(r.targetARN(r)),
-		RoleArn: aws.String(r.roleARN()),
-		EcsParameters: &cloudwatchevents.EcsParameters{
-			TaskDefinitionArn: aws.String(r.taskDefinitionArn(r)),
-			TaskCount:         aws.Int64(r.taskCount()),
-		},
-		Input: aws.String(string(bs)),
+		Id:            aws.String(r.targetID(r)),
+		Arn:           aws.String(r.targetARN(r)),
+		RoleArn:       aws.String(r.roleARN()),
+		EcsParameters: r.ecsParameters(),
+		Input:         aws.String(string(bs)),
 	}
 }
 
