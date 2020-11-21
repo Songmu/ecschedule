@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.3.0](https://github.com/Songmu/ecschedule/compare/v0.2.0...v0.3.0) (2020-11-22)
+
+* Add ecs parameters to rule [#20](https://github.com/Songmu/ecschedule/pull/20) ([fujiwara](https://github.com/fujiwara))
+
 ## [v0.2.0](https://github.com/Songmu/ecschedule/compare/v0.1.2...v0.2.0) (2020-11-15)
 
 * update deps [#19](https://github.com/Songmu/ecschedule/pull/19) ([Songmu](https://github.com/Songmu))
