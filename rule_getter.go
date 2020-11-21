@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudwatchevents"
 	"github.com/aws/aws-sdk-go/service/ecs"
 )
@@ -50,6 +51,19 @@ func (rg *ruleGetter) getRule(ctx context.Context, r *cloudwatchevents.Rule) (*R
 			target.TaskCount = taskCount
 		}
 		target.TaskDefinition = strings.TrimPrefix(*ecsParams.TaskDefinitionArn, rg.taskDefArnPrefix)
+
+		target.Group = aws.StringValue(ecsParams.Group)
+		target.LaunchType = aws.StringValue(ecsParams.LaunchType)
+		target.PlatformVersion = aws.StringValue(ecsParams.PlatformVersion)
+		if nc := ecsParams.NetworkConfiguration; nc != nil {
+			target.NetworkConfiguration = &NetworkConfiguration{
+				AwsVpcConfiguration: &AwsVpcConfiguration{
+					Subnets:        aws.StringValueSlice(nc.AwsvpcConfiguration.Subnets),
+					SecurityGroups: aws.StringValueSlice(nc.AwsvpcConfiguration.SecurityGroups),
+					AssinPublicIP:  aws.StringValue(nc.AwsvpcConfiguration.AssignPublicIp),
+				},
+			}
+		}
 
 		taskOv := &ecs.TaskOverride{}
 		if err := json.Unmarshal([]byte(*t.Input), taskOv); err != nil {
