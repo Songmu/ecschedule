@@ -37,7 +37,9 @@ func Run(argv []string, outStream, errStream io.Writer) error {
 	if *ver {
 		return printVersion(outStream)
 	}
-	sess, err := session.NewSession()
+	sess, err := session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	})
 	if err != nil {
 		return err
 	}
