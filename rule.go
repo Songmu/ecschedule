@@ -75,6 +75,21 @@ func (nc *NetworkConfiguration) ecsParameters() *cloudwatchevents.NetworkConfigu
 	}
 }
 
+func (nc *NetworkConfiguration) inputParameters() *ecs.NetworkConfiguration {
+	awsVpcConfiguration := &ecs.AwsVpcConfiguration{
+		Subnets: aws.StringSlice(nc.AwsVpcConfiguration.Subnets),
+	}
+	if as := nc.AwsVpcConfiguration.AssinPublicIP; as != "" {
+		awsVpcConfiguration.AssignPublicIp = aws.String(as)
+	}
+	if sgs := nc.AwsVpcConfiguration.SecurityGroups; len(sgs) > 0 {
+		awsVpcConfiguration.SecurityGroups = aws.StringSlice(sgs)
+	}
+	return &ecs.NetworkConfiguration{
+		AwsvpcConfiguration: awsVpcConfiguration,
+	}
+}
+
 func (ta *Target) targetID(r *Rule) string {
 	if r.TargetID == "" {
 		return r.Name
@@ -311,6 +326,11 @@ func (r *Rule) Run(ctx context.Context, sess *session.Session, noWait bool) erro
 		})
 	}
 
+	var networkConfiguration *ecs.NetworkConfiguration
+	if r.NetworkConfiguration != nil {
+		networkConfiguration = r.NetworkConfiguration.inputParameters()
+	}
+
 	out, err := svc.RunTaskWithContext(ctx,
 		&ecs.RunTaskInput{
 			Cluster:        aws.String(r.Cluster),
@@ -319,6 +339,8 @@ func (r *Rule) Run(ctx context.Context, sess *session.Session, noWait bool) erro
 				ContainerOverrides: contaierOverrides,
 			},
 			Count: aws.Int64(r.taskCount()),
+			LaunchType: aws.String(r.Target.LaunchType),
+			NetworkConfiguration: networkConfiguration,
 		})
 	if err != nil {
 		return err
