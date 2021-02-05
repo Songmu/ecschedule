@@ -26,7 +26,7 @@ region: us-east-1
 cluster: clusterName
 - name: taskName1
   description: task 1
-  scheduledExpression: cron(30 15 ? * * *)
+  scheduleExpression: cron(30 15 ? * * *)
   taskDefinition: taskDefName
   containerOverrides:
   - name: containerName
@@ -36,7 +36,7 @@ cluster: clusterName
       FUGA: {{ must_env `APP_FUGA` }}
 - name: taskName2
   description: task2
-  scheduledExpression: cron(30 16 ? * * *)
+  scheduleExpression: cron(30 16 ? * * *)
   taskDefinition: taskDefName2
   containerOverrides:
   - name: containerName2
