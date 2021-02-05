@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.3.1](https://github.com/Songmu/ecschedule/compare/v0.3.0...v0.3.1) (2021-02-06)
+
+* Fixed yaml from scheduledExpression to scheduleExpression [#23](https://github.com/Songmu/ecschedule/pull/23) ([yutachaos](https://github.com/yutachaos))
+* fix the variable Run Task Input when running rule. [#22](https://github.com/Songmu/ecschedule/pull/22) ([laughk](https://github.com/laughk))
+* enable shared config state [#21](https://github.com/Songmu/ecschedule/pull/21) ([tughril](https://github.com/tughril))
+
 ## [v0.3.0](https://github.com/Songmu/ecschedule/compare/v0.2.0...v0.3.0) (2020-11-22)
 
 * Add ecs parameters to rule [#20](https://github.com/Songmu/ecschedule/pull/20) ([fujiwara](https://github.com/fujiwara))
