@@ -49,6 +49,23 @@ cluster: clusterName
 % go get github.com/Songmu/ecschedule/cmd/ecschedule
 ```
 
+### GitHub Actions
+
+Action Songmu/ecschedule@main installs ecschedule binary for Linux into /usr/local/bin. This action runs install only.
+
+```yaml
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: Songmu/ecschedule@main
+        with:
+          version: v0.3.1
+      - run: |
+          ecschedule -conf ecschedule.yaml apply -all
+```
+
 ## Quick Start
 
 ### dump configuration YAML
