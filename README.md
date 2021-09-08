@@ -24,6 +24,7 @@ The ecschedule manages ECS Schedule tasks using a YAML configuration file like f
 ```yaml
 region: us-east-1
 cluster: clusterName
+rules:
 - name: taskName1
   description: task 1
   scheduleExpression: cron(30 15 ? * * *)
