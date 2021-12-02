@@ -89,6 +89,14 @@ Before you apply it, you can check the diff in the following way.
 % ecschedule -conf ecschedule.yaml diff -rule $ruleName
 ```
 
+### run rule
+
+Execute `run` subcommand when want execute arbitrary timing.
+
+```console
+% ecschedule -conf ecschedule.yaml run -rule $ruleName
+```
+
 ## Functions
 
 You can use following functions in the configuration file.
