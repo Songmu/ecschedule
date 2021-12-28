@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.3.2](https://github.com/Songmu/ecschedule/compare/v0.3.1...v0.3.2) (2021-12-28)
+
+* Go 1.17 and follow it in toolchains [#29](https://github.com/Songmu/ecschedule/pull/29) ([Songmu](https://github.com/Songmu))
+* added task definition validation. [#28](https://github.com/Songmu/ecschedule/pull/28) ([reiki4040](https://github.com/reiki4040))
+* Add procedure of execute `run` subcommand to README [#27](https://github.com/Songmu/ecschedule/pull/27) ([gotoeveryone](https://github.com/gotoeveryone))
+* Add "rules:" to the sample configuration [#25](https://github.com/Songmu/ecschedule/pull/25) ([yuu26jp](https://github.com/yuu26jp))
+* Add action.yml for GitHub Actions [#24](https://github.com/Songmu/ecschedule/pull/24) ([mokichi](https://github.com/mokichi))
+
 ## [v0.3.1](https://github.com/Songmu/ecschedule/compare/v0.3.0...v0.3.1) (2021-02-06)
 
 * Fixed yaml from scheduledExpression to scheduleExpression [#23](https://github.com/Songmu/ecschedule/pull/23) ([yutachaos](https://github.com/yutachaos))
