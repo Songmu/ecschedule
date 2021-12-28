@@ -1,13 +1,20 @@
 module github.com/Songmu/ecschedule
 
-go 1.14
+go 1.17
 
 require (
-	github.com/aws/aws-sdk-go v1.35.28
-	github.com/goccy/go-yaml v1.8.4
+	github.com/aws/aws-sdk-go v1.42.25
+	github.com/goccy/go-yaml v1.9.4
 	github.com/pkg/errors v0.9.1
-	github.com/sergi/go-diff v1.1.0
+	github.com/sergi/go-diff v1.2.0
+)
+
+require (
+	github.com/fatih/color v1.13.0 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
+	github.com/mattn/go-colorable v0.1.12 // indirect
+	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/stretchr/testify v1.5.1 // indirect
-	golang.org/x/net v0.0.0-20201031054903-ff519b6c9102 // indirect
-	golang.org/x/sys v0.0.0-20201113233024-12cec1faf1ba // indirect
+	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
+	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 )
