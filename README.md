@@ -47,7 +47,7 @@ rules:
 ## Installation
 
 ```console
-% go get github.com/Songmu/ecschedule/cmd/ecschedule
+% go install github.com/Songmu/ecschedule/cmd/ecschedule@latest
 ```
 
 ### GitHub Actions
