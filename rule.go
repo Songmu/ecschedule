@@ -265,9 +265,23 @@ func (r *Rule) validateEnv() error {
 	return nil
 }
 
+func (r *Rule) validateTaskDefinition(sess *session.Session) error {
+	svc := ecs.New(sess, &aws.Config{Region: aws.String(r.Region)})
+	input := &ecs.DescribeTaskDefinitionInput{
+		TaskDefinition: aws.String(r.Target.TaskDefinition),
+	}
+	if _, err := svc.DescribeTaskDefinition(input); err != nil {
+		return fmt.Errorf("task definition %s is not defined: %s", r.Target.TaskDefinition, err.Error())
+	}
+	return nil
+}
+
 // Apply the rule
 func (r *Rule) Apply(ctx context.Context, sess *session.Session, dryRun bool) error {
 	if err := r.validateEnv(); err != nil {
+		return err
+	}
+	if err := r.validateTaskDefinition(sess); err != nil {
 		return err
 	}
 	svc := cloudwatchevents.New(sess, &aws.Config{Region: aws.String(r.Region)})
