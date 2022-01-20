@@ -95,7 +95,7 @@ var cmdDump = &runnerImpl{
 				taskDefArnPrefix: fmt.Sprintf("arn:aws:ecs:%s:%s:task-definition/", *region, accountID),
 				roleArnPrefix:    roleArnPrefix,
 				roleArn:          fmt.Sprintf("%s%s", roleArnPrefix, *role),
-				sqsArnPrefix:     fmt.Sprintf("arn:aws:sqs:%s:%s", *region, accountID),
+				sqsArnPrefix:     fmt.Sprintf("arn:aws:sqs:%s:%s:", *region, accountID),
 			}
 		)
 		for _, r := range remoteRules {
