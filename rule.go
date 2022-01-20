@@ -179,14 +179,16 @@ func (r *Rule) ecsParameters() *cloudwatchevents.EcsParameters {
 }
 
 func (r *Rule) deadLetterConfigParameters() *cloudwatchevents.DeadLetterConfig {
-	p := cloudwatchevents.DeadLetterConfig{}
-
 	ta := r.Target
+
 	if dlc := ta.DeadLetterConfig; dlc != nil {
-		p.Arn = aws.String(dlc.sqsArn(r))
+		arn := dlc.sqsArn(r)
+		return &cloudwatchevents.DeadLetterConfig{
+			Arn: aws.String(arn),
+		}
 	}
 
-	return &p
+	return nil
 }
 
 func (r *Rule) mergeBaseConfig(bc *BaseConfig, role string) {
