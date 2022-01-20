@@ -87,6 +87,12 @@ func (rg *ruleGetter) getRule(ctx context.Context, r *cloudwatchevents.Rule) (*R
 		}
 		target.ContainerOverrides = contOverrides
 		targets = append(targets, target)
+
+		if dlc := t.DeadLetterConfig; dlc != nil {
+			target.DeadLetterConfig = &DeadLetterConfig{
+				Sqs: strings.TrimPrefix(*dlc.Arn, rg.roleArnPrefix),
+			}
+		}
 	}
 	var desc string
 	if r.Description != nil {
