@@ -39,6 +39,7 @@ type Target struct {
 	LaunchType           string                `yaml:"launch_type,omitempty"`
 	PlatformVersion      string                `yaml:"platform_version,omitempty"`
 	NetworkConfiguration *NetworkConfiguration `yaml:"network_configuration,omitempty"`
+	DeadLetterConfig     *DeadLetterConfig     `yaml:"dead_letter_config,omitempty"`
 }
 
 // ContainerOverride overrids container
@@ -46,6 +47,22 @@ type ContainerOverride struct {
 	Name        string            `yaml:"name"`
 	Command     []string          `yaml:"command,flow"` // ,flow
 	Environment map[string]string `yaml:"environment,omitempty"`
+}
+
+// A DeadLetterConfig object that contains information about a dead-letter queue
+// configuration.
+type DeadLetterConfig struct {
+	Sqs string `yaml:"sqs"`
+}
+
+func (dlc *DeadLetterConfig) sqsArn(r *Rule) string {
+	ta := r.Target
+
+	if strings.HasPrefix(ta.DeadLetterConfig.Sqs, "arn:") {
+		return ta.DeadLetterConfig.Sqs
+	}
+
+	return fmt.Sprintf("arn:aws:sqs:%s:%s:%s", r.Region, r.AccountID, r.DeadLetterConfig.Sqs)
 }
 
 // NetworkConfiguration represents ECS network configuration
@@ -161,6 +178,17 @@ func (r *Rule) ecsParameters() *cloudwatchevents.EcsParameters {
 	return &p
 }
 
+func (r *Rule) deadLetterConfigParameters() *cloudwatchevents.DeadLetterConfig {
+	p := cloudwatchevents.DeadLetterConfig{}
+
+	ta := r.Target
+	if dlc := ta.DeadLetterConfig; dlc != nil {
+		p.Arn = aws.String(dlc.sqsArn(r))
+	}
+
+	return &p
+}
+
 func (r *Rule) mergeBaseConfig(bc *BaseConfig, role string) {
 	if r.Role == "" {
 		// XXX care multiple target
@@ -236,11 +264,12 @@ func (r *Rule) target() *cloudwatchevents.Target {
 	}
 	bs, _ := json.Marshal(coj)
 	return &cloudwatchevents.Target{
-		Id:            aws.String(r.targetID(r)),
-		Arn:           aws.String(r.targetARN(r)),
-		RoleArn:       aws.String(r.roleARN()),
-		EcsParameters: r.ecsParameters(),
-		Input:         aws.String(string(bs)),
+		Id:               aws.String(r.targetID(r)),
+		Arn:              aws.String(r.targetARN(r)),
+		RoleArn:          aws.String(r.roleARN()),
+		EcsParameters:    r.ecsParameters(),
+		DeadLetterConfig: r.deadLetterConfigParameters(),
+		Input:            aws.String(string(bs)),
 	}
 }
 
@@ -352,8 +381,8 @@ func (r *Rule) Run(ctx context.Context, sess *session.Session, noWait bool) erro
 			Overrides: &ecs.TaskOverride{
 				ContainerOverrides: contaierOverrides,
 			},
-			Count: aws.Int64(r.taskCount()),
-			LaunchType: aws.String(r.Target.LaunchType),
+			Count:                aws.Int64(r.taskCount()),
+			LaunchType:           aws.String(r.Target.LaunchType),
 			NetworkConfiguration: networkConfiguration,
 		})
 	if err != nil {
