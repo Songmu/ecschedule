@@ -57,6 +57,9 @@ func TestLoadConfig(t *testing.T) {
 							},
 						},
 					},
+					DeadLetterConfig: &DeadLetterConfig{
+						Sqs: "queue1",
+					},
 					Role: "ecsEventsRole",
 				},
 				BaseConfig: &BaseConfig{

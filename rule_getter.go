@@ -11,8 +11,8 @@ import (
 )
 
 type ruleGetter struct {
-	svc                                                                 *cloudwatchevents.CloudWatchEvents
-	clusterArn, ruleArnPrefix, taskDefArnPrefix, roleArnPrefix, roleArn string
+	svc                                                                               *cloudwatchevents.CloudWatchEvents
+	clusterArn, ruleArnPrefix, taskDefArnPrefix, roleArnPrefix, roleArn, sqsArnPrefix string
 }
 
 func (rg *ruleGetter) getRule(ctx context.Context, r *cloudwatchevents.Rule) (*Rule, error) {
@@ -87,6 +87,12 @@ func (rg *ruleGetter) getRule(ctx context.Context, r *cloudwatchevents.Rule) (*R
 		}
 		target.ContainerOverrides = contOverrides
 		targets = append(targets, target)
+
+		if dlc := t.DeadLetterConfig; dlc != nil {
+			target.DeadLetterConfig = &DeadLetterConfig{
+				Sqs: strings.TrimPrefix(*dlc.Arn, rg.sqsArnPrefix),
+			}
+		}
 	}
 	var desc string
 	if r.Description != nil {
