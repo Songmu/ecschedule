@@ -276,6 +276,7 @@ func (r *Rule) target() *cloudwatchevents.Target {
 }
 
 var envReg = regexp.MustCompile(`ecschedule::<([^>]+)>`)
+var tfstateReg = regexp.MustCompile(`ecschedule::tfstate::<([^>]+)>`)
 
 func (r *Rule) validateEnv() error {
 	bs, err := yaml.Marshal(r)
@@ -296,6 +297,25 @@ func (r *Rule) validateEnv() error {
 	return nil
 }
 
+func (r *Rule) validateTFstate() error {
+	bs, err := yaml.Marshal(r)
+	if err != nil {
+		return err
+	}
+	m := tfstateReg.FindAllSubmatch(bs, -1)
+	if len(m) > 0 {
+		if len(m) == 1 {
+			return fmt.Errorf("tfstate reference %s is not defined", string(m[0][1]))
+		}
+		var envs []string
+		for _, v := range m {
+			envs = append(envs, string(v[1]))
+		}
+		return fmt.Errorf("tfstate reference %s are not defined", strings.Join(envs, " and "))
+	}
+	return nil
+}
+
 func (r *Rule) validateTaskDefinition(sess *session.Session) error {
 	svc := ecs.New(sess, &aws.Config{Region: aws.String(r.Region)})
 	input := &ecs.DescribeTaskDefinitionInput{
@@ -310,6 +330,9 @@ func (r *Rule) validateTaskDefinition(sess *session.Session) error {
 // Apply the rule
 func (r *Rule) Apply(ctx context.Context, sess *session.Session, dryRun bool) error {
 	if err := r.validateEnv(); err != nil {
+		return err
+	}
+	if err := r.validateTFstate(); err != nil {
 		return err
 	}
 	if err := r.validateTaskDefinition(sess); err != nil {
@@ -346,6 +369,9 @@ func (r *Rule) Apply(ctx context.Context, sess *session.Session, dryRun bool) er
 // Run the rule
 func (r *Rule) Run(ctx context.Context, sess *session.Session, noWait bool) error {
 	if err := r.validateEnv(); err != nil {
+		return err
+	}
+	if err := r.validateTFstate(); err != nil {
 		return err
 	}
 	svc := ecs.New(sess, &aws.Config{Region: aws.String(r.Region)})

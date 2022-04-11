@@ -32,6 +32,9 @@ func init() {
 			}
 			return fmt.Sprintf("ecschedule::<%s>", key)
 		},
+		"tfstate": func(key string) string {
+			return fmt.Sprintf("ecschedule::tfstate::<`%s`>", key)
+		},
 	})
 }
 
