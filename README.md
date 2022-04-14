@@ -110,6 +110,56 @@ You can use following functions in the configuration file.
 
 inspired by [ecspresso](https://github.com/kayac/ecspresso).
 
+# Plugins
+
+## tfstate
+
+tfstate plugin introduces a template function `tfstate`.
+
+```yaml
+region: us-east-1
+cluster: api
+role: ecsEventsRole
+rules:
+- name: hoge-task-name
+  description: hoge description
+  scheduleExpression: cron(0 0 * * ? *)
+  taskDefinition: task1
+  group: xxx
+  platform_version: 1.4.0
+  launch_type: FARGATE
+  network_configuration:
+    aws_vpc_configuration:
+      subnets:
+      - {{ tfstate `aws_subnet.private-a.id` }}
+      - {{ tfstate `aws_subnet.private-c.id` }}
+      security_groups:
+      - {{ tfstatef `data.aws_security_group.default['%s'].id` `first` }}
+      - {{ tfstatef `data.aws_security_group.default['%s'].id` `second` }}
+      assign_public_ip: ENABLED
+  containerOverrides:
+  - name: container1
+    command: ["subcmd", "argument"]
+    environment:
+      HOGE_ENV: {{ env "DUMMY_HOGE_ENV" "HOGEGE" }}
+  dead_letter_config:
+    sqs: queue1
+plugins:
+- name: tfstate
+  config:
+    path: testdata/terraform.tfstate    # path to tfstate file
+      # or url: s3://my-bucket/terraform.tfstate
+```
+
+`{{ tfstate "resource_type.resource_name.attr" }}` will expand to an attribute value of the resource in tfstate.  
+
+`{{ tfstatef "resource_type.resource_name['%s'].attr" "index" }}` is similar to `{{ tfstatef "resource_type.resource_name['index'].attr" }}`.  
+This function is useful to build a resource address with environment variables.  
+
+```
+{{ tfstatef `aws_subnet.ecs['%s'].id` (must_env `SERVICE`) }}
+```
+
 ## Author
 
 [Songmu](https://github.com/Songmu)
