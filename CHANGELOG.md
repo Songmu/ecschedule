@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.5.1](https://github.com/Songmu/ecschedule/compare/v0.5.0...v0.5.1) (2022-05-06)
+
+* Go 1.18 and update deps [#35](https://github.com/Songmu/ecschedule/pull/35) ([Songmu](https://github.com/Songmu))
+* introduce reviewdog and drop golint [#34](https://github.com/Songmu/ecschedule/pull/34) ([Songmu](https://github.com/Songmu))
+* fix: golint error [#33](https://github.com/Songmu/ecschedule/pull/33) ([gotoeveryone](https://github.com/gotoeveryone))
+
 ## [v0.5.0](https://github.com/Songmu/ecschedule/compare/v0.4.0...v0.5.0) (2022-05-06)
 
 * enable tfstate plugin [#32](https://github.com/Songmu/ecschedule/pull/32) ([gotoeveryone](https://github.com/gotoeveryone))
