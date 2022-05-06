@@ -4,16 +4,18 @@ import (
 	"os"
 	"reflect"
 	"testing"
+	"text/template"
 )
 
 func TestLoadConfig(t *testing.T) {
-	f, err := os.Open("testdata/sample.yaml")
+	path := "testdata/sample.yaml"
+	f, err := os.Open(path)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer f.Close()
 
-	c, err := LoadConfig(f, "334")
+	c, err := LoadConfig(f, "334", path)
 	if err != nil {
 		t.Errorf("error shoud be nil, but: %s", err)
 	}
@@ -69,6 +71,9 @@ func TestLoadConfig(t *testing.T) {
 				},
 			},
 		},
+		Plugins:       []*Plugin(nil),
+		templateFuncs: []template.FuncMap(nil),
+		dir:           "testdata",
 	}
 
 	if !reflect.DeepEqual(c, expect) {
@@ -77,13 +82,14 @@ func TestLoadConfig(t *testing.T) {
 }
 
 func TestLoadConfig_mustEnv(t *testing.T) {
-	f, err := os.Open("testdata/sample2.yaml")
+	path := "testdata/sample2.yaml"
+	f, err := os.Open(path)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer f.Close()
 
-	c, err := LoadConfig(f, "335")
+	c, err := LoadConfig(f, "335", path)
 	if err != nil {
 		t.Errorf("error shoud be nil, but: %s", err)
 	}
@@ -95,5 +101,37 @@ func TestLoadConfig_mustEnv(t *testing.T) {
 	}
 	if g, e := err.Error(), "environment variable DUMMY_HOGE_ENV is not defined"; g != e {
 		t.Errorf("error shoud be %q, but: %q", e, g)
+	}
+}
+
+func TestLoadConfig_tfstate(t *testing.T) {
+	path := "testdata/sample3.yaml"
+	f, err := os.Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+
+	c, err := LoadConfig(f, "336", path)
+	if err != nil {
+		t.Errorf("error shoud be nil, but: %s", err)
+	}
+
+	if !reflect.DeepEqual(c.Plugins, []*Plugin{
+		{Name: "tfstate", Config: map[string]interface{}{"path": "testdata/terraform.tfstate"}},
+	}) {
+		t.Errorf("unexpected output: %#v", c)
+	}
+
+	as := c.Rules[0].NetworkConfiguration.AwsVpcConfiguration.Subnets
+	es := []string{"subnet-01234567", "subnet-12345678"}
+	if !reflect.DeepEqual(as, es) {
+		t.Errorf("error shoud be %v, but: %v", as, es)
+	}
+
+	asg := c.Rules[0].NetworkConfiguration.AwsVpcConfiguration.SecurityGroups
+	esg := []string{"sg-11111111", "sg-99999999"}
+	if !reflect.DeepEqual(asg, esg) {
+		t.Errorf("error shoud be %v, but: %v", asg, esg)
 	}
 }

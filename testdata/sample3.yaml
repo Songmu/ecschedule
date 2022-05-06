@@ -1,0 +1,31 @@
+region: us-east-1
+cluster: api
+role: ecsEventsRole
+rules:
+- name: hoge-task-name
+  description: hoge description
+  scheduleExpression: cron(0 0 * * ? *)
+  taskDefinition: task1
+  group: xxx
+  platform_version: 1.4.0
+  launch_type: FARGATE
+  network_configuration:
+    aws_vpc_configuration:
+      subnets:
+      - {{ tfstate `aws_subnet.private-a.id` }}
+      - {{ tfstate `aws_subnet.private-c.id` }}
+      security_groups:
+      - {{ tfstatef `data.aws_security_group.default['%s'].id` `first` }}
+      - {{ tfstatef `data.aws_security_group.default['%s'].id` `second` }}
+      assign_public_ip: ENABLED
+  containerOverrides:
+  - name: container1
+    command: ["subcmd", "argument"]
+    environment:
+      HOGE_ENV: {{ env "DUMMY_HOGE_ENV" "HOGEGE" }}
+  dead_letter_config:
+    sqs: queue1
+plugins:
+- name: tfstate
+  config:
+    path: testdata/terraform.tfstate

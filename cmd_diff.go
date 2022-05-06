@@ -39,7 +39,7 @@ var cmdDiff = &runnerImpl{
 				return err
 			}
 			defer f.Close()
-			c, err = LoadConfig(f, a.AccountID)
+			c, err = LoadConfig(f, a.AccountID, *conf)
 			if err != nil {
 				return err
 			}
