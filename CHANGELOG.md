@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.5.0](https://github.com/Songmu/ecschedule/compare/v0.4.0...v0.5.0) (2022-05-06)
+
+* enable tfstate plugin [#32](https://github.com/Songmu/ecschedule/pull/32) ([gotoeveryone](https://github.com/gotoeveryone))
+
 ## [v0.4.0](https://github.com/Songmu/ecschedule/compare/v0.3.2...v0.4.0) (2022-01-20)
 
 * support deadletter config [#30](https://github.com/Songmu/ecschedule/pull/30) ([MikiWaraMiki](https://github.com/MikiWaraMiki))
