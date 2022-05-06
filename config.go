@@ -42,7 +42,7 @@ func (c *Config) GetRuleByName(name string) *Rule {
 
 func (c *Config) setupPlugins() error {
 	for _, p := range c.Plugins {
-		if err := p.Setup(c); err != nil {
+		if err := p.setup(c); err != nil {
 			return err
 		}
 	}

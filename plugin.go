@@ -9,12 +9,13 @@ import (
 	"github.com/fujiwara/tfstate-lookup/tfstate"
 )
 
+// Plugin the plugin
 type Plugin struct {
 	Name   string                 `yaml:"name"`
 	Config map[string]interface{} `yaml:"config"`
 }
 
-func (p Plugin) Setup(c *Config) error {
+func (p Plugin) setup(c *Config) error {
 	switch strings.ToLower(p.Name) {
 	case "tfstate":
 		return setupPluginTFState(p, c)
