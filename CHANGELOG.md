@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.5.2](https://github.com/Songmu/ecschedule/compare/v0.5.1...v0.5.2) (2022-05-25)
+
+* fix: can execute release workflow to fix darwin builds [#38](https://github.com/Songmu/ecschedule/pull/38) ([gotoeveryone](https://github.com/gotoeveryone))
+* update github actions [#36](https://github.com/Songmu/ecschedule/pull/36) ([Songmu](https://github.com/Songmu))
+
 ## [v0.5.1](https://github.com/Songmu/ecschedule/compare/v0.5.0...v0.5.1) (2022-05-06)
 
 * Go 1.18 and update deps [#35](https://github.com/Songmu/ecschedule/pull/35) ([Songmu](https://github.com/Songmu))
