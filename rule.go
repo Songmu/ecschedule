@@ -40,6 +40,7 @@ type Target struct {
 	PlatformVersion      string                `yaml:"platform_version,omitempty"`
 	NetworkConfiguration *NetworkConfiguration `yaml:"network_configuration,omitempty"`
 	DeadLetterConfig     *DeadLetterConfig     `yaml:"dead_letter_config,omitempty"`
+	PropagateTags        string                `yaml:"propagateTags,omitempty"`
 }
 
 // ContainerOverride overrids container
@@ -171,6 +172,9 @@ func (r *Rule) ecsParameters() *cloudwatchevents.EcsParameters {
 	}
 	if ta.PlatformVersion != "" {
 		p.PlatformVersion = aws.String(ta.PlatformVersion)
+	}
+	if ta.PropagateTags != "" {
+		p.PropagateTags = aws.String(ta.PropagateTags)
 	}
 	if nc := ta.NetworkConfiguration; nc != nil {
 		p.NetworkConfiguration = nc.ecsParameters()
@@ -412,6 +416,7 @@ func (r *Rule) Run(ctx context.Context, sess *session.Session, noWait bool) erro
 			Count:                aws.Int64(r.taskCount()),
 			LaunchType:           aws.String(r.Target.LaunchType),
 			NetworkConfiguration: networkConfiguration,
+			PropagateTags:        aws.String(r.PropagateTags),
 		})
 	if err != nil {
 		return err

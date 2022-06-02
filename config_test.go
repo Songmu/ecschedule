@@ -62,6 +62,7 @@ func TestLoadConfig(t *testing.T) {
 					DeadLetterConfig: &DeadLetterConfig{
 						Sqs: "queue1",
 					},
+					PropagateTags: "TASK_DEFINITION",
 					Role: "ecsEventsRole",
 				},
 				BaseConfig: &BaseConfig{

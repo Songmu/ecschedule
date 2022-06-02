@@ -144,6 +144,7 @@ rules:
       HOGE_ENV: {{ env "DUMMY_HOGE_ENV" "HOGEGE" }}
   dead_letter_config:
     sqs: queue1
+  propagateTags: TASK_DEFINITION
 plugins:
 - name: tfstate
   config:
