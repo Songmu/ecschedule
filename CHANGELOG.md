@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.6.0](https://github.com/Songmu/ecschedule/compare/v0.5.2...v0.6.0) (2022-06-02)
+
+* feat: add propagateTags option [#39](https://github.com/Songmu/ecschedule/pull/39) ([cohalz](https://github.com/cohalz))
+
 ## [v0.5.2](https://github.com/Songmu/ecschedule/compare/v0.5.1...v0.5.2) (2022-05-25)
 
 * fix: can execute release workflow to fix darwin builds [#38](https://github.com/Songmu/ecschedule/pull/38) ([gotoeveryone](https://github.com/gotoeveryone))
