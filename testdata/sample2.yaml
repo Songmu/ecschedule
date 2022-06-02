@@ -11,3 +11,4 @@ rules:
     command: ["subcmd", "argument"]
     environment:
       HOGE_ENV: {{ must_env "DUMMY_HOGE_ENV" }}
+  propagateTags: TASK_DEFINITION
