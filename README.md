@@ -110,9 +110,9 @@ You can use following functions in the configuration file.
 
 inspired by [ecspresso](https://github.com/kayac/ecspresso).
 
-# Plugins
+## Plugins
 
-## tfstate
+### tfstate
 
 tfstate plugin introduces a template function `tfstate`.
 
@@ -160,6 +160,22 @@ This function is useful to build a resource address with environment variables.
 ```
 {{ tfstatef `aws_subnet.ecs['%s'].id` (must_env `SERVICE`) }}
 ```
+
+## Pitfalls
+
+### Trap due to rule name uniqueness constraints
+ecschedule is designed to guarantee the uniqueness of job definitions by rule name in the configuration file. This causes the following confusing behavior at the moment. Please be careful.
+
+### The rule name change causes a problem of garbage definition remaining
+If the name of a rule that is already reflected in the configuration file is changed, a new rule with that name is created and the old rule with the old name remains, resulting in an unintended double definition. The only solution is to delete the old rule manually.
+
+### Unable to delete rules
+If a rule is deleted from the configuration file and then reflected, the rule will not be deleted. The only way to do this is to delete this separately, too manually.
+
+This is because ecschedule only manages a subset of cloudwatch event rules, so it cannot distinguish whether a rule name that does not exist in the configuration file is out of ecschedule management or has been deleted.
+
+### Desired solution
+There should be designs to implement some state management mechanisms to solve these problems. If you have a good solution, I would be happy to make suggestions.
 
 ## Author
 
