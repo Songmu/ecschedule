@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.6.1](https://github.com/Songmu/ecschedule/compare/v0.6.0...v0.6.1) (2022-06-15)
+
+* [bugfix] Fixed the diff of propagateTags to appear correctly. [#41](https://github.com/Songmu/ecschedule/pull/41) ([cohalz](https://github.com/cohalz))
+* add pitfall warnings to README [#40](https://github.com/Songmu/ecschedule/pull/40) ([Songmu](https://github.com/Songmu))
+
 ## [v0.6.0](https://github.com/Songmu/ecschedule/compare/v0.5.2...v0.6.0) (2022-06-02)
 
 * feat: add propagateTags option [#39](https://github.com/Songmu/ecschedule/pull/39) ([cohalz](https://github.com/cohalz))
