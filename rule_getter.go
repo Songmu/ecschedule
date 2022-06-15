@@ -55,6 +55,7 @@ func (rg *ruleGetter) getRule(ctx context.Context, r *cloudwatchevents.Rule) (*R
 		target.Group = aws.StringValue(ecsParams.Group)
 		target.LaunchType = aws.StringValue(ecsParams.LaunchType)
 		target.PlatformVersion = aws.StringValue(ecsParams.PlatformVersion)
+		target.PropagateTags = aws.StringValue(t.EcsParameters.PropagateTags)
 		if nc := ecsParams.NetworkConfiguration; nc != nil {
 			target.NetworkConfiguration = &NetworkConfiguration{
 				AwsVpcConfiguration: &AwsVpcConfiguration{
