@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.6.3](https://github.com/Songmu/ecschedule/compare/v0.6.2...v0.6.3) (2022-07-12)
+
+* update deps except for go-ieproxy [#44](https://github.com/Songmu/ecschedule/pull/44) ([Songmu](https://github.com/Songmu))
+
 ## [v0.6.2](https://github.com/Songmu/ecschedule/compare/v0.6.1...v0.6.2) (2022-07-12)
 
 * fix: allow undefined for PropagateTags [#42](https://github.com/Songmu/ecschedule/pull/42) ([gotoeveryone](https://github.com/gotoeveryone))
