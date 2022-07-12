@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"testing"
 	"text/template"
+
+	"github.com/aws/aws-sdk-go/aws"
 )
 
 func TestLoadConfig(t *testing.T) {
@@ -62,8 +64,8 @@ func TestLoadConfig(t *testing.T) {
 					DeadLetterConfig: &DeadLetterConfig{
 						Sqs: "queue1",
 					},
-					PropagateTags: "TASK_DEFINITION",
-					Role: "ecsEventsRole",
+					PropagateTags: aws.String("TASK_DEFINITION"),
+					Role:          "ecsEventsRole",
 				},
 				BaseConfig: &BaseConfig{
 					Region:    "us-east-1",
@@ -134,5 +136,23 @@ func TestLoadConfig_tfstate(t *testing.T) {
 	esg := []string{"sg-11111111", "sg-99999999"}
 	if !reflect.DeepEqual(asg, esg) {
 		t.Errorf("error shoud be %v, but: %v", asg, esg)
+	}
+}
+
+func TestLoadConfig_undefined(t *testing.T) {
+	path := "testdata/sample4.yaml"
+	f, err := os.Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+
+	c, err := LoadConfig(f, "337", path)
+	if err != nil {
+		t.Errorf("error shoud be nil, but: %s", err)
+	}
+
+	if c.Rules[0].PropagateTags != nil {
+		t.Errorf("error shoud be nil, but: %v", c.Rules[0].PropagateTags)
 	}
 }
