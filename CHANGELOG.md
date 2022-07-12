@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.6.2](https://github.com/Songmu/ecschedule/compare/v0.6.1...v0.6.2) (2022-07-12)
+
+* fix: allow undefined for PropagateTags [#42](https://github.com/Songmu/ecschedule/pull/42) ([gotoeveryone](https://github.com/gotoeveryone))
+
 ## [v0.6.1](https://github.com/Songmu/ecschedule/compare/v0.6.0...v0.6.1) (2022-06-15)
 
 * [bugfix] Fixed the diff of propagateTags to appear correctly. [#41](https://github.com/Songmu/ecschedule/pull/41) ([cohalz](https://github.com/cohalz))
