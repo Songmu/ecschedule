@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.7.0](https://github.com/Songmu/ecschedule/compare/v0.6.3...v0.7.0) - 2022-11-20
+- add install.sh by @Songmu in https://github.com/Songmu/ecschedule/pull/45
+- add SHA256SUMS to artifacts by @Songmu in https://github.com/Songmu/ecschedule/pull/46
+- introduce tagpr by @Songmu in https://github.com/Songmu/ecschedule/pull/47
+- update deps except for go-ieproxy by @Songmu in https://github.com/Songmu/ecschedule/pull/49
+- update action.yml to use installer by @Songmu in https://github.com/Songmu/ecschedule/pull/50
+
 ## [v0.6.3](https://github.com/Songmu/ecschedule/compare/v0.6.2...v0.6.3) (2022-07-12)
 
 * update deps except for go-ieproxy [#44](https://github.com/Songmu/ecschedule/pull/44) ([Songmu](https://github.com/Songmu))
