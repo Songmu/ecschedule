@@ -14,7 +14,7 @@ import (
 const cmdName = "ecschedule"
 
 // Run the ecschedule
-func Run(argv []string, outStream, errStream io.Writer) error {
+func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) error {
 	log.SetOutput(errStream)
 	log.SetPrefix(fmt.Sprintf("[%s] ", cmdName))
 	nameAndVer := fmt.Sprintf("%s (v%s rev:%s)", cmdName, version, revision)
@@ -57,13 +57,13 @@ func Run(argv []string, outStream, errStream io.Writer) error {
 			return err
 		}
 		defer f.Close()
-		c, err := LoadConfig(f, a.AccountID, *conf)
+		c, err := LoadConfig(ctx, f, a.AccountID, *conf)
 		if err != nil {
 			return err
 		}
 		a.Config = c
 	}
-	ctx := setApp(context.Background(), a)
+	ctx = setApp(ctx, a)
 	argv = fs.Args()
 	if len(argv) < 1 {
 		return fmt.Errorf("no subcommand specified")
