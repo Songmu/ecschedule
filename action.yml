@@ -1,15 +1,13 @@
 inputs:
   version:
     description: "A version to install ecschedule"
-    default: "v0.3.1"
+    default: "v0.6.3"
 runs:
   using: "composite"
   steps:
-    - run: |
-        DIRNAME=ecschedule_${{ inputs.version }}_linux_amd64
-        cd /tmp
-        curl -sLO https://github.com/Songmu/ecschedule/releases/download/${{ inputs.version }}/${DIRNAME}.tar.gz
-        tar zxvf ${DIRNAME}.tar.gz
-        sudo mv ${DIRNAME}/ecschedule /usr/local/bin/ecschedule
-        rm -rf ${DIRNAME} ${DIRNAME}.zip
-      shell: bash
+  - run: |
+      TEMP_PATH="$(mktemp -d)"
+      curl -sfL https://raw.githubusercontent.com/Songmu/ecschedule/main/install.sh | sh -s -- -b "$TEMP_PATH" "{{ inputs.version }}" 2>&1
+      sudo mv ${TEMP_PATH}/ecschedule /usr/local/bin/ecschedule
+      rm -rf ${TEMP_PATH}
+    shell: bash
