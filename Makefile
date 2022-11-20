@@ -34,10 +34,13 @@ release: devel-deps
 CREDITS: go.sum devel-deps
 	godzil credits -w
 
+DIST_DIR = dist
 .PHONY: crossbuild
 crossbuild: go.sum devel-deps
+	rm -rf $(DIST_DIR)
 	godzil crossbuild -pv=v$(VERSION) -build-ldflags=$(BUILD_LDFLAGS) \
-      -os=linux,darwin -d=./dist/v$(VERSION) ./cmd/*
+      -os=linux,darwin -d=$(DIST_DIR) ./cmd/*
+	cd $(DIST_DIR) && shasum -a 256 $$(find * -type f -maxdepth 0) > SHA256SUMS
 
 .PHONY: upload
 upload:
