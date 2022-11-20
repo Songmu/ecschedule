@@ -27,10 +27,6 @@ build: deps
 install:
 	go install -ldflags=$(BUILD_LDFLAGS) ./cmd/ecschedule
 
-.PHONY: release
-release: devel-deps
-	godzil release
-
 CREDITS: go.sum devel-deps
 	godzil credits -w
 
