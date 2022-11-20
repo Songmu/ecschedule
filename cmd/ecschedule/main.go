@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
 	"os"
@@ -10,7 +11,7 @@ import (
 
 func main() {
 	log.SetFlags(0)
-	err := ecschedule.Run(os.Args[1:], os.Stdout, os.Stderr)
+	err := ecschedule.Run(context.Background(), os.Args[1:], os.Stdout, os.Stderr)
 	if err != nil && err != flag.ErrHelp {
 		log.Printf("💢 %s\n", err)
 		exitCode := 1

@@ -1,6 +1,7 @@
 package ecschedule
 
 import (
+	"context"
 	"os"
 	"reflect"
 	"testing"
@@ -17,7 +18,7 @@ func TestLoadConfig(t *testing.T) {
 	}
 	defer f.Close()
 
-	c, err := LoadConfig(f, "334", path)
+	c, err := LoadConfig(context.Background(), f, "334", path)
 	if err != nil {
 		t.Errorf("error shoud be nil, but: %s", err)
 	}
@@ -92,7 +93,7 @@ func TestLoadConfig_mustEnv(t *testing.T) {
 	}
 	defer f.Close()
 
-	c, err := LoadConfig(f, "335", path)
+	c, err := LoadConfig(context.Background(), f, "335", path)
 	if err != nil {
 		t.Errorf("error shoud be nil, but: %s", err)
 	}
@@ -115,7 +116,7 @@ func TestLoadConfig_tfstate(t *testing.T) {
 	}
 	defer f.Close()
 
-	c, err := LoadConfig(f, "336", path)
+	c, err := LoadConfig(context.Background(), f, "336", path)
 	if err != nil {
 		t.Errorf("error shoud be nil, but: %s", err)
 	}
@@ -147,7 +148,7 @@ func TestLoadConfig_undefined(t *testing.T) {
 	}
 	defer f.Close()
 
-	c, err := LoadConfig(f, "337", path)
+	c, err := LoadConfig(context.Background(), f, "337", path)
 	if err != nil {
 		t.Errorf("error shoud be nil, but: %s", err)
 	}

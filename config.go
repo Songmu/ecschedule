@@ -1,6 +1,7 @@
 package ecschedule
 
 import (
+	"context"
 	"io"
 	"io/ioutil"
 	"path/filepath"
@@ -40,9 +41,9 @@ func (c *Config) GetRuleByName(name string) *Rule {
 	return nil
 }
 
-func (c *Config) setupPlugins() error {
+func (c *Config) setupPlugins(ctx context.Context) error {
 	for _, p := range c.Plugins {
-		if err := p.setup(c); err != nil {
+		if err := p.setup(ctx, c); err != nil {
 			return err
 		}
 	}
@@ -50,7 +51,7 @@ func (c *Config) setupPlugins() error {
 }
 
 // LoadConfig loads config
-func LoadConfig(r io.Reader, accountID string, confPath string) (*Config, error) {
+func LoadConfig(ctx context.Context, r io.Reader, accountID string, confPath string) (*Config, error) {
 	c := Config{}
 	bs, err := ioutil.ReadAll(r)
 	if err != nil {
@@ -64,7 +65,7 @@ func LoadConfig(r io.Reader, accountID string, confPath string) (*Config, error)
 		return nil, err
 	}
 	c.AccountID = accountID
-	if err := c.setupPlugins(); err != nil {
+	if err := c.setupPlugins(ctx); err != nil {
 		return nil, err
 	}
 	c.dir = filepath.Dir(confPath)

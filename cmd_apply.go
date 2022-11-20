@@ -38,7 +38,7 @@ var cmdApply = &runnerImpl{
 				return err
 			}
 			defer f.Close()
-			c, err = LoadConfig(f, a.AccountID, *conf)
+			c, err = LoadConfig(ctx, f, a.AccountID, *conf)
 			if err != nil {
 				return err
 			}
