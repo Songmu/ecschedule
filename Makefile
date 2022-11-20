@@ -44,4 +44,4 @@ crossbuild: go.sum devel-deps
 
 .PHONY: upload
 upload:
-	ghr -body="$$(godzil changelog --latest -F markdown)" v$(VERSION) dist/v$(VERSION)
+	ghr v$(VERSION) $(DIST_DIR)
