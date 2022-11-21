@@ -7,7 +7,7 @@ runs:
   steps:
   - run: |
       TEMP_PATH="$(mktemp -d)"
-      curl -sfL https://raw.githubusercontent.com/Songmu/ecschedule/main/install.sh | sh -s -- -b "$TEMP_PATH" "{{ inputs.version }}" 2>&1
+      curl -sfL https://raw.githubusercontent.com/Songmu/ecschedule/main/install.sh | sh -s -- -b "${TEMP_PATH}" "${{ inputs.version }}" 2>&1
       sudo mv ${TEMP_PATH}/ecschedule /usr/local/bin/ecschedule
       rm -rf ${TEMP_PATH}
     shell: bash
