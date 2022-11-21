@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.7.1](https://github.com/Songmu/ecschedule/compare/v0.7.0...v0.7.1) - 2022-11-21
+- fix a shell command to expand variables by @hoyo in https://github.com/Songmu/ecschedule/pull/51
+
 ## [v0.7.0](https://github.com/Songmu/ecschedule/compare/v0.6.3...v0.7.0) - 2022-11-20
 - add install.sh by @Songmu in https://github.com/Songmu/ecschedule/pull/45
 - add SHA256SUMS to artifacts by @Songmu in https://github.com/Songmu/ecschedule/pull/46
