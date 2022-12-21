@@ -1,5 +1,5 @@
 name: release
-description: release maltmill
+description: release ecschedule
 inputs:
   tag:
     description: tag name to be released
