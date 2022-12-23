@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.7.2](https://github.com/Songmu/ecschedule/compare/v0.7.1...v0.7.2) - 2022-12-23
+- Update version description "v0.3.1" to "v0.7.1" in  README by @TanisukeGoro in https://github.com/Songmu/ecschedule/pull/53
+- fix: PropagateTags not applied by @sinsi404 in https://github.com/Songmu/ecschedule/pull/55
+
 ## [v0.7.1](https://github.com/Songmu/ecschedule/compare/v0.7.0...v0.7.1) - 2022-11-21
 - fix a shell command to expand variables by @hoyo in https://github.com/Songmu/ecschedule/pull/51
 
