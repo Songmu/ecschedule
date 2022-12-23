@@ -173,6 +173,9 @@ func (r *Rule) ecsParameters() *cloudwatchevents.EcsParameters {
 	if ta.PlatformVersion != "" {
 		p.PlatformVersion = aws.String(ta.PlatformVersion)
 	}
+	if ta.PropagateTags != nil {
+		p.PropagateTags = ta.PropagateTags
+	}
 	if nc := ta.NetworkConfiguration; nc != nil {
 		p.NetworkConfiguration = nc.ecsParameters()
 	}
