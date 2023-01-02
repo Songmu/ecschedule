@@ -3,11 +3,11 @@ ecschedule
 
 [![Test Status](https://github.com/Songmu/ecschedule/workflows/test/badge.svg?branch=main)][actions]
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)][license]
-[![GoDoc](https://godoc.org/github.com/Songmu/ecschedule?status.svg)][godoc]
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/Songmu/ecschedule)][PkgGoDev]
 
 [actions]: https://github.com/Songmu/ecschedule/actions?workflow=test
 [license]: https://github.com/Songmu/ecschedule/blob/main/LICENSE
-[godoc]: https://godoc.org/github.com/Songmu/ecschedule
+[PkgGoDev]: https://pkg.go.dev/github.com/Songmu/ecschedule
 
 ecschedule is a tool to manage ECS Scheduled Tasks.
 
