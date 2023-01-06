@@ -1,0 +1,45 @@
+{
+  "region": "us-east-1",
+  "cluster": "api",
+  "role": "ecsEventsRole",
+  "rules": [
+    {
+      "name": "hoge-task-name",
+      "description": "hoge description",
+      "scheduleExpression": "cron(0 0 * * ? *)",
+      "taskDefinition": "task1",
+      "group": "xxx",
+      "platform_version": "1.4.0",
+      "launch_type": "FARGATE",
+      "network_configuration": {
+        "aws_vpc_configuration": {
+          "subnets": [
+            "subnet-01234567",
+            "subnet-12345678"
+          ],
+          "security_groups": [
+            "sg-11111111",
+            "sg-99999999"
+          ],
+          "assign_public_ip": "ENABLED"
+        }
+      },
+      "containerOverrides": [
+        {
+          "name": "container1",
+          "command": [
+            "subcmd",
+            "argument"
+          ],
+          "environment": {
+            "HOGE_ENV": "{{ env `DUMMY_HOGE_ENV` `HOGEGE` }}"
+          }
+        }
+      ],
+      "dead_letter_config": {
+        "sqs": "queue1"
+      },
+      "propagateTags": "TASK_DEFINITION"
+    }
+  ]
+}
