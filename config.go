@@ -23,17 +23,17 @@ const (
 
 // BaseConfig baseconfig
 type BaseConfig struct {
-	Region    string `yaml:"region"`
-	Cluster   string `yaml:"cluster"`
-	AccountID string `yaml:"-"`
+	Region    string `yaml:"region" json:"region"`
+	Cluster   string `yaml:"cluster" json:"cluster"`
+	AccountID string `yaml:"-" json:"-"`
 }
 
 // Config config
 type Config struct {
-	Role        string `yaml:"role,omitempty"`
-	*BaseConfig `yaml:",inline"`
-	Rules       []*Rule   `yaml:"rules"`
-	Plugins     []*Plugin `yaml:"plugins,omitempty"`
+	Role        string `yaml:"role,omitempty" json:"role,omitempty"`
+	*BaseConfig `yaml:",inline" json:",inline"`
+	Rules       []*Rule   `yaml:"rules" json:"rules"`
+	Plugins     []*Plugin `yaml:"plugins,omitempty" json:"plugins,omitempty"`
 
 	templateFuncs []template.FuncMap
 	dir           string

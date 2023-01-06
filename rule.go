@@ -18,11 +18,11 @@ import (
 
 // Rule the rule
 type Rule struct {
-	Name               string `yaml:"name"`
-	Description        string `yaml:"description,omitempty"`
-	ScheduleExpression string `yaml:"scheduleExpression"`
-	Disabled           bool   `yaml:"disabled,omitempty"` // ENABLE | DISABLE
-	*Target            `yaml:",inline"`
+	Name               string `yaml:"name" json:"name"`
+	Description        string `yaml:"description,omitempty" json:"description,omitempty"`
+	ScheduleExpression string `yaml:"scheduleExpression" json:"scheduleExpression"`
+	Disabled           bool   `yaml:"disabled,omitempty" json:"disabled,omitempty"` // ENABLE | DISABLE
+	*Target            `yaml:",inline" json:",inline"`
 	// Targets []*Target `yaml:"targets,omitempty"`
 
 	*BaseConfig `yaml:",inline,omitempty"`
@@ -30,30 +30,30 @@ type Rule struct {
 
 // Target cluster
 type Target struct {
-	TargetID             string                `yaml:"targetId,omitempty"`
-	TaskDefinition       string                `yaml:"taskDefinition"`
-	TaskCount            int64                 `yaml:"taskCount,omitempty"`
-	ContainerOverrides   []*ContainerOverride  `yaml:"containerOverrides,omitempty"`
-	Role                 string                `yaml:"role,omitempty"`
-	Group                string                `yaml:"group,omitempty"`
-	LaunchType           string                `yaml:"launch_type,omitempty"`
-	PlatformVersion      string                `yaml:"platform_version,omitempty"`
-	NetworkConfiguration *NetworkConfiguration `yaml:"network_configuration,omitempty"`
-	DeadLetterConfig     *DeadLetterConfig     `yaml:"dead_letter_config,omitempty"`
-	PropagateTags        *string               `yaml:"propagateTags,omitempty"`
+	TargetID             string                `yaml:"targetId,omitempty" json:"targetId,omitempty"`
+	TaskDefinition       string                `yaml:"taskDefinition" json:"taskDefinition"`
+	TaskCount            int64                 `yaml:"taskCount,omitempty" json:"taskCount,omitempty"`
+	ContainerOverrides   []*ContainerOverride  `yaml:"containerOverrides,omitempty" json:"containerOverrides,omitempty"`
+	Role                 string                `yaml:"role,omitempty" json:"role,omitempty"`
+	Group                string                `yaml:"group,omitempty" json:"group,omitempty"`
+	LaunchType           string                `yaml:"launch_type,omitempty" json:"launch_type,omitempty"`
+	PlatformVersion      string                `yaml:"platform_version,omitempty" json:"platform_version,omitempty"`
+	NetworkConfiguration *NetworkConfiguration `yaml:"network_configuration,omitempty" json:"network_configuration,omitempty"`
+	DeadLetterConfig     *DeadLetterConfig     `yaml:"dead_letter_config,omitempty" json:"dead_letter_config,omitempty"`
+	PropagateTags        *string               `yaml:"propagateTags,omitempty" json:"propagateTags,omitempty"`
 }
 
 // ContainerOverride overrids container
 type ContainerOverride struct {
-	Name        string            `yaml:"name"`
-	Command     []string          `yaml:"command,flow"` // ,flow
-	Environment map[string]string `yaml:"environment,omitempty"`
+	Name        string            `yaml:"name" json:"name"`
+	Command     []string          `yaml:"command,flow" json:"command"` // ,flow
+	Environment map[string]string `yaml:"environment,omitempty" json:"environment,omitempty"`
 }
 
 // A DeadLetterConfig object that contains information about a dead-letter queue
 // configuration.
 type DeadLetterConfig struct {
-	Sqs string `yaml:"sqs"`
+	Sqs string `yaml:"sqs" json:"sqs"`
 }
 
 func (dlc *DeadLetterConfig) sqsArn(r *Rule) string {
@@ -68,14 +68,14 @@ func (dlc *DeadLetterConfig) sqsArn(r *Rule) string {
 
 // NetworkConfiguration represents ECS network configuration
 type NetworkConfiguration struct {
-	AwsVpcConfiguration *AwsVpcConfiguration `yaml:"aws_vpc_configuration"`
+	AwsVpcConfiguration *AwsVpcConfiguration `yaml:"aws_vpc_configuration" json:"aws_vpc_configuration"`
 }
 
 // AwsVpcConfiguration represents AWS VPC configuration
 type AwsVpcConfiguration struct {
-	Subnets        []string `yaml:"subnets"`
-	SecurityGroups []string `yaml:"security_groups,omitempty"`
-	AssinPublicIP  string   `yaml:"assign_public_ip,omitempty"`
+	Subnets        []string `yaml:"subnets" json:"subnets"`
+	SecurityGroups []string `yaml:"security_groups,omitempty" json:"security_groups,omitempty"`
+	AssinPublicIP  string   `yaml:"assign_public_ip,omitempty" json:"assign_public_ip,omitempty"`
 }
 
 func (nc *NetworkConfiguration) ecsParameters() *cloudwatchevents.NetworkConfiguration {
