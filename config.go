@@ -2,6 +2,8 @@ package ecschedule
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"path/filepath"
@@ -12,6 +14,12 @@ import (
 )
 
 const defaultRole = "ecsEventsRole"
+
+const (
+	jsonExt = ".json"
+	ymlExt  = ".yml"
+	yamlExt = ".yaml"
+)
 
 // BaseConfig baseconfig
 type BaseConfig struct {
@@ -61,7 +69,7 @@ func LoadConfig(ctx context.Context, r io.Reader, accountID string, confPath str
 	if err != nil {
 		return nil, err
 	}
-	if err := yaml.Unmarshal(bs, &c); err != nil {
+	if err := unmarshalConfig(bs, &c, confPath); err != nil {
 		return nil, err
 	}
 	c.AccountID = accountID
@@ -86,4 +94,15 @@ func LoadConfig(ctx context.Context, r io.Reader, accountID string, confPath str
 		r.mergeBaseConfig(c.BaseConfig, c.Role)
 	}
 	return &c, nil
+}
+
+// unmarshalConfig unmarshal json or yaml file
+func unmarshalConfig(bs []byte, c *Config, filePath string) error {
+	switch filepath.Ext(filePath) {
+	case jsonExt:
+		return json.Unmarshal(bs, c)
+	case yamlExt, ymlExt:
+		return yaml.Unmarshal(bs, c)
+	}
+	return fmt.Errorf("not supported file type")
 }
