@@ -6,6 +6,7 @@ require (
 	github.com/aws/aws-sdk-go v1.44.142
 	github.com/fujiwara/tfstate-lookup v1.0.0
 	github.com/goccy/go-yaml v1.9.6
+	github.com/google/go-jsonnet v0.19.1
 	github.com/kayac/go-config v0.6.0
 	github.com/pkg/errors v0.9.1
 	github.com/sergi/go-diff v1.2.0
@@ -87,4 +88,5 @@ require (
 	google.golang.org/grpc v1.51.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	sigs.k8s.io/yaml v1.1.0 // indirect
 )

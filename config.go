@@ -10,15 +10,17 @@ import (
 	"text/template"
 
 	"github.com/goccy/go-yaml"
+	"github.com/google/go-jsonnet"
 	gc "github.com/kayac/go-config"
 )
 
 const defaultRole = "ecsEventsRole"
 
 const (
-	jsonExt = ".json"
-	ymlExt  = ".yml"
-	yamlExt = ".yaml"
+	jsonnetExt = ".jsonnet"
+	jsonExt    = ".json"
+	ymlExt     = ".yml"
+	yamlExt    = ".yaml"
 )
 
 // BaseConfig baseconfig
@@ -69,7 +71,19 @@ func LoadConfig(ctx context.Context, r io.Reader, accountID string, confPath str
 	if err != nil {
 		return nil, err
 	}
-	if err := unmarshalConfig(bs, &c, confPath); err != nil {
+
+	ext := filepath.Ext(confPath)
+	if ext == jsonnetExt {
+		vm := jsonnet.MakeVM()
+		jsonStr, err := vm.EvaluateFile(confPath)
+		if err != nil {
+			return nil, err
+		}
+		bs = []byte(jsonStr)
+		ext = jsonExt
+	}
+
+	if err := unmarshalConfig(bs, &c, ext); err != nil {
 		return nil, err
 	}
 	c.AccountID = accountID
@@ -97,8 +111,9 @@ func LoadConfig(ctx context.Context, r io.Reader, accountID string, confPath str
 }
 
 // unmarshalConfig unmarshal json or yaml file
-func unmarshalConfig(bs []byte, c *Config, filePath string) error {
-	switch filepath.Ext(filePath) {
+func unmarshalConfig(bs []byte, c *Config, ext string) error {
+
+	switch ext {
 	case jsonExt:
 		return json.Unmarshal(bs, c)
 	case yamlExt, ymlExt:

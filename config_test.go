@@ -11,7 +11,7 @@ import (
 )
 
 func TestLoadConfig(t *testing.T) {
-	pathes := []string{"testdata/sample.yaml", "testdata/sample.json"}
+	pathes := []string{"testdata/sample.yaml", "testdata/sample.json", "testdata/sample.jsonnet"}
 	expect := &Config{
 		Role: "ecsEventsRole",
 		BaseConfig: &BaseConfig{
