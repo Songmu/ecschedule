@@ -63,24 +63,13 @@ func (c *Config) setupPlugins(ctx context.Context) error {
 // LoadConfig loads config
 func LoadConfig(ctx context.Context, r io.Reader, accountID string, confPath string) (*Config, error) {
 	c := Config{}
-	bs, err := ioutil.ReadAll(r)
+	bs, ext, err := readConfigFile(r, confPath)
 	if err != nil {
 		return nil, err
 	}
 	bs, err = envReplacer(bs)
 	if err != nil {
 		return nil, err
-	}
-
-	ext := filepath.Ext(confPath)
-	if ext == jsonnetExt {
-		vm := jsonnet.MakeVM()
-		jsonStr, err := vm.EvaluateFile(confPath)
-		if err != nil {
-			return nil, err
-		}
-		bs = []byte(jsonStr)
-		ext = jsonExt
 	}
 
 	if err := unmarshalConfig(bs, &c, ext); err != nil {
@@ -101,7 +90,7 @@ func LoadConfig(ctx context.Context, r io.Reader, accountID string, confPath str
 	if err != nil {
 		return nil, err
 	}
-	if err := yaml.Unmarshal(bs, &c); err != nil {
+	if err := unmarshalConfig(bs, &c, ext); err != nil {
 		return nil, err
 	}
 	for _, r := range c.Rules {
@@ -112,7 +101,6 @@ func LoadConfig(ctx context.Context, r io.Reader, accountID string, confPath str
 
 // unmarshalConfig unmarshal json or yaml file
 func unmarshalConfig(bs []byte, c *Config, ext string) error {
-
 	switch ext {
 	case jsonExt:
 		return json.Unmarshal(bs, c)
@@ -120,4 +108,15 @@ func unmarshalConfig(bs []byte, c *Config, ext string) error {
 		return yaml.Unmarshal(bs, c)
 	}
 	return fmt.Errorf("not supported file type")
+}
+
+func readConfigFile(r io.Reader, confPath string) ([]byte, string, error) {
+	ext := filepath.Ext(confPath)
+	if ext == jsonnetExt {
+		vm := jsonnet.MakeVM()
+		bs, err := vm.EvaluateFile(confPath)
+		return []byte(bs), jsonExt, err
+	}
+	bs, err := ioutil.ReadAll(r)
+	return bs, ext, err
 }
