@@ -107,7 +107,7 @@ func unmarshalConfig(bs []byte, c *Config, ext string) error {
 	case yamlExt, ymlExt:
 		return yaml.Unmarshal(bs, c)
 	}
-	return fmt.Errorf("not supported file type")
+	return fmt.Errorf("unsupported file type: %s", ext)
 }
 
 func readConfigFile(r io.Reader, confPath string) ([]byte, string, error) {
@@ -115,6 +115,9 @@ func readConfigFile(r io.Reader, confPath string) ([]byte, string, error) {
 	if ext == jsonnetExt {
 		vm := jsonnet.MakeVM()
 		bs, err := vm.EvaluateFile(confPath)
+		if err != nil {
+			return nil, ext, fmt.Errorf("failed to evaluate jsonnet file: %w", err)
+		}
 		return []byte(bs), jsonExt, err
 	}
 	bs, err := ioutil.ReadAll(r)
