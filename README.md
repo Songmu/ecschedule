@@ -19,7 +19,7 @@ ecschedule is a tool to manage ECS Scheduled Tasks.
 
 ## Description
 
-The ecschedule manages ECS Schedule tasks using a YAML configuration file like following.
+The ecschedule manages ECS Schedule tasks using a configuration file (YAML, JSON or Jsonnet format) like following.
 
 ```yaml
 region: us-east-1

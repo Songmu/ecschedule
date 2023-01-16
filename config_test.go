@@ -11,18 +11,7 @@ import (
 )
 
 func TestLoadConfig(t *testing.T) {
-	path := "testdata/sample.yaml"
-	f, err := os.Open(path)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer f.Close()
-
-	c, err := LoadConfig(context.Background(), f, "334", path)
-	if err != nil {
-		t.Errorf("error shoud be nil, but: %s", err)
-	}
-
+	pathes := []string{"testdata/sample.yaml", "testdata/sample.json", "testdata/sample.jsonnet"}
 	expect := &Config{
 		Role: "ecsEventsRole",
 		BaseConfig: &BaseConfig{
@@ -80,8 +69,20 @@ func TestLoadConfig(t *testing.T) {
 		dir:           "testdata",
 	}
 
-	if !reflect.DeepEqual(c, expect) {
-		t.Errorf("unexpected output: %#v", c)
+	for _, path := range pathes {
+		f, err := os.Open(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer f.Close()
+		c, err := LoadConfig(context.Background(), f, "334", path)
+		if err != nil {
+			t.Errorf("error shoud be nil, but: %s", err)
+		}
+
+		if !reflect.DeepEqual(c, expect) {
+			t.Errorf("unexpected output: %#v", c)
+		}
 	}
 }
 
