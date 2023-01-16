@@ -19,8 +19,6 @@ const defaultRole = "ecsEventsRole"
 const (
 	jsonnetExt = ".jsonnet"
 	jsonExt    = ".json"
-	ymlExt     = ".yml"
-	yamlExt    = ".yaml"
 )
 
 // BaseConfig baseconfig
@@ -101,13 +99,12 @@ func LoadConfig(ctx context.Context, r io.Reader, accountID string, confPath str
 
 // unmarshalConfig unmarshal json or yaml file
 func unmarshalConfig(bs []byte, c *Config, ext string) error {
-	switch ext {
-	case jsonExt:
+	if ext == jsonExt {
 		return json.Unmarshal(bs, c)
-	case yamlExt, ymlExt:
-		return yaml.Unmarshal(bs, c)
 	}
-	return fmt.Errorf("unsupported file type: %s", ext)
+
+	// as a YAML file if the file type cannot be determined from the extension (e.g. .ecschedule, ecschedule.cfg)
+	return yaml.Unmarshal(bs, c)
 }
 
 func readConfigFile(r io.Reader, confPath string) ([]byte, string, error) {
