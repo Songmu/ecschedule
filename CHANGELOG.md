@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.8.0](https://github.com/Songmu/ecschedule/compare/v0.7.2...v0.8.0) - 2023-01-16
+- support json jsonnet by @mrymam in https://github.com/Songmu/ecschedule/pull/58
+
 ## [v0.7.2](https://github.com/Songmu/ecschedule/compare/v0.7.1...v0.7.2) - 2022-12-23
 - Update version description "v0.3.1" to "v0.7.1" in  README by @TanisukeGoro in https://github.com/Songmu/ecschedule/pull/53
 - fix: PropagateTags not applied by @sinsi404 in https://github.com/Songmu/ecschedule/pull/55
