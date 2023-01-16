@@ -61,8 +61,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: Songmu/ecschedule@main
-        with:
-          version: v0.7.1
       - run: |
           ecschedule -conf ecschedule.yaml apply -all
 ```
