@@ -67,26 +67,28 @@ func (rg *ruleGetter) getRule(ctx context.Context, r *cloudwatchevents.Rule) (*R
 		}
 
 		taskOv := &ecs.TaskOverride{}
-		if err := json.Unmarshal([]byte(*t.Input), taskOv); err != nil {
-			return nil, err
-		}
-		var contOverrides []*ContainerOverride
-		for _, co := range taskOv.ContainerOverrides {
-			var cmd []string
-			for _, c := range co.Command {
-				cmd = append(cmd, *c)
+		if t.Input != nil {
+			if err := json.Unmarshal([]byte(*t.Input), taskOv); err != nil {
+				return nil, err
 			}
-			env := map[string]string{}
-			for _, kv := range co.Environment {
-				env[*kv.Name] = *kv.Value
+			var contOverrides []*ContainerOverride
+			for _, co := range taskOv.ContainerOverrides {
+				var cmd []string
+				for _, c := range co.Command {
+					cmd = append(cmd, *c)
+				}
+				env := map[string]string{}
+				for _, kv := range co.Environment {
+					env[*kv.Name] = *kv.Value
+				}
+				contOverrides = append(contOverrides, &ContainerOverride{
+					Name:        *co.Name,
+					Command:     cmd,
+					Environment: env,
+				})
 			}
-			contOverrides = append(contOverrides, &ContainerOverride{
-				Name:        *co.Name,
-				Command:     cmd,
-				Environment: env,
-			})
+			target.ContainerOverrides = contOverrides
 		}
-		target.ContainerOverrides = contOverrides
 		targets = append(targets, target)
 
 		if dlc := t.DeadLetterConfig; dlc != nil {
