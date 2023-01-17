@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.8.1](https://github.com/Songmu/ecschedule/compare/v0.8.0...v0.8.1) - 2023-01-17
+- fix the error that occurs when the input is nil by @sinsoku in https://github.com/Songmu/ecschedule/pull/60
+
 ## [v0.8.0](https://github.com/Songmu/ecschedule/compare/v0.7.2...v0.8.0) - 2023-01-16
 - support json jsonnet by @mrymam in https://github.com/Songmu/ecschedule/pull/58
 
