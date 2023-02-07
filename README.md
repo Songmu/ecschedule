@@ -140,6 +140,9 @@ rules:
     command: ["subcmd", "argument"]
     environment:
       HOGE_ENV: {{ env "DUMMY_HOGE_ENV" "HOGEGE" }}
+    cpu: 1024
+    memory: 1024
+    memoryReservation: 512
   dead_letter_config:
     sqs: queue1
   propagateTags: TASK_DEFINITION
