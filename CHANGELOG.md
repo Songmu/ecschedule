@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.9.0](https://github.com/Songmu/ecschedule/compare/v0.8.1...v0.9.0) - 2023-02-08
+- Support resource overrides by @lamanotrama in https://github.com/Songmu/ecschedule/pull/62
+
 ## [v0.8.1](https://github.com/Songmu/ecschedule/compare/v0.8.0...v0.8.1) - 2023-01-17
 - fix the error that occurs when the input is nil by @sinsoku in https://github.com/Songmu/ecschedule/pull/60
 
