@@ -45,9 +45,12 @@ type Target struct {
 
 // ContainerOverride overrids container
 type ContainerOverride struct {
-	Name        string            `yaml:"name" json:"name"`
-	Command     []string          `yaml:"command,flow" json:"command"` // ,flow
-	Environment map[string]string `yaml:"environment,omitempty" json:"environment,omitempty"`
+	Name              string            `yaml:"name" json:"name"`
+	Command           []string          `yaml:"command,flow" json:"command"` // ,flow
+	Environment       map[string]string `yaml:"environment,omitempty" json:"environment,omitempty"`
+	Cpu               *int64            `yaml:"cpu,omitempty" json:"cpu,omitempty"`
+	Memory            *int64            `yaml:"memory,omitempty" json:"memory,omitempty"`
+	MemoryReservation *int64            `yaml:"memoryReservation,omitempty" json:"memoryReservation,omitempty"`
 }
 
 // A DeadLetterConfig object that contains information about a dead-letter queue
@@ -239,9 +242,12 @@ type containerOverridesJSON struct {
 }
 
 type containerOverrideJSON struct {
-	Name        string    `json:"name"`
-	Command     []string  `json:"command,omitempty"`
-	Environment []*kvPair `json:"environment,omitempty"`
+	Name              string    `json:"name"`
+	Command           []string  `json:"command,omitempty"`
+	Environment       []*kvPair `json:"environment,omitempty"`
+	Cpu               *int64    `json:"cpu,omitempty"`
+	Memory            *int64    `json:"memory,omitempty"`
+	MemoryReservation *int64    `json:"memoryReservation,omitempty"`
 }
 
 type kvPair struct {
@@ -263,9 +269,12 @@ func (r *Rule) target() *cloudwatchevents.Target {
 			})
 		}
 		coj.ContainerOverrides = append(coj.ContainerOverrides, &containerOverrideJSON{
-			Name:        co.Name,
-			Command:     co.Command,
-			Environment: kvPairs,
+			Name:              co.Name,
+			Command:           co.Command,
+			Environment:       kvPairs,
+			Cpu:               co.Cpu,
+			Memory:            co.Memory,
+			MemoryReservation: co.MemoryReservation,
 		})
 	}
 	bs, _ := json.Marshal(coj)
@@ -395,9 +404,12 @@ func (r *Rule) Run(ctx context.Context, sess *session.Session, noWait bool) erro
 			command = append(command, aws.String(v))
 		}
 		contaierOverrides = append(contaierOverrides, &ecs.ContainerOverride{
-			Name:        aws.String(co.Name),
-			Environment: kvPairs,
-			Command:     command,
+			Name:              aws.String(co.Name),
+			Environment:       kvPairs,
+			Command:           command,
+			Cpu:               co.Cpu,
+			Memory:            co.Memory,
+			MemoryReservation: co.MemoryReservation,
 		})
 	}
 
