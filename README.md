@@ -49,7 +49,7 @@ rules:
 ```console
 % brew install Songmu/tap/ecschedule
 # or
-% go get github.com/Songmu/ecschedule/cmd/ecschedule
+% go install github.com/Songmu/ecschedule/cmd/ecschedule@latest
 ```
 
 ### GitHub Actions
