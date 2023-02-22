@@ -47,6 +47,8 @@ rules:
 ## Installation
 
 ```console
+% brew install Songmu/tap/ecschedule
+# or
 % go install github.com/Songmu/ecschedule/cmd/ecschedule@latest
 ```
 
