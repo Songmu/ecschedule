@@ -125,6 +125,52 @@ func (ta *Target) taskCount() int64 {
 	return ta.TaskCount
 }
 
+// NewRuleFromRemote creates a new rule from remote (AWS EventBridge Rule)
+func NewRuleFromRemote(ctx context.Context, sess *session.Session, bc *BaseConfig, ruleName string) (*Rule, error) {
+	cw := cloudwatchevents.New(sess, &aws.Config{Region: aws.String(bc.Region)})
+	remoteRule, err := cw.DescribeRuleWithContext(ctx, &cloudwatchevents.DescribeRuleInput{
+		Name: aws.String(ruleName),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var (
+		rg            = &ruleGetter{
+			svc:              cw,
+			ruleArnPrefix:    fmt.Sprintf("arn:aws:events:%s:%s:rule/", bc.Region, bc.AccountID),
+			clusterArn:       fmt.Sprintf("arn:aws:ecs:%s:%s:cluster/%s", bc.Region, bc.AccountID, bc.Cluster),
+			taskDefArnPrefix: fmt.Sprintf("arn:aws:ecs:%s:%s:task-definition/", bc.Region, bc.AccountID),
+		}
+	)
+
+	cwRule := &cloudwatchevents.Rule{
+		Arn:                remoteRule.Arn,
+		Description:        remoteRule.Description,
+		EventBusName:       remoteRule.EventBusName,
+		EventPattern:       remoteRule.EventPattern,
+		ManagedBy:          remoteRule.ManagedBy,
+		Name:               remoteRule.Name,
+		RoleArn:            remoteRule.RoleArn,
+		ScheduleExpression: remoteRule.ScheduleExpression,
+		State:              remoteRule.State,
+	}
+	ru, err := rg.getRule(ctx, cwRule)
+	if err != nil {
+		return nil, err
+	}
+
+	newRule := &Rule{
+		Name:               ru.Name,
+		Description:        ru.Description,
+		ScheduleExpression: ru.ScheduleExpression,
+		Disabled:           ru.Disabled,
+		Target:             ru.Target,
+		BaseConfig:         bc,
+	}
+	return newRule, nil
+}
+
 func (r *Rule) trackingID() string {
 	return r.Cluster
 }
@@ -461,6 +507,40 @@ func (r *Rule) Run(ctx context.Context, sess *session.Session, noWait bool) erro
 	// TODO: Wait for task termination if `noWait` flag is false
 	//       (Is it necessary?)
 	return nil
+}
+
+// Delete the rule
+func (r *Rule) Delete(ctx context.Context, sess *session.Session, dryRun bool) error {
+	svc := cloudwatchevents.New(sess, &aws.Config{Region: aws.String(r.Region)})
+	remoteRuleYaml, err := yaml.Marshal(r)
+	if err != nil {
+		return err
+	}
+
+	var dryRunSuffix string
+	if dryRun {
+		dryRunSuffix = " (dry-run)"
+	}
+
+	dmp := diffmatchpatch.New()
+	diffs := dmp.DiffMain(string(remoteRuleYaml), "", false)
+	log.Printf("🪓 deleting following rule%s\n%s", dryRunSuffix, dmp.DiffPrettyText(diffs))
+
+	if dryRun {
+		return nil
+	}
+
+	// Before deleting the rule, need to delete all targets.
+	if _, err := svc.RemoveTargets(&cloudwatchevents.RemoveTargetsInput{
+		Ids:  []*string{aws.String(r.Name)},
+		Rule: aws.String(r.Name),
+	}); err != nil {
+		return err
+	}
+	_, err = svc.DeleteRule(&cloudwatchevents.DeleteRuleInput{
+		Name: aws.String(r.Name),
+	})
+	return err
 }
 
 func (r *Rule) diff(ctx context.Context, cw *cloudwatchevents.CloudWatchEvents) (from, to string, err error) {
