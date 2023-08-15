@@ -125,6 +125,10 @@ func (ta *Target) taskCount() int64 {
 	return ta.TaskCount
 }
 
+func (r *Rule) trackingID() string {
+	return r.Cluster
+}
+
 func (r *Rule) roleARN() string {
 	if strings.HasPrefix(r.Role, "arn:") {
 		return r.Role
@@ -234,6 +238,19 @@ func (r *Rule) PutTargetsInput() *cloudwatchevents.PutTargetsInput {
 	return &cloudwatchevents.PutTargetsInput{
 		Rule:    aws.String(r.Name),
 		Targets: []*cloudwatchevents.Target{r.target()},
+	}
+}
+
+// TagResourceInput tags resource input
+func (r *Rule) TagResourceInput() *cloudwatchevents.TagResourceInput {
+	return &cloudwatchevents.TagResourceInput{
+		ResourceARN: aws.String(r.ruleARN()),
+		Tags: []*cloudwatchevents.Tag{
+			{
+				Key:   aws.String("ecschedule:tracking-id"),
+				Value: aws.String(r.trackingID()),
+			},
+		},
 	}
 }
 
@@ -375,7 +392,11 @@ func (r *Rule) Apply(ctx context.Context, sess *session.Session, dryRun bool) er
 	if _, err := svc.PutRule(r.PutRuleInput()); err != nil {
 		return err
 	}
-	_, err = svc.PutTargets(r.PutTargetsInput())
+	if _, err = svc.PutTargets(r.PutTargetsInput()); err != nil {
+		return err
+	}
+	_, err = svc.TagResource(r.TagResourceInput())
+
 	return err
 }
 
