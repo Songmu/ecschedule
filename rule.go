@@ -171,10 +171,6 @@ func NewRuleFromRemote(ctx context.Context, sess *session.Session, bc *BaseConfi
 	return newRule, nil
 }
 
-func (r *Rule) trackingID() string {
-	return r.Cluster
-}
-
 func (r *Rule) roleARN() string {
 	if strings.HasPrefix(r.Role, "arn:") {
 		return r.Role
@@ -294,7 +290,7 @@ func (r *Rule) TagResourceInput() *cloudwatchevents.TagResourceInput {
 		Tags: []*cloudwatchevents.Tag{
 			{
 				Key:   aws.String("ecschedule:tracking-id"),
-				Value: aws.String(r.trackingID()),
+				Value: aws.String(r.Cluster),
 			},
 		},
 	}
