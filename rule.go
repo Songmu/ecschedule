@@ -136,7 +136,7 @@ func NewRuleFromRemote(ctx context.Context, sess *session.Session, bc *BaseConfi
 	}
 
 	var (
-		rg            = &ruleGetter{
+		rg = &ruleGetter{
 			svc:              cw,
 			ruleArnPrefix:    fmt.Sprintf("arn:aws:events:%s:%s:rule/", bc.Region, bc.AccountID),
 			clusterArn:       fmt.Sprintf("arn:aws:ecs:%s:%s:cluster/%s", bc.Region, bc.AccountID, bc.Cluster),

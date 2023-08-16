@@ -12,13 +12,13 @@ import (
 )
 
 type Query struct {
-	ResourceTypeFIlters []string `json:"ResourceTypeFilters"`
-	TagFilters 					[]TagFilter    `json:"TagFilters"`
+	ResourceTypeFIlters []string    `json:"ResourceTypeFilters"`
+	TagFilters          []TagFilter `json:"TagFilters"`
 }
 
 type TagFilter struct {
-	Key		  string   `json:"Key"`
-	Values	[]string `json:"Values"`
+	Key    string   `json:"Key"`
+	Values []string `json:"Values"`
 }
 
 // Extract the Rule associated with trackingId and extract those that are not included in ruleNames.
@@ -57,7 +57,7 @@ func listTrackedRules(ctx context.Context, sess *session.Session, trackingId str
 		ResourceTypeFIlters: []string{"AWS::Events::Rule"},
 		TagFilters: []TagFilter{
 			{
-				Key: "ecschedule:tracking-id",
+				Key:    "ecschedule:tracking-id",
 				Values: []string{trackingId},
 			},
 		},
@@ -69,7 +69,7 @@ func listTrackedRules(ctx context.Context, sess *session.Session, trackingId str
 
 	input := &resourcegroups.SearchResourcesInput{
 		ResourceQuery: &resourcegroups.ResourceQuery{
-			Type: aws.String(resourcegroups.QueryTypeTagFilters10),
+			Type:  aws.String(resourcegroups.QueryTypeTagFilters10),
 			Query: aws.String(string(queryBytes)),
 		},
 	}
@@ -85,7 +85,7 @@ func listTrackedRules(ctx context.Context, sess *session.Session, trackingId str
 	for _, identifier := range result.ResourceIdentifiers {
 		arn := *identifier.ResourceArn
 		arnElements := strings.Split(arn, "/")
-		ruleName := arnElements[len(arnElements) - 1]
+		ruleName := arnElements[len(arnElements)-1]
 		ruleNames = append(ruleNames, ruleName)
 	}
 
