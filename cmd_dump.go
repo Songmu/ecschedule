@@ -7,8 +7,9 @@ import (
 	"io"
 	"os"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/cloudwatchevents"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/cloudwatchevents"
+	"github.com/aws/aws-sdk-go-v2/service/cloudwatchevents/types"
 	"github.com/goccy/go-yaml"
 )
 
@@ -66,19 +67,23 @@ var cmdDump = &runnerImpl{
 		c.Cluster = *cluster
 
 		var (
-			sess        = a.Session
-			svc         = cloudwatchevents.New(sess, &aws.Config{Region: region})
-			remoteRules []*cloudwatchevents.Rule
+			awsConf = a.AwsConf
+			svc     = cloudwatchevents.NewFromConfig(awsConf, func(o *cloudwatchevents.Options) {
+				o.Region = aws.ToString(region)
+			})
+			remoteRules []*types.Rule
 			nextToken   *string
 		)
 		for {
-			r, err := svc.ListRulesWithContext(ctx, &cloudwatchevents.ListRulesInput{
+			r, err := svc.ListRules(ctx, &cloudwatchevents.ListRulesInput{
 				NextToken: nextToken,
 			})
 			if err != nil {
 				return err
 			}
-			remoteRules = append(remoteRules, r.Rules...)
+			for _, rule := range r.Rules {
+				remoteRules = append(remoteRules, &rule)
+			}
 			if r.NextToken == nil {
 				break
 			}

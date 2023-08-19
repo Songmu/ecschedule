@@ -8,10 +8,11 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/cloudwatchevents"
-	"github.com/aws/aws-sdk-go/service/ecs"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/cloudwatchevents"
+	cweTypes "github.com/aws/aws-sdk-go-v2/service/cloudwatchevents/types"
+	"github.com/aws/aws-sdk-go-v2/service/ecs"
+	ecsTypes "github.com/aws/aws-sdk-go-v2/service/ecs/types"
 	"github.com/goccy/go-yaml"
 	"github.com/sergi/go-diff/diffmatchpatch"
 )
@@ -32,7 +33,7 @@ type Rule struct {
 type Target struct {
 	TargetID             string                `yaml:"targetId,omitempty" json:"targetId,omitempty"`
 	TaskDefinition       string                `yaml:"taskDefinition" json:"taskDefinition"`
-	TaskCount            int64                 `yaml:"taskCount,omitempty" json:"taskCount,omitempty"`
+	TaskCount            int32                 `yaml:"taskCount,omitempty" json:"taskCount,omitempty"`
 	ContainerOverrides   []*ContainerOverride  `yaml:"containerOverrides,omitempty" json:"containerOverrides,omitempty"`
 	Role                 string                `yaml:"role,omitempty" json:"role,omitempty"`
 	Group                string                `yaml:"group,omitempty" json:"group,omitempty"`
@@ -48,9 +49,9 @@ type ContainerOverride struct {
 	Name              string            `yaml:"name" json:"name"`
 	Command           []string          `yaml:"command,flow" json:"command"` // ,flow
 	Environment       map[string]string `yaml:"environment,omitempty" json:"environment,omitempty"`
-	Cpu               *int64            `yaml:"cpu,omitempty" json:"cpu,omitempty"`
-	Memory            *int64            `yaml:"memory,omitempty" json:"memory,omitempty"`
-	MemoryReservation *int64            `yaml:"memoryReservation,omitempty" json:"memoryReservation,omitempty"`
+	Cpu               *int32            `yaml:"cpu,omitempty" json:"cpu,omitempty"`
+	Memory            *int32            `yaml:"memory,omitempty" json:"memory,omitempty"`
+	MemoryReservation *int32            `yaml:"memoryReservation,omitempty" json:"memoryReservation,omitempty"`
 }
 
 // A DeadLetterConfig object that contains information about a dead-letter queue
@@ -81,32 +82,32 @@ type AwsVpcConfiguration struct {
 	AssignPublicIP string   `yaml:"assign_public_ip,omitempty" json:"assign_public_ip,omitempty"`
 }
 
-func (nc *NetworkConfiguration) ecsParameters() *cloudwatchevents.NetworkConfiguration {
-	awsVpcConf := &cloudwatchevents.AwsVpcConfiguration{
-		Subnets: aws.StringSlice(nc.AwsVpcConfiguration.Subnets),
+func (nc *NetworkConfiguration) ecsParameters() *cweTypes.NetworkConfiguration {
+	awsVpcConf := &cweTypes.AwsVpcConfiguration{
+		Subnets: nc.AwsVpcConfiguration.Subnets,
 	}
 	if sgs := nc.AwsVpcConfiguration.SecurityGroups; len(sgs) > 0 {
-		awsVpcConf.SecurityGroups = aws.StringSlice(sgs)
+		awsVpcConf.SecurityGroups = sgs
 	}
 	if as := nc.AwsVpcConfiguration.AssignPublicIP; as != "" {
-		awsVpcConf.AssignPublicIp = aws.String(as)
+		awsVpcConf.AssignPublicIp = cweTypes.AssignPublicIp(as)
 	}
-	return &cloudwatchevents.NetworkConfiguration{
+	return &cweTypes.NetworkConfiguration{
 		AwsvpcConfiguration: awsVpcConf,
 	}
 }
 
-func (nc *NetworkConfiguration) inputParameters() *ecs.NetworkConfiguration {
-	awsVpcConfiguration := &ecs.AwsVpcConfiguration{
-		Subnets: aws.StringSlice(nc.AwsVpcConfiguration.Subnets),
+func (nc *NetworkConfiguration) inputParameters() *ecsTypes.NetworkConfiguration {
+	awsVpcConfiguration := &ecsTypes.AwsVpcConfiguration{
+		Subnets: nc.AwsVpcConfiguration.Subnets,
 	}
 	if as := nc.AwsVpcConfiguration.AssignPublicIP; as != "" {
-		awsVpcConfiguration.AssignPublicIp = aws.String(as)
+		awsVpcConfiguration.AssignPublicIp = ecsTypes.AssignPublicIp(as)
 	}
 	if sgs := nc.AwsVpcConfiguration.SecurityGroups; len(sgs) > 0 {
-		awsVpcConfiguration.SecurityGroups = aws.StringSlice(sgs)
+		awsVpcConfiguration.SecurityGroups = sgs
 	}
-	return &ecs.NetworkConfiguration{
+	return &ecsTypes.NetworkConfiguration{
 		AwsvpcConfiguration: awsVpcConfiguration,
 	}
 }
@@ -118,7 +119,7 @@ func (ta *Target) targetID(r *Rule) string {
 	return ta.TargetID
 }
 
-func (ta *Target) taskCount() int64 {
+func (ta *Target) taskCount() int32 {
 	if ta.TaskCount < 1 {
 		return 1
 	}
@@ -126,9 +127,11 @@ func (ta *Target) taskCount() int64 {
 }
 
 // NewRuleFromRemote creates a new rule from remote (AWS EventBridge Rule)
-func NewRuleFromRemote(ctx context.Context, sess *session.Session, bc *BaseConfig, ruleName string) (*Rule, error) {
-	cw := cloudwatchevents.New(sess, &aws.Config{Region: aws.String(bc.Region)})
-	remoteRule, err := cw.DescribeRuleWithContext(ctx, &cloudwatchevents.DescribeRuleInput{
+func NewRuleFromRemote(ctx context.Context, awsConf aws.Config, bc *BaseConfig, ruleName string) (*Rule, error) {
+	cw := cloudwatchevents.NewFromConfig(awsConf, func(o *cloudwatchevents.Options) {
+		o.Region = bc.Region
+	})
+	remoteRule, err := cw.DescribeRule(ctx, &cloudwatchevents.DescribeRuleInput{
 		Name: aws.String(ruleName),
 	})
 	if err != nil {
@@ -144,7 +147,7 @@ func NewRuleFromRemote(ctx context.Context, sess *session.Session, bc *BaseConfi
 		}
 	)
 
-	cwRule := &cloudwatchevents.Rule{
+	cwRule := &cweTypes.Rule{
 		Arn:                remoteRule.Arn,
 		Description:        remoteRule.Description,
 		EventBusName:       remoteRule.EventBusName,
@@ -207,23 +210,23 @@ func (r *Rule) state() string {
 	return "ENABLED"
 }
 
-func (r *Rule) ecsParameters() *cloudwatchevents.EcsParameters {
-	p := cloudwatchevents.EcsParameters{
+func (r *Rule) ecsParameters() *cweTypes.EcsParameters {
+	p := cweTypes.EcsParameters{
 		TaskDefinitionArn: aws.String(r.taskDefinitionArn(r)),
-		TaskCount:         aws.Int64(r.taskCount()),
+		TaskCount:         aws.Int32(r.taskCount()),
 	}
 	ta := r.Target
 	if ta.Group != "" {
 		p.Group = aws.String(ta.Group)
 	}
 	if ta.LaunchType != "" {
-		p.LaunchType = aws.String(ta.LaunchType)
+		p.LaunchType = cweTypes.LaunchType(ta.LaunchType)
 	}
 	if ta.PlatformVersion != "" {
 		p.PlatformVersion = aws.String(ta.PlatformVersion)
 	}
 	if ta.PropagateTags != nil {
-		p.PropagateTags = ta.PropagateTags
+		p.PropagateTags = cweTypes.PropagateTags(*ta.PropagateTags)
 	}
 	if nc := ta.NetworkConfiguration; nc != nil {
 		p.NetworkConfiguration = nc.ecsParameters()
@@ -231,12 +234,12 @@ func (r *Rule) ecsParameters() *cloudwatchevents.EcsParameters {
 	return &p
 }
 
-func (r *Rule) deadLetterConfigParameters() *cloudwatchevents.DeadLetterConfig {
+func (r *Rule) deadLetterConfigParameters() *cweTypes.DeadLetterConfig {
 	ta := r.Target
 
 	if dlc := ta.DeadLetterConfig; dlc != nil {
 		arn := dlc.sqsArn(r)
-		return &cloudwatchevents.DeadLetterConfig{
+		return &cweTypes.DeadLetterConfig{
 			Arn: aws.String(arn),
 		}
 	}
@@ -271,7 +274,7 @@ func (r *Rule) PutRuleInput() *cloudwatchevents.PutRuleInput {
 		Name:               aws.String(r.Name),
 		RoleArn:            aws.String(r.roleARN()),
 		ScheduleExpression: aws.String(r.ScheduleExpression),
-		State:              aws.String(r.state()),
+		State:              cweTypes.RuleState(r.state()),
 	}
 }
 
@@ -279,7 +282,7 @@ func (r *Rule) PutRuleInput() *cloudwatchevents.PutRuleInput {
 func (r *Rule) PutTargetsInput() *cloudwatchevents.PutTargetsInput {
 	return &cloudwatchevents.PutTargetsInput{
 		Rule:    aws.String(r.Name),
-		Targets: []*cloudwatchevents.Target{r.target()},
+		Targets: []cweTypes.Target{*r.target()},
 	}
 }
 
@@ -287,7 +290,7 @@ func (r *Rule) PutTargetsInput() *cloudwatchevents.PutTargetsInput {
 func (r *Rule) TagResourceInput() *cloudwatchevents.TagResourceInput {
 	return &cloudwatchevents.TagResourceInput{
 		ResourceARN: aws.String(r.ruleARN()),
-		Tags: []*cloudwatchevents.Tag{
+		Tags: []cweTypes.Tag{
 			{
 				Key:   aws.String("ecschedule:tracking-id"),
 				Value: aws.String(r.Cluster),
@@ -304,9 +307,9 @@ type containerOverrideJSON struct {
 	Name              string    `json:"name"`
 	Command           []string  `json:"command,omitempty"`
 	Environment       []*kvPair `json:"environment,omitempty"`
-	Cpu               *int64    `json:"cpu,omitempty"`
-	Memory            *int64    `json:"memory,omitempty"`
-	MemoryReservation *int64    `json:"memoryReservation,omitempty"`
+	Cpu               *int32    `json:"cpu,omitempty"`
+	Memory            *int32    `json:"memory,omitempty"`
+	MemoryReservation *int32    `json:"memoryReservation,omitempty"`
 }
 
 type kvPair struct {
@@ -314,7 +317,7 @@ type kvPair struct {
 	Value string `json:"value"`
 }
 
-func (r *Rule) target() *cloudwatchevents.Target {
+func (r *Rule) target() *cweTypes.Target {
 	if r.Target == nil {
 		return nil
 	}
@@ -337,7 +340,7 @@ func (r *Rule) target() *cloudwatchevents.Target {
 		})
 	}
 	bs, _ := json.Marshal(coj)
-	return &cloudwatchevents.Target{
+	return &cweTypes.Target{
 		Id:               aws.String(r.targetID(r)),
 		Arn:              aws.String(r.targetARN(r)),
 		RoleArn:          aws.String(r.roleARN()),
@@ -388,29 +391,33 @@ func (r *Rule) validateTFstate() error {
 	return nil
 }
 
-func (r *Rule) validateTaskDefinition(sess *session.Session) error {
-	svc := ecs.New(sess, &aws.Config{Region: aws.String(r.Region)})
+func (r *Rule) validateTaskDefinition(ctx context.Context, awsConf aws.Config) error {
+	svc := ecs.NewFromConfig(awsConf, func(o *ecs.Options) {
+		o.Region = r.Region
+	})
 	input := &ecs.DescribeTaskDefinitionInput{
 		TaskDefinition: aws.String(r.Target.TaskDefinition),
 	}
-	if _, err := svc.DescribeTaskDefinition(input); err != nil {
+	if _, err := svc.DescribeTaskDefinition(ctx, input); err != nil {
 		return fmt.Errorf("task definition %s is not defined: %s", r.Target.TaskDefinition, err.Error())
 	}
 	return nil
 }
 
 // Apply the rule
-func (r *Rule) Apply(ctx context.Context, sess *session.Session, dryRun bool) error {
+func (r *Rule) Apply(ctx context.Context, awsConf aws.Config, dryRun bool) error {
 	if err := r.validateEnv(); err != nil {
 		return err
 	}
 	if err := r.validateTFstate(); err != nil {
 		return err
 	}
-	if err := r.validateTaskDefinition(sess); err != nil {
+	if err := r.validateTaskDefinition(ctx, awsConf); err != nil {
 		return err
 	}
-	svc := cloudwatchevents.New(sess, &aws.Config{Region: aws.String(r.Region)})
+	svc := cloudwatchevents.NewFromConfig(awsConf, func(o *cloudwatchevents.Options) {
+		o.Region = r.Region
+	})
 
 	from, to, err := r.diff(ctx, svc)
 	if err != nil {
@@ -431,42 +438,44 @@ func (r *Rule) Apply(ctx context.Context, sess *session.Session, dryRun bool) er
 	if dryRun {
 		return nil
 	}
-	if _, err := svc.PutRule(r.PutRuleInput()); err != nil {
+	if _, err := svc.PutRule(ctx, r.PutRuleInput()); err != nil {
 		return err
 	}
-	if _, err = svc.PutTargets(r.PutTargetsInput()); err != nil {
+	if _, err = svc.PutTargets(ctx, r.PutTargetsInput()); err != nil {
 		return err
 	}
-	_, err = svc.TagResource(r.TagResourceInput())
+	_, err = svc.TagResource(ctx, r.TagResourceInput())
 
 	return err
 }
 
 // Run the rule
-func (r *Rule) Run(ctx context.Context, sess *session.Session, noWait bool) error {
+func (r *Rule) Run(ctx context.Context, awsConf aws.Config, noWait bool) error {
 	if err := r.validateEnv(); err != nil {
 		return err
 	}
 	if err := r.validateTFstate(); err != nil {
 		return err
 	}
-	svc := ecs.New(sess, &aws.Config{Region: aws.String(r.Region)})
-	var containerOverrides []*ecs.ContainerOverride
+	svc := ecs.NewFromConfig(awsConf, func(o *ecs.Options) {
+		o.Region = r.Region
+	})
+	var containerOverrides []ecsTypes.ContainerOverride
 	for _, co := range r.ContainerOverrides {
 		var (
-			kvPairs []*ecs.KeyValuePair
-			command []*string
+			kvPairs []ecsTypes.KeyValuePair
+			command []string
 		)
 		for k, v := range co.Environment {
-			kvPairs = append(kvPairs, &ecs.KeyValuePair{
+			kvPairs = append(kvPairs, ecsTypes.KeyValuePair{
 				Name:  aws.String(k),
 				Value: aws.String(v),
 			})
 		}
 		for _, v := range co.Command {
-			command = append(command, aws.String(v))
+			command = append(command, v)
 		}
-		containerOverrides = append(containerOverrides, &ecs.ContainerOverride{
+		containerOverrides = append(containerOverrides, ecsTypes.ContainerOverride{
 			Name:              aws.String(co.Name),
 			Environment:       kvPairs,
 			Command:           command,
@@ -476,22 +485,22 @@ func (r *Rule) Run(ctx context.Context, sess *session.Session, noWait bool) erro
 		})
 	}
 
-	var networkConfiguration *ecs.NetworkConfiguration
+	var networkConfiguration *ecsTypes.NetworkConfiguration
 	if r.NetworkConfiguration != nil {
 		networkConfiguration = r.NetworkConfiguration.inputParameters()
 	}
 
-	out, err := svc.RunTaskWithContext(ctx,
+	out, err := svc.RunTask(ctx,
 		&ecs.RunTaskInput{
 			Cluster:        aws.String(r.Cluster),
 			TaskDefinition: aws.String(r.taskDefinitionArn(r)),
-			Overrides: &ecs.TaskOverride{
+			Overrides: &ecsTypes.TaskOverride{
 				ContainerOverrides: containerOverrides,
 			},
-			Count:                aws.Int64(r.taskCount()),
-			LaunchType:           aws.String(r.Target.LaunchType),
+			Count:                aws.Int32(r.taskCount()),
+			LaunchType:           ecsTypes.LaunchType(r.Target.LaunchType),
 			NetworkConfiguration: networkConfiguration,
-			PropagateTags:        r.PropagateTags,
+			PropagateTags:        ecsTypes.PropagateTags(*r.PropagateTags),
 		})
 	if err != nil {
 		return err
@@ -506,8 +515,10 @@ func (r *Rule) Run(ctx context.Context, sess *session.Session, noWait bool) erro
 }
 
 // Delete the rule
-func (r *Rule) Delete(ctx context.Context, sess *session.Session, dryRun bool) error {
-	svc := cloudwatchevents.New(sess, &aws.Config{Region: aws.String(r.Region)})
+func (r *Rule) Delete(ctx context.Context, awsConf aws.Config, dryRun bool) error {
+	svc := cloudwatchevents.NewFromConfig(awsConf, func(o *cloudwatchevents.Options) {
+		o.Region = r.Region
+	})
 	remoteRuleYaml, err := yaml.Marshal(r)
 	if err != nil {
 		return err
@@ -527,19 +538,19 @@ func (r *Rule) Delete(ctx context.Context, sess *session.Session, dryRun bool) e
 	}
 
 	// Before deleting the rule, need to delete all targets.
-	if _, err := svc.RemoveTargets(&cloudwatchevents.RemoveTargetsInput{
-		Ids:  []*string{aws.String(r.Name)},
+	if _, err := svc.RemoveTargets(ctx, &cloudwatchevents.RemoveTargetsInput{
+		Ids:  []string{r.Name},
 		Rule: aws.String(r.Name),
 	}); err != nil {
 		return err
 	}
-	_, err = svc.DeleteRule(&cloudwatchevents.DeleteRuleInput{
+	_, err = svc.DeleteRule(ctx, &cloudwatchevents.DeleteRuleInput{
 		Name: aws.String(r.Name),
 	})
 	return err
 }
 
-func (r *Rule) diff(ctx context.Context, cw *cloudwatchevents.CloudWatchEvents) (from, to string, err error) {
+func (r *Rule) diff(ctx context.Context, cw *cloudwatchevents.Client) (from, to string, err error) {
 	rule := aws.String(r.Name)
 
 	c := r.BaseConfig
@@ -555,7 +566,7 @@ func (r *Rule) diff(ctx context.Context, cw *cloudwatchevents.CloudWatchEvents) 
 	if role == "" {
 		role = defaultRole
 	}
-	ruleList, err := cw.ListRulesWithContext(ctx, &cloudwatchevents.ListRulesInput{
+	ruleList, err := cw.ListRules(ctx, &cloudwatchevents.ListRulesInput{
 		NamePrefix: rule,
 	})
 	if err != nil {
@@ -578,7 +589,7 @@ func (r *Rule) diff(ctx context.Context, cw *cloudwatchevents.CloudWatchEvents) 
 		if *r.Name != *rule {
 			continue
 		}
-		ru, err := rg.getRule(ctx, r)
+		ru, err := rg.getRule(ctx, &r)
 		if err != nil {
 			return "", "", err
 		}

@@ -61,6 +61,6 @@ var cmdRun = &runnerImpl{
 		if *dryRun {
 			return nil
 		}
-		return ru.Run(ctx, a.Session, true)
+		return ru.Run(ctx, a.AwsConf, true)
 	},
 }
