@@ -11,7 +11,7 @@ import (
 )
 
 func TestLoadConfig(t *testing.T) {
-	pathes := []string{"testdata/sample.yaml", "testdata/sample.json", "testdata/sample.jsonnet"}
+	paths := []string{"testdata/sample.yaml", "testdata/sample.json", "testdata/sample.jsonnet"}
 	expect := &Config{
 		Role: "ecsEventsRole",
 		BaseConfig: &BaseConfig{
@@ -36,7 +36,7 @@ func TestLoadConfig(t *testing.T) {
 						AwsVpcConfiguration: &AwsVpcConfiguration{
 							Subnets:        []string{"subnet-01234567", "subnet-12345678"},
 							SecurityGroups: []string{"sg-11111111", "sg-99999999"},
-							AssinPublicIP:  "ENABLED",
+							AssignPublicIP: "ENABLED",
 						},
 					},
 					ContainerOverrides: []*ContainerOverride{
@@ -69,7 +69,7 @@ func TestLoadConfig(t *testing.T) {
 		dir:           "testdata",
 	}
 
-	for _, path := range pathes {
+	for _, path := range paths {
 		f, err := os.Open(path)
 		if err != nil {
 			t.Fatal(err)
@@ -77,7 +77,7 @@ func TestLoadConfig(t *testing.T) {
 		defer f.Close()
 		c, err := LoadConfig(context.Background(), f, "334", path)
 		if err != nil {
-			t.Errorf("error shoud be nil, but: %s", err)
+			t.Errorf("error should be nil, but: %s", err)
 		}
 
 		if !reflect.DeepEqual(c, expect) {
@@ -96,7 +96,7 @@ func TestLoadConfig_mustEnv(t *testing.T) {
 
 	c, err := LoadConfig(context.Background(), f, "335", path)
 	if err != nil {
-		t.Errorf("error shoud be nil, but: %s", err)
+		t.Errorf("error should be nil, but: %s", err)
 	}
 
 	ru := c.GetRuleByName("hoge-task-name")
@@ -105,7 +105,7 @@ func TestLoadConfig_mustEnv(t *testing.T) {
 		t.Errorf("error should be occurred but nil")
 	}
 	if g, e := err.Error(), "environment variable DUMMY_HOGE_ENV is not defined"; g != e {
-		t.Errorf("error shoud be %q, but: %q", e, g)
+		t.Errorf("error should be %q, but: %q", e, g)
 	}
 }
 
@@ -119,7 +119,7 @@ func TestLoadConfig_tfstate(t *testing.T) {
 
 	c, err := LoadConfig(context.Background(), f, "336", path)
 	if err != nil {
-		t.Errorf("error shoud be nil, but: %s", err)
+		t.Errorf("error should be nil, but: %s", err)
 	}
 
 	if !reflect.DeepEqual(c.Plugins, []*Plugin{
@@ -131,13 +131,13 @@ func TestLoadConfig_tfstate(t *testing.T) {
 	as := c.Rules[0].NetworkConfiguration.AwsVpcConfiguration.Subnets
 	es := []string{"subnet-01234567", "subnet-12345678"}
 	if !reflect.DeepEqual(as, es) {
-		t.Errorf("error shoud be %v, but: %v", as, es)
+		t.Errorf("error should be %v, but: %v", as, es)
 	}
 
 	asg := c.Rules[0].NetworkConfiguration.AwsVpcConfiguration.SecurityGroups
 	esg := []string{"sg-11111111", "sg-99999999"}
 	if !reflect.DeepEqual(asg, esg) {
-		t.Errorf("error shoud be %v, but: %v", asg, esg)
+		t.Errorf("error should be %v, but: %v", asg, esg)
 	}
 }
 
@@ -151,10 +151,10 @@ func TestLoadConfig_undefined(t *testing.T) {
 
 	c, err := LoadConfig(context.Background(), f, "337", path)
 	if err != nil {
-		t.Errorf("error shoud be nil, but: %s", err)
+		t.Errorf("error should be nil, but: %s", err)
 	}
 
 	if c.Rules[0].PropagateTags != nil {
-		t.Errorf("error shoud be nil, but: %v", c.Rules[0].PropagateTags)
+		t.Errorf("error should be nil, but: %v", c.Rules[0].PropagateTags)
 	}
 }

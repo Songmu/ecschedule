@@ -61,7 +61,7 @@ func (rg *ruleGetter) getRule(ctx context.Context, r *cloudwatchevents.Rule) (*R
 				AwsVpcConfiguration: &AwsVpcConfiguration{
 					Subnets:        aws.StringValueSlice(nc.AwsvpcConfiguration.Subnets),
 					SecurityGroups: aws.StringValueSlice(nc.AwsvpcConfiguration.SecurityGroups),
-					AssinPublicIP:  aws.StringValue(nc.AwsvpcConfiguration.AssignPublicIp),
+					AssignPublicIP: aws.StringValue(nc.AwsvpcConfiguration.AssignPublicIp),
 				},
 			}
 		}

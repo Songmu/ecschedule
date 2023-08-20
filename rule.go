@@ -43,7 +43,7 @@ type Target struct {
 	PropagateTags        *string               `yaml:"propagateTags,omitempty" json:"propagateTags,omitempty"`
 }
 
-// ContainerOverride overrids container
+// ContainerOverride overrides container
 type ContainerOverride struct {
 	Name              string            `yaml:"name" json:"name"`
 	Command           []string          `yaml:"command,flow" json:"command"` // ,flow
@@ -78,7 +78,7 @@ type NetworkConfiguration struct {
 type AwsVpcConfiguration struct {
 	Subnets        []string `yaml:"subnets" json:"subnets"`
 	SecurityGroups []string `yaml:"security_groups,omitempty" json:"security_groups,omitempty"`
-	AssinPublicIP  string   `yaml:"assign_public_ip,omitempty" json:"assign_public_ip,omitempty"`
+	AssignPublicIP string   `yaml:"assign_public_ip,omitempty" json:"assign_public_ip,omitempty"`
 }
 
 func (nc *NetworkConfiguration) ecsParameters() *cloudwatchevents.NetworkConfiguration {
@@ -88,7 +88,7 @@ func (nc *NetworkConfiguration) ecsParameters() *cloudwatchevents.NetworkConfigu
 	if sgs := nc.AwsVpcConfiguration.SecurityGroups; len(sgs) > 0 {
 		awsVpcConf.SecurityGroups = aws.StringSlice(sgs)
 	}
-	if as := nc.AwsVpcConfiguration.AssinPublicIP; as != "" {
+	if as := nc.AwsVpcConfiguration.AssignPublicIP; as != "" {
 		awsVpcConf.AssignPublicIp = aws.String(as)
 	}
 	return &cloudwatchevents.NetworkConfiguration{
@@ -100,7 +100,7 @@ func (nc *NetworkConfiguration) inputParameters() *ecs.NetworkConfiguration {
 	awsVpcConfiguration := &ecs.AwsVpcConfiguration{
 		Subnets: aws.StringSlice(nc.AwsVpcConfiguration.Subnets),
 	}
-	if as := nc.AwsVpcConfiguration.AssinPublicIP; as != "" {
+	if as := nc.AwsVpcConfiguration.AssignPublicIP; as != "" {
 		awsVpcConfiguration.AssignPublicIp = aws.String(as)
 	}
 	if sgs := nc.AwsVpcConfiguration.SecurityGroups; len(sgs) > 0 {
@@ -388,7 +388,7 @@ func (r *Rule) Run(ctx context.Context, sess *session.Session, noWait bool) erro
 		return err
 	}
 	svc := ecs.New(sess, &aws.Config{Region: aws.String(r.Region)})
-	var contaierOverrides []*ecs.ContainerOverride
+	var containerOverrides []*ecs.ContainerOverride
 	for _, co := range r.ContainerOverrides {
 		var (
 			kvPairs []*ecs.KeyValuePair
@@ -403,7 +403,7 @@ func (r *Rule) Run(ctx context.Context, sess *session.Session, noWait bool) erro
 		for _, v := range co.Command {
 			command = append(command, aws.String(v))
 		}
-		contaierOverrides = append(contaierOverrides, &ecs.ContainerOverride{
+		containerOverrides = append(containerOverrides, &ecs.ContainerOverride{
 			Name:              aws.String(co.Name),
 			Environment:       kvPairs,
 			Command:           command,
@@ -423,7 +423,7 @@ func (r *Rule) Run(ctx context.Context, sess *session.Session, noWait bool) erro
 			Cluster:        aws.String(r.Cluster),
 			TaskDefinition: aws.String(r.taskDefinitionArn(r)),
 			Overrides: &ecs.TaskOverride{
-				ContainerOverrides: contaierOverrides,
+				ContainerOverrides: containerOverrides,
 			},
 			Count:                aws.Int64(r.taskCount()),
 			LaunchType:           aws.String(r.Target.LaunchType),
