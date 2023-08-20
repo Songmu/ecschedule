@@ -23,6 +23,7 @@ var cmdApply = &runnerImpl{
 			rule   = fs.String("rule", "", "rule")
 			dryRun = fs.Bool("dry-run", false, "dry run")
 			all    = fs.Bool("all", false, "apply all rules")
+			prune  = fs.Bool("prune", false, "prune orphaned rules after apply")
 		)
 		if err := fs.Parse(argv); err != nil {
 			return err
@@ -52,14 +53,16 @@ var cmdApply = &runnerImpl{
 				ruleNames = append(ruleNames, r.Name)
 			}
 		}
+
+		var dryRunSuffix string
+		if *dryRun {
+			dryRunSuffix = " (dry-run)"
+		}
+
 		for _, rule := range ruleNames {
 			ru := c.GetRuleByName(rule)
 			if ru == nil {
 				return fmt.Errorf("no rules found for %s", rule)
-			}
-			var dryRunSuffix string
-			if *dryRun {
-				dryRunSuffix = " (dry-run)"
 			}
 			log.Printf("applying the rule %q%s", rule, dryRunSuffix)
 			if err := ru.Apply(ctx, a.Session, *dryRun); err != nil {
@@ -72,6 +75,23 @@ var cmdApply = &runnerImpl{
 			bs, _ := yaml.Marshal(ru)
 			log.Printf("✅ following rule applied%s\n%s", dryRunSuffix, string(bs))
 		}
+
+		if *prune {
+			orphanedRules, err := extractOrphanedRules(ctx, a.Session, c.BaseConfig, ruleNames)
+			if err != nil {
+				return err
+			}
+
+			if len(orphanedRules) > 0 {
+				log.Printf("orphaned rules will be deleted %s", dryRunSuffix)
+				for _, rule := range orphanedRules {
+					if err := rule.Delete(ctx, a.Session, *dryRun); err != nil {
+						return err
+					}
+				}
+			}
+		}
+
 		return nil
 	},
 }
