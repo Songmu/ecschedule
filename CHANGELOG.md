@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.10.0](https://github.com/Songmu/ecschedule/compare/v0.9.1...v0.10.0) - 2023-08-20
+- update deps by @Songmu in https://github.com/Songmu/ecschedule/pull/68
+- fix typo by @snaka in https://github.com/Songmu/ecschedule/pull/72
+- feat: Adding a `-prune` option to remove Orphaned Rules. by @snaka in https://github.com/Songmu/ecschedule/pull/71
+
 ## [v0.9.1](https://github.com/Songmu/ecschedule/compare/v0.9.0...v0.9.1) - 2023-02-22
 - chore: improve install guide by @paprika-mah in https://github.com/Songmu/ecschedule/pull/64
 - build(deps): bump golang.org/x/net from 0.2.0 to 0.7.0 by @dependabot in https://github.com/Songmu/ecschedule/pull/65
