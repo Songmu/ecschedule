@@ -41,6 +41,9 @@ var cmdRun = &runnerImpl{
 				return err
 			}
 		}
+		if c == nil {
+			return errors.New("-conf option required")
+		}
 		ru := c.GetRuleByName(*rule)
 		if ru == nil {
 			return fmt.Errorf("no rules found for %s", *rule)

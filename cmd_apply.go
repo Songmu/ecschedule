@@ -44,6 +44,9 @@ var cmdApply = &runnerImpl{
 				return err
 			}
 		}
+		if c == nil {
+			return errors.New("-conf option required")
+		}
 
 		var ruleNames []string
 		if !*all {
