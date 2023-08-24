@@ -97,6 +97,20 @@ Execute `run` subcommand when want execute arbitrary timing.
 % ecschedule -conf ecschedule.yaml run -rule $ruleName
 ```
 
+### Using the `-prune` option to manage rules
+
+In version `v0.9.1` and earlier, when rules were renamed or deleted from the configuration, the old rules remained and had to be deleted manually. With the `-prune` option introduced in `v0.10.0`, you can now automatically remove these old rules.
+
+```console
+% ecschedule -conf ecschedule.yaml apply -all -prune
+```
+
+To see which rules would be deleted without actually removing them, combine with the `-dry-run` option.
+
+```console
+% ecschedule -conf ecschedule.yaml apply -all -prune -dry-run
+```
+
 ## Functions
 
 You can use following functions in the configuration file.
@@ -155,10 +169,10 @@ plugins:
       # or url: s3://my-bucket/terraform.tfstate
 ```
 
-`{{ tfstate "resource_type.resource_name.attr" }}` will expand to an attribute value of the resource in tfstate.  
+`{{ tfstate "resource_type.resource_name.attr" }}` will expand to an attribute value of the resource in tfstate.
 
-`{{ tfstatef "resource_type.resource_name['%s'].attr" "index" }}` is similar to `{{ tfstatef "resource_type.resource_name['index'].attr" }}`.  
-This function is useful to build a resource address with environment variables.  
+`{{ tfstatef "resource_type.resource_name['%s'].attr" "index" }}` is similar to `{{ tfstatef "resource_type.resource_name['index'].attr" }}`.
+This function is useful to build a resource address with environment variables.
 
 ```
 {{ tfstatef `aws_subnet.ecs['%s'].id` (must_env `SERVICE`) }}
@@ -166,19 +180,15 @@ This function is useful to build a resource address with environment variables.
 
 ## Pitfalls
 
-### Trap due to rule name uniqueness constraints
-ecschedule is designed to guarantee the uniqueness of job definitions by rule name in the configuration file. This causes the following confusing behavior at the moment. Please be careful.
+### Rule Name Uniqueness and Overwrite Risks
 
-### The rule name change causes a problem of garbage definition remaining
-If the name of a rule that is already reflected in the configuration file is changed, a new rule with that name is created and the old rule with the old name remains, resulting in an unintended double definition. The only solution is to delete the old rule manually.
+ecschedule is designed to guarantee the uniqueness of job definitions by rule name in the configuration file.
 
-### Unable to delete rules
-If a rule is deleted from the configuration file and then reflected, the rule will not be deleted. The only way to do this is to delete this separately, too manually.
+If ecschedule is run in an environment where a Rule that is not managed by ecschedule already exists, ecschedule will overwrite that Rule. If you do not intend to overwrite, please ensure that the names written in the configuration file do not duplicate with existing Rules.
 
-This is because ecschedule only manages a subset of cloudwatch event rules, so it cannot distinguish whether a rule name that does not exist in the configuration file is out of ecschedule management or has been deleted.
+### Note on Previous Versions
 
-### Desired solution
-There should be designs to implement some state management mechanisms to solve these problems. If you have a good solution, I would be happy to make suggestions.
+In versions `v0.9.1` and earlier, there were issues related to rule name changes causing garbage definitions and rules not being deleted from AWS when removed from the configuration file. These issues have been addressed in version `v0.10.0` with the introduction of the `-prune` option.
 
 ## Author
 
