@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.10.1](https://github.com/Songmu/ecschedule/compare/v0.10.0...v0.10.1) - 2023-08-25
+- docs: Add description of `-prune` option by @snaka in https://github.com/Songmu/ecschedule/pull/73
+- fix: `-conf` omitted caused panic by referencing a nil pointer by @snaka in https://github.com/Songmu/ecschedule/pull/74
+
 ## [v0.10.0](https://github.com/Songmu/ecschedule/compare/v0.9.1...v0.10.0) - 2023-08-20
 - update deps by @Songmu in https://github.com/Songmu/ecschedule/pull/68
 - fix typo by @snaka in https://github.com/Songmu/ecschedule/pull/72
