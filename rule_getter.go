@@ -82,9 +82,12 @@ func (rg *ruleGetter) getRule(ctx context.Context, r *cloudwatchevents.Rule) (*R
 					env[*kv.Name] = *kv.Value
 				}
 				contOverrides = append(contOverrides, &ContainerOverride{
-					Name:        *co.Name,
-					Command:     cmd,
-					Environment: env,
+					Name:              *co.Name,
+					Command:           cmd,
+					Environment:       env,
+					Cpu:               co.Cpu,
+					Memory:            co.Memory,
+					MemoryReservation: co.MemoryReservation,
 				})
 			}
 			target.ContainerOverrides = contOverrides
