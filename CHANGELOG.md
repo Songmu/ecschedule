@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.10.2](https://github.com/Songmu/ecschedule/compare/v0.10.1...v0.10.2) - 2023-09-01
+- Align remote and conf override members by @lamanotrama in https://github.com/Songmu/ecschedule/pull/76
+
 ## [v0.10.1](https://github.com/Songmu/ecschedule/compare/v0.10.0...v0.10.1) - 2023-08-25
 - docs: Add description of `-prune` option by @snaka in https://github.com/Songmu/ecschedule/pull/73
 - fix: `-conf` omitted caused panic by referencing a nil pointer by @snaka in https://github.com/Songmu/ecschedule/pull/74
