@@ -489,6 +489,10 @@ func (r *Rule) Run(ctx context.Context, awsConf aws.Config, noWait bool) error {
 	if r.NetworkConfiguration != nil {
 		networkConfiguration = r.NetworkConfiguration.inputParameters()
 	}
+	var propagateTags ecsTypes.PropagateTags
+	if r.PropagateTags != nil {
+		propagateTags = ecsTypes.PropagateTags(*r.PropagateTags)
+	}
 
 	out, err := svc.RunTask(ctx,
 		&ecs.RunTaskInput{
@@ -500,7 +504,7 @@ func (r *Rule) Run(ctx context.Context, awsConf aws.Config, noWait bool) error {
 			Count:                aws.Int32(r.taskCount()),
 			LaunchType:           ecsTypes.LaunchType(r.Target.LaunchType),
 			NetworkConfiguration: networkConfiguration,
-			PropagateTags:        ecsTypes.PropagateTags(*r.PropagateTags),
+			PropagateTags:        propagateTags,
 		})
 	if err != nil {
 		return err
