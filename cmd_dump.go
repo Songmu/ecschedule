@@ -71,7 +71,7 @@ var cmdDump = &runnerImpl{
 			svc     = cloudwatchevents.NewFromConfig(awsConf, func(o *cloudwatchevents.Options) {
 				o.Region = aws.ToString(region)
 			})
-			remoteRules []*types.Rule
+			remoteRules []types.Rule
 			nextToken   *string
 		)
 		for {
@@ -82,7 +82,7 @@ var cmdDump = &runnerImpl{
 				return err
 			}
 			for _, rule := range r.Rules {
-				remoteRules = append(remoteRules, &rule)
+				remoteRules = append(remoteRules, rule)
 			}
 			if r.NextToken == nil {
 				break
@@ -104,7 +104,7 @@ var cmdDump = &runnerImpl{
 			}
 		)
 		for _, r := range remoteRules {
-			ru, err := rg.getRule(ctx, r)
+			ru, err := rg.getRule(ctx, &r)
 			if err != nil {
 				return err
 			}
