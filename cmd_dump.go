@@ -81,9 +81,7 @@ var cmdDump = &runnerImpl{
 			if err != nil {
 				return err
 			}
-			for _, rule := range r.Rules {
-				remoteRules = append(remoteRules, rule)
-			}
+			remoteRules = append(remoteRules, r.Rules...)
 			if r.NextToken == nil {
 				break
 			}
