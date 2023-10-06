@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.10.3](https://github.com/Songmu/ecschedule/compare/v0.10.2...v0.10.3) - 2023-10-06
+- update to tfstate-lookup v1.1.4 by @fujiwara in https://github.com/Songmu/ecschedule/pull/79
+
 ## [v0.10.2](https://github.com/Songmu/ecschedule/compare/v0.10.1...v0.10.2) - 2023-09-01
 - Align remote and conf override members by @lamanotrama in https://github.com/Songmu/ecschedule/pull/76
 
