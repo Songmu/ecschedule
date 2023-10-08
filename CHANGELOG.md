@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.11.0](https://github.com/Songmu/ecschedule/compare/v0.10.3...v0.11.0) - 2023-10-08
+- Upgrade AWS SDK for Go from V1 to V2 by @snaka in https://github.com/Songmu/ecschedule/pull/78
+- Go 1.21 and update deps by @Songmu in https://github.com/Songmu/ecschedule/pull/83
+
 ## [v0.10.3](https://github.com/Songmu/ecschedule/compare/v0.10.2...v0.10.3) - 2023-10-06
 - update to tfstate-lookup v1.1.4 by @fujiwara in https://github.com/Songmu/ecschedule/pull/79
 
