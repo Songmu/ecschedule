@@ -7,7 +7,7 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go-v2/aws"
 )
 
 func TestLoadConfig(t *testing.T) {

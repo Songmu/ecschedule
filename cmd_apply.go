@@ -68,7 +68,7 @@ var cmdApply = &runnerImpl{
 				return fmt.Errorf("no rules found for %s", rule)
 			}
 			log.Printf("applying the rule %q%s", rule, dryRunSuffix)
-			if err := ru.Apply(ctx, a.Session, *dryRun); err != nil {
+			if err := ru.Apply(ctx, a.AwsConf, *dryRun); err != nil {
 				return err
 			}
 			for _, v := range ru.ContainerOverrides {
@@ -80,7 +80,7 @@ var cmdApply = &runnerImpl{
 		}
 
 		if *prune {
-			orphanedRules, err := extractOrphanedRules(ctx, a.Session, c.BaseConfig, ruleNames)
+			orphanedRules, err := extractOrphanedRules(ctx, a.AwsConf, c.BaseConfig, ruleNames)
 			if err != nil {
 				return err
 			}
@@ -88,7 +88,7 @@ var cmdApply = &runnerImpl{
 			if len(orphanedRules) > 0 {
 				log.Printf("orphaned rules will be deleted %s", dryRunSuffix)
 				for _, rule := range orphanedRules {
-					if err := rule.Delete(ctx, a.Session, *dryRun); err != nil {
+					if err := rule.Delete(ctx, a.AwsConf, *dryRun); err != nil {
 						return err
 					}
 				}

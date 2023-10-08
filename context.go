@@ -3,7 +3,7 @@ package ecschedule
 import (
 	"context"
 
-	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go-v2/aws"
 )
 
 type contextKey string
@@ -13,7 +13,7 @@ const appKey contextKey = "app"
 type app struct {
 	Config    *Config
 	AccountID string
-	Session   *session.Session
+	AwsConf   aws.Config
 }
 
 func setApp(ctx context.Context, a *app) context.Context {

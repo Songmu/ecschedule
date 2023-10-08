@@ -3,7 +3,6 @@ module github.com/Songmu/ecschedule
 go 1.19
 
 require (
-	github.com/aws/aws-sdk-go v1.44.207
 	github.com/fujiwara/tfstate-lookup v1.1.4
 	github.com/goccy/go-yaml v1.9.8
 	github.com/google/go-jsonnet v0.19.1
@@ -39,25 +38,28 @@ require (
 	github.com/Azure/go-autorest/logger v0.2.1 // indirect
 	github.com/Azure/go-autorest/tracing v0.6.0 // indirect
 	github.com/BurntSushi/toml v1.2.1 // indirect
-	github.com/aws/aws-sdk-go-v2 v1.17.5 // indirect
+	github.com/aws/aws-sdk-go-v2 v1.21.0
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.4.10 // indirect
-	github.com/aws/aws-sdk-go-v2/config v1.18.15 // indirect
-	github.com/aws/aws-sdk-go-v2/credentials v1.13.15 // indirect
-	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.12.23 // indirect
+	github.com/aws/aws-sdk-go-v2/config v1.18.35
+	github.com/aws/aws-sdk-go-v2/credentials v1.13.34 // indirect
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.13.10 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.11.55 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.29 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.23 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/ini v1.3.30 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.41 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.35 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/ini v1.3.41 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.0.21 // indirect
+	github.com/aws/aws-sdk-go-v2/service/cloudwatchevents v1.16.4
+	github.com/aws/aws-sdk-go-v2/service/ecs v1.29.5
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.9.11 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.1.24 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.23 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.34 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.13.23 // indirect
+	github.com/aws/aws-sdk-go-v2/service/resourcegroups v1.15.5
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.30.5 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sso v1.12.4 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.14.4 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sts v1.18.5 // indirect
-	github.com/aws/smithy-go v1.13.5 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.13.4 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.15.4 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sts v1.21.4
+	github.com/aws/smithy-go v1.14.2 // indirect
 	github.com/dimchansky/utfbom v1.1.1 // indirect
 	github.com/fatih/color v1.14.1 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect

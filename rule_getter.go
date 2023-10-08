@@ -5,22 +5,23 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/cloudwatchevents"
-	"github.com/aws/aws-sdk-go/service/ecs"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/cloudwatchevents"
+	cweTypes "github.com/aws/aws-sdk-go-v2/service/cloudwatchevents/types"
+	ecsTypes "github.com/aws/aws-sdk-go-v2/service/ecs/types"
 )
 
 type ruleGetter struct {
-	svc                                                                               *cloudwatchevents.CloudWatchEvents
+	svc                                                                               *cloudwatchevents.Client
 	clusterArn, ruleArnPrefix, taskDefArnPrefix, roleArnPrefix, roleArn, sqsArnPrefix string
 }
 
-func (rg *ruleGetter) getRule(ctx context.Context, r *cloudwatchevents.Rule) (*Rule, error) {
+func (rg *ruleGetter) getRule(ctx context.Context, r *cweTypes.Rule) (*Rule, error) {
 	if !strings.HasPrefix(*r.Arn, rg.ruleArnPrefix) {
 		return nil, nil
 	}
 
-	ta, err := rg.svc.ListTargetsByRuleWithContext(ctx, &cloudwatchevents.ListTargetsByRuleInput{
+	ta, err := rg.svc.ListTargetsByRule(ctx, &cloudwatchevents.ListTargetsByRuleInput{
 		Rule: r.Name,
 	})
 	if err != nil {
@@ -52,21 +53,21 @@ func (rg *ruleGetter) getRule(ctx context.Context, r *cloudwatchevents.Rule) (*R
 		}
 		target.TaskDefinition = strings.TrimPrefix(*ecsParams.TaskDefinitionArn, rg.taskDefArnPrefix)
 
-		target.Group = aws.StringValue(ecsParams.Group)
-		target.LaunchType = aws.StringValue(ecsParams.LaunchType)
-		target.PlatformVersion = aws.StringValue(ecsParams.PlatformVersion)
-		target.PropagateTags = t.EcsParameters.PropagateTags
+		target.Group = aws.ToString(ecsParams.Group)
+		target.LaunchType = string(ecsParams.LaunchType)
+		target.PlatformVersion = aws.ToString(ecsParams.PlatformVersion)
+		target.PropagateTags = aws.String(string(t.EcsParameters.PropagateTags))
 		if nc := ecsParams.NetworkConfiguration; nc != nil {
 			target.NetworkConfiguration = &NetworkConfiguration{
 				AwsVpcConfiguration: &AwsVpcConfiguration{
-					Subnets:        aws.StringValueSlice(nc.AwsvpcConfiguration.Subnets),
-					SecurityGroups: aws.StringValueSlice(nc.AwsvpcConfiguration.SecurityGroups),
-					AssignPublicIP: aws.StringValue(nc.AwsvpcConfiguration.AssignPublicIp),
+					Subnets:        nc.AwsvpcConfiguration.Subnets,
+					SecurityGroups: nc.AwsvpcConfiguration.SecurityGroups,
+					AssignPublicIP: string(nc.AwsvpcConfiguration.AssignPublicIp),
 				},
 			}
 		}
 
-		taskOv := &ecs.TaskOverride{}
+		taskOv := &ecsTypes.TaskOverride{}
 		if t.Input != nil {
 			if err := json.Unmarshal([]byte(*t.Input), taskOv); err != nil {
 				return nil, err
@@ -75,7 +76,7 @@ func (rg *ruleGetter) getRule(ctx context.Context, r *cloudwatchevents.Rule) (*R
 			for _, co := range taskOv.ContainerOverrides {
 				var cmd []string
 				for _, c := range co.Command {
-					cmd = append(cmd, *c)
+					cmd = append(cmd, c)
 				}
 				env := map[string]string{}
 				for _, kv := range co.Environment {
@@ -108,7 +109,7 @@ func (rg *ruleGetter) getRule(ctx context.Context, r *cloudwatchevents.Rule) (*R
 		Name:               *r.Name,
 		Description:        desc,
 		ScheduleExpression: *r.ScheduleExpression,
-		Disabled:           *r.State == "DISABLED",
+		Disabled:           string(r.State) == "DISABLED",
 	}
 	switch len(targets) {
 	case 0:

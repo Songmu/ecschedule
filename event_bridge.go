@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/resourcegroups"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/resourcegroups"
+	"github.com/aws/aws-sdk-go-v2/service/resourcegroups/types"
 	"golang.org/x/exp/slices"
 )
 
@@ -22,8 +22,8 @@ type TagFilter struct {
 }
 
 // Extract the Rule associated with trackingId and extract those that are not included in ruleNames.
-func extractOrphanedRules(ctx context.Context, sess *session.Session, base *BaseConfig, ruleNames []string) ([]*Rule, error) {
-	trackedRuleNames, err := listTrackedRules(ctx, sess, base.Cluster)
+func extractOrphanedRules(ctx context.Context, awsConf aws.Config, base *BaseConfig, ruleNames []string) ([]*Rule, error) {
+	trackedRuleNames, err := listTrackedRules(ctx, awsConf, base.Cluster)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +37,7 @@ func extractOrphanedRules(ctx context.Context, sess *session.Session, base *Base
 
 	var orphanedRules []*Rule
 	for _, orphanedRuleName := range orphanedRuleNames {
-		orphanedRule, err := NewRuleFromRemote(ctx, sess, base, orphanedRuleName)
+		orphanedRule, err := NewRuleFromRemote(ctx, awsConf, base, orphanedRuleName)
 		if err != nil {
 			return nil, err
 		}
@@ -51,8 +51,10 @@ func extractOrphanedRules(ctx context.Context, sess *session.Session, base *Base
 // the following tags from `AWS::Events::Rule`.
 // - Key: 'ecschedule:tracking-id'
 // - Value: tracking_id
-func listTrackedRules(ctx context.Context, sess *session.Session, trackingId string) ([]string, error) {
-	svc := resourcegroups.New(sess)
+func listTrackedRules(ctx context.Context, awsConf aws.Config, trackingId string) ([]string, error) {
+	svc := resourcegroups.NewFromConfig(awsConf, func(o *resourcegroups.Options) {
+		o.Region = awsConf.Region
+	})
 	q := Query{
 		ResourceTypeFIlters: []string{"AWS::Events::Rule"},
 		TagFilters: []TagFilter{
@@ -68,12 +70,12 @@ func listTrackedRules(ctx context.Context, sess *session.Session, trackingId str
 	}
 
 	input := &resourcegroups.SearchResourcesInput{
-		ResourceQuery: &resourcegroups.ResourceQuery{
-			Type:  aws.String(resourcegroups.QueryTypeTagFilters10),
+		ResourceQuery: &types.ResourceQuery{
+			Type:  types.QueryTypeTagFilters10,
 			Query: aws.String(string(queryBytes)),
 		},
 	}
-	result, err := svc.SearchResourcesWithContext(ctx, input)
+	result, err := svc.SearchResources(ctx, input)
 	if err != nil {
 		return []string{}, err
 	}

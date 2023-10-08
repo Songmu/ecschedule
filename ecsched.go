@@ -8,7 +8,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go-v2/config"
 )
 
 const cmdName = "ecschedule"
@@ -37,19 +37,17 @@ func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 	if *ver {
 		return printVersion(outStream)
 	}
-	sess, err := session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	})
+	awsConf, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		return err
 	}
-	accountID, err := GetAWSAccountID(sess)
+	accountID, err := GetAWSAccountID(awsConf)
 	if err != nil {
 		return err
 	}
 	a := &app{
 		AccountID: accountID,
-		Session:   sess,
+		AwsConf:   awsConf,
 	}
 	if *conf != "" {
 		f, err := os.Open(*conf)

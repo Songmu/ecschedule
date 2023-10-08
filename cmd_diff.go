@@ -9,8 +9,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/cloudwatchevents"
+	"github.com/aws/aws-sdk-go-v2/service/cloudwatchevents"
 	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
@@ -61,8 +60,9 @@ var cmdDiff = &runnerImpl{
 			if ru == nil {
 				return fmt.Errorf("no rules found for %s", rule)
 			}
-			sess := a.Session
-			svc := cloudwatchevents.New(sess, &aws.Config{Region: &c.Region})
+			svc := cloudwatchevents.NewFromConfig(a.AwsConf, func(o *cloudwatchevents.Options) {
+				o.Region = c.Region
+			})
 			from, to, err := ru.diff(ctx, svc)
 			if err != nil {
 				return err
