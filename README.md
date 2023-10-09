@@ -67,6 +67,14 @@ jobs:
           ecschedule -conf ecschedule.yaml apply -all
 ```
 
+### aqua
+
+A declarative CLI Version Manager [aqua](https://aquaproj.github.io/) can install ecschedule.
+
+```console
+% aqua g -i Songmu/ecschedule
+```
+
 ## Quick Start
 
 ### dump configuration YAML
