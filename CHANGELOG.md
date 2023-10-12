@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.11.1](https://github.com/Songmu/ecschedule/compare/v0.11.0...v0.11.1) - 2023-10-12
+- docs: add the installation guides with aqua by @suzuki-shunsuke in https://github.com/Songmu/ecschedule/pull/85
+- build(deps): bump golang.org/x/net from 0.16.0 to 0.17.0 by @dependabot in https://github.com/Songmu/ecschedule/pull/87
+
 ## [v0.11.0](https://github.com/Songmu/ecschedule/compare/v0.10.3...v0.11.0) - 2023-10-08
 - Upgrade AWS SDK for Go from V1 to V2 by @snaka in https://github.com/Songmu/ecschedule/pull/78
 - Go 1.21 and update deps by @Songmu in https://github.com/Songmu/ecschedule/pull/83
