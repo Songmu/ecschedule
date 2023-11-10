@@ -57,6 +57,9 @@ func (rg *ruleGetter) getRule(ctx context.Context, r *cweTypes.Rule) (*Rule, err
 		target.LaunchType = string(ecsParams.LaunchType)
 		target.PlatformVersion = aws.ToString(ecsParams.PlatformVersion)
 		target.PropagateTags = aws.String(string(t.EcsParameters.PropagateTags))
+		if aws.ToString(target.PropagateTags) == "" {
+			target.PropagateTags = nil
+		}
 		if nc := ecsParams.NetworkConfiguration; nc != nil {
 			target.NetworkConfiguration = &NetworkConfiguration{
 				AwsVpcConfiguration: &AwsVpcConfiguration{
