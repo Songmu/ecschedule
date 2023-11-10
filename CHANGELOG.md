@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.11.2](https://github.com/Songmu/ecschedule/compare/v0.11.1...v0.11.2) - 2023-11-10
+- Care remote PropagateTags default value by @lamanotrama in https://github.com/Songmu/ecschedule/pull/89
+- build(deps): bump google.golang.org/grpc from 1.58.2 to 1.58.3 by @dependabot in https://github.com/Songmu/ecschedule/pull/88
+- update deps by @Songmu in https://github.com/Songmu/ecschedule/pull/91
+
 ## [v0.11.1](https://github.com/Songmu/ecschedule/compare/v0.11.0...v0.11.1) - 2023-10-12
 - docs: add the installation guides with aqua by @suzuki-shunsuke in https://github.com/Songmu/ecschedule/pull/85
 - build(deps): bump golang.org/x/net from 0.16.0 to 0.17.0 by @dependabot in https://github.com/Songmu/ecschedule/pull/87
