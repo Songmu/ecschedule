@@ -26,7 +26,7 @@ type BaseConfig struct {
 	Region     string `yaml:"region" json:"region"`
 	Cluster    string `yaml:"cluster" json:"cluster"`
 	AccountID  string `yaml:"-" json:"-"`
-	TrackingID string `yaml:"trakingId,omitempty" json:"trakingId,omitempty"`
+	TrackingID string `yaml:"trackingId,omitempty" json:"trackingId,omitempty"`
 }
 
 // Config config
