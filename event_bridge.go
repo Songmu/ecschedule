@@ -75,20 +75,28 @@ func listTrackedRules(ctx context.Context, awsConf aws.Config, trackingId string
 			Query: aws.String(string(queryBytes)),
 		},
 	}
-	result, err := svc.SearchResources(ctx, input)
-	if err != nil {
-		return []string{}, err
-	}
-	if result.ResourceIdentifiers == nil {
-		return []string{}, nil
-	}
 
 	var ruleNames []string
-	for _, identifier := range result.ResourceIdentifiers {
-		arn := *identifier.ResourceArn
-		arnElements := strings.Split(arn, "/")
-		ruleName := arnElements[len(arnElements)-1]
-		ruleNames = append(ruleNames, ruleName)
+	for {
+		result, err := svc.SearchResources(ctx, input)
+		if err != nil {
+			return []string{}, err
+		}
+
+		if result.ResourceIdentifiers != nil {
+			for _, identifier := range result.ResourceIdentifiers {
+				arn := *identifier.ResourceArn
+				arnElements := strings.Split(arn, "/")
+				ruleName := arnElements[len(arnElements)-1]
+				ruleNames = append(ruleNames, ruleName)
+			}
+		}
+
+		if result.NextToken == nil {
+			break
+		}
+
+		input.NextToken = result.NextToken
 	}
 
 	return ruleNames, nil
