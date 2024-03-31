@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.11.4](https://github.com/Songmu/ecschedule/compare/v0.11.3...v0.11.4) - 2024-03-31
+- Fix retrieval of AWS::Events::Rule SearchResources results by @kenkaton in https://github.com/Songmu/ecschedule/pull/97
+- build(deps): bump google.golang.org/protobuf from 1.31.0 to 1.33.0 by @dependabot in https://github.com/Songmu/ecschedule/pull/96
+- Go 1.22 and update deps by @Songmu in https://github.com/Songmu/ecschedule/pull/99
+
 ## [v0.11.3](https://github.com/Songmu/ecschedule/compare/v0.11.2...v0.11.3) - 2023-12-31
 - build(deps): bump golang.org/x/crypto from 0.15.0 to 0.17.0 by @dependabot in https://github.com/Songmu/ecschedule/pull/94
 
