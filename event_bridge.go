@@ -23,7 +23,7 @@ type TagFilter struct {
 
 // Extract the Rule associated with trackingId and extract those that are not included in ruleNames.
 func extractOrphanedRules(ctx context.Context, awsConf aws.Config, base *BaseConfig, ruleNames []string) ([]*Rule, error) {
-	trackedRuleNames, err := listTrackedRules(ctx, awsConf, base.Cluster)
+	trackedRuleNames, err := listTrackedRules(ctx, awsConf, base.TrackingID)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func extractOrphanedRules(ctx context.Context, awsConf aws.Config, base *BaseCon
 // Using the SearchResources API of the AWS Resource Groups service, extract the Rule with
 // the following tags from `AWS::Events::Rule`.
 // - Key: 'ecschedule:tracking-id'
-// - Value: tracking_id
+// - Value: base.TrackingId
 func listTrackedRules(ctx context.Context, awsConf aws.Config, trackingId string) ([]string, error) {
 	svc := resourcegroups.NewFromConfig(awsConf, func(o *resourcegroups.Options) {
 		o.Region = awsConf.Region
