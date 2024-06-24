@@ -13,6 +13,13 @@ local envs = import 'envs.libsonnet';
       "group": "xxx",
       "platform_version": "1.4.0",
       "launch_type": "FARGATE",
+      "capacityProviderStrategy": [
+        {
+          "capacityProvider": "FARGATE",
+          "base": 1,
+          "weight": 1
+        }
+      ],
       "network_configuration": envs.network_configuration,
       "containerOverrides": [
         {
