@@ -31,17 +31,25 @@ type Rule struct {
 
 // Target cluster
 type Target struct {
-	TargetID             string                `yaml:"targetId,omitempty" json:"targetId,omitempty"`
-	TaskDefinition       string                `yaml:"taskDefinition" json:"taskDefinition"`
-	TaskCount            int32                 `yaml:"taskCount,omitempty" json:"taskCount,omitempty"`
-	ContainerOverrides   []*ContainerOverride  `yaml:"containerOverrides,omitempty" json:"containerOverrides,omitempty"`
-	Role                 string                `yaml:"role,omitempty" json:"role,omitempty"`
-	Group                string                `yaml:"group,omitempty" json:"group,omitempty"`
-	LaunchType           string                `yaml:"launch_type,omitempty" json:"launch_type,omitempty"`
-	PlatformVersion      string                `yaml:"platform_version,omitempty" json:"platform_version,omitempty"`
-	NetworkConfiguration *NetworkConfiguration `yaml:"network_configuration,omitempty" json:"network_configuration,omitempty"`
-	DeadLetterConfig     *DeadLetterConfig     `yaml:"dead_letter_config,omitempty" json:"dead_letter_config,omitempty"`
-	PropagateTags        *string               `yaml:"propagateTags,omitempty" json:"propagateTags,omitempty"`
+	TargetID                 string                          `yaml:"targetId,omitempty" json:"targetId,omitempty"`
+	TaskDefinition           string                          `yaml:"taskDefinition" json:"taskDefinition"`
+	TaskCount                int32                           `yaml:"taskCount,omitempty" json:"taskCount,omitempty"`
+	ContainerOverrides       []*ContainerOverride            `yaml:"containerOverrides,omitempty" json:"containerOverrides,omitempty"`
+	Role                     string                          `yaml:"role,omitempty" json:"role,omitempty"`
+	Group                    string                          `yaml:"group,omitempty" json:"group,omitempty"`
+	CapacityProviderStrategy []*CapacityProviderStrategyItem `yaml:"capacityProviderStrategy,omitempty" json:"capacityProviderStrategy,omitempty"`
+	LaunchType               string                          `yaml:"launch_type,omitempty" json:"launch_type,omitempty"`
+	PlatformVersion          string                          `yaml:"platform_version,omitempty" json:"platform_version,omitempty"`
+	NetworkConfiguration     *NetworkConfiguration           `yaml:"network_configuration,omitempty" json:"network_configuration,omitempty"`
+	DeadLetterConfig         *DeadLetterConfig               `yaml:"dead_letter_config,omitempty" json:"dead_letter_config,omitempty"`
+	PropagateTags            *string                         `yaml:"propagateTags,omitempty" json:"propagateTags,omitempty"`
+}
+
+// CapacityProviderStrategyItem represents ECS capacity provider strategy item
+type CapacityProviderStrategyItem struct {
+	CapacityProvider string `yaml:"capacityProvider" json:"capacityProvider"`
+	Base             int32  `yaml:"base" json:"base"`
+	Weight           int32  `yaml:"weight" json:"weight"`
 }
 
 // ContainerOverride overrides container
@@ -222,6 +230,17 @@ func (r *Rule) ecsParameters() *cweTypes.EcsParameters {
 	if ta.LaunchType != "" {
 		p.LaunchType = cweTypes.LaunchType(ta.LaunchType)
 	}
+
+	var capacityProviderStrategy []cweTypes.CapacityProviderStrategyItem
+	for _, cps := range ta.CapacityProviderStrategy {
+		capacityProviderStrategy = append(capacityProviderStrategy, cweTypes.CapacityProviderStrategyItem{
+			CapacityProvider: aws.String(cps.CapacityProvider),
+			Base:             cps.Base,
+			Weight:           cps.Weight,
+		})
+	}
+	p.CapacityProviderStrategy = capacityProviderStrategy
+
 	if ta.PlatformVersion != "" {
 		p.PlatformVersion = aws.String(ta.PlatformVersion)
 	}

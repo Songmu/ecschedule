@@ -55,6 +55,18 @@ func (rg *ruleGetter) getRule(ctx context.Context, r *cweTypes.Rule) (*Rule, err
 
 		target.Group = aws.ToString(ecsParams.Group)
 		target.LaunchType = string(ecsParams.LaunchType)
+
+		var capacityProviderStrategy []*CapacityProviderStrategyItem
+		for _, cps := range ecsParams.CapacityProviderStrategy {
+			capacityProviderStrategy = append(capacityProviderStrategy, &CapacityProviderStrategyItem{
+				Base:             cps.Base,
+				Weight:           cps.Weight,
+				CapacityProvider: aws.ToString(cps.CapacityProvider),
+			})
+		}
+
+		target.CapacityProviderStrategy = capacityProviderStrategy
+
 		target.PlatformVersion = aws.ToString(ecsParams.PlatformVersion)
 		target.PropagateTags = aws.String(string(t.EcsParameters.PropagateTags))
 		if aws.ToString(target.PropagateTags) == "" {

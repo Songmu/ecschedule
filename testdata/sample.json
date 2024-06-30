@@ -11,6 +11,13 @@
       "group": "xxx",
       "platform_version": "1.4.0",
       "launch_type": "FARGATE",
+      "capacityProviderStrategy": [
+        {
+          "capacityProvider": "FARGATE",
+          "base": 1,
+          "weight": 1
+        }
+      ],
       "network_configuration": {
         "aws_vpc_configuration": {
           "subnets": [
