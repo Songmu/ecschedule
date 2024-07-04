@@ -32,6 +32,13 @@ func TestLoadConfig(t *testing.T) {
 					Group:           "xxx",
 					PlatformVersion: "1.4.0",
 					LaunchType:      "FARGATE",
+					CapacityProviderStrategy: []*CapacityProviderStrategyItem{
+						{
+							CapacityProvider: "FARGATE",
+							Weight:           1,
+							Base:             1,
+						},
+					},
 					NetworkConfiguration: &NetworkConfiguration{
 						AwsVpcConfiguration: &AwsVpcConfiguration{
 							Subnets:        []string{"subnet-01234567", "subnet-12345678"},
