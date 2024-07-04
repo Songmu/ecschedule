@@ -186,6 +186,50 @@ This function is useful to build a resource address with environment variables.
 {{ tfstatef `aws_subnet.ecs['%s'].id` (must_env `SERVICE`) }}
 ```
 
+### ssm
+
+ssm plugin introduces a template function `ssm`.
+
+```yaml
+region: us-east-1
+cluster: api
+role: ecsEventsRole
+rules:
+- name: fuga-task-name
+  description: fuga description
+  scheduleExpression: cron(0 0 * * ? *)
+  taskDefinition: task1
+  group: xxx
+  platform_version: 1.4.0
+  launch_type: FARGATE
+  network_configuration:
+    aws_vpc_configuration:
+      subnets:
+      - {{ ssm `/subnet/private/a/id` }} # String type.
+      - {{ ssm `/subnet/private/c/id` }}
+      security_groups:
+      - {{ ssm `security_group/default/id` 1 }} # StringList type.
+      - {{ ssm `security_group/default/id` 2 }}
+      assign_public_ip: ENABLED
+  containerOverrides:
+  - name: container1
+    command: ["subcmd", "argument"]
+    environment:
+      FUGA_ENV: {{ ssm "/path/to/secretstring/fuga" }} # SecureString type.
+    cpu: 1024
+    memory: 1024
+    memoryReservation: 512
+  dead_letter_config:
+    sqs: queue1
+  propagateTags: TASK_DEFINITION
+plugins:
+- name: ssm
+```
+
+`{{ ssm "/path/to/parameter" }}` will retrieve a parameter from the AWS Systems Manager Parameter Store.
+
+This function supports String, StringList, and SecureString types.
+
 ## Pitfalls
 
 ### Rule Name Uniqueness and Overwrite Risks

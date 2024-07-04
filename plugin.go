@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/fujiwara/tfstate-lookup/tfstate"
+        "github.com/kayac/ecspresso/ssm"
 )
 
 // Plugin the plugin
@@ -20,6 +21,8 @@ func (p Plugin) setup(ctx context.Context, c *Config) error {
 	switch strings.ToLower(p.Name) {
 	case "tfstate":
 		return setupPluginTFState(ctx, p, c)
+        case "ssm":
+                return setupPluginSSM(ctx, c)
 	default:
 		return fmt.Errorf("plugin %s is not available", p.Name)
 	}
@@ -51,4 +54,13 @@ func setupPluginTFState(ctx context.Context, p Plugin, c *Config) error {
 	}
 	c.templateFuncs = append(c.templateFuncs, funcs)
 	return nil
+}
+
+func setupPluginSSM(ctx context.Context, c *Config) error {
+        funcs, err := ssm.FuncMap(ctx, getApp(ctx).AwsConf)
+        if err != nil {
+                return err
+        }
+        c.templateFuncs = append(c.templateFuncs, funcs)
+        return nil
 }
