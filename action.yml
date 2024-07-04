@@ -1,7 +1,7 @@
 inputs:
   version:
     description: "A version to install ecschedule"
-    default: "v0.11.4"
+    default: "v0.12.0"
 runs:
   using: "composite"
   steps:

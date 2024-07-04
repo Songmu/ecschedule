@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.12.0](https://github.com/Songmu/ecschedule/compare/v0.11.4...v0.12.0) - 2024-07-04
+- Support CapacityProviderStrategy by @tomoasleep in https://github.com/Songmu/ecschedule/pull/104
+- feat: ssm plugin by @ch1aki in https://github.com/Songmu/ecschedule/pull/105
+- build(deps): bump golang.org/x/net from 0.22.0 to 0.23.0 by @dependabot in https://github.com/Songmu/ecschedule/pull/100
+- build(deps): bump github.com/hashicorp/go-retryablehttp from 0.7.5 to 0.7.7 by @dependabot in https://github.com/Songmu/ecschedule/pull/103
+- build(deps): bump github.com/Azure/azure-sdk-for-go/sdk/azidentity from 1.5.1 to 1.6.0 by @dependabot in https://github.com/Songmu/ecschedule/pull/102
+- update deps by @Songmu in https://github.com/Songmu/ecschedule/pull/107
+- provide windows executable on releasing by @Songmu in https://github.com/Songmu/ecschedule/pull/108
+
 ## [v0.11.4](https://github.com/Songmu/ecschedule/compare/v0.11.3...v0.11.4) - 2024-03-31
 - Fix retrieval of AWS::Events::Rule SearchResources results by @kenkaton in https://github.com/Songmu/ecschedule/pull/97
 - build(deps): bump google.golang.org/protobuf from 1.31.0 to 1.33.0 by @dependabot in https://github.com/Songmu/ecschedule/pull/96
