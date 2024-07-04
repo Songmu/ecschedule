@@ -371,6 +371,7 @@ func (r *Rule) target() *cweTypes.Target {
 
 var envReg = regexp.MustCompile(`ecschedule::<([^>]+)>`)
 var tfstateReg = regexp.MustCompile(`ecschedule::tfstate::<([^>]+)>`)
+var ssmReg = regexp.MustCompile(`ecschedule::ssm::<([^>]+)>`)
 
 func (r *Rule) validateEnv() error {
 	bs, err := yaml.Marshal(r)
@@ -410,6 +411,25 @@ func (r *Rule) validateTFstate() error {
 	return nil
 }
 
+func (r *Rule) validateSSM() error {
+	bs, err := yaml.Marshal(r)
+	if err != nil {
+		return err
+	}
+	m := ssmReg.FindAllSubmatch(bs, -1)
+	if len(m) > 0 {
+		if len(m) == 1 {
+			return fmt.Errorf("ssm reference %s is not defined", string(m[0][1]))
+		}
+		var envs []string
+		for _, v := range m {
+			envs = append(envs, string(v[1]))
+		}
+		return fmt.Errorf("ssm reference %s are not defined", strings.Join(envs, " and "))
+	}
+	return nil
+}
+
 func (r *Rule) validateTaskDefinition(ctx context.Context, awsConf aws.Config) error {
 	svc := ecs.NewFromConfig(awsConf, func(o *ecs.Options) {
 		o.Region = r.Region
@@ -429,6 +449,9 @@ func (r *Rule) Apply(ctx context.Context, awsConf aws.Config, dryRun bool) error
 		return err
 	}
 	if err := r.validateTFstate(); err != nil {
+		return err
+	}
+	if err := r.validateSSM(); err != nil {
 		return err
 	}
 	if err := r.validateTaskDefinition(ctx, awsConf); err != nil {
@@ -474,6 +497,9 @@ func (r *Rule) Run(ctx context.Context, awsConf aws.Config, noWait bool) error {
 		return err
 	}
 	if err := r.validateTFstate(); err != nil {
+		return err
+	}
+	if err := r.validateSSM(); err != nil {
 		return err
 	}
 	svc := ecs.NewFromConfig(awsConf, func(o *ecs.Options) {

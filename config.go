@@ -84,6 +84,8 @@ func LoadConfig(ctx context.Context, r io.Reader, accountID string, confPath str
 	}
 	// recover tfstate variable
 	bs = tfstateRecover(bs)
+	// recover ssm variable
+	bs = ssmRecover(bs)
 	bs, err = loader.ReadWithEnvBytes(bs)
 	if err != nil {
 		return nil, err
