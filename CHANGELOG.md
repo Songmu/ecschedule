@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.12.1](https://github.com/Songmu/ecschedule/compare/v0.12.0...v0.12.1) - 2024-12-03
+- build(deps): bump github.com/golang-jwt/jwt/v4 from 4.5.0 to 4.5.1 by @dependabot in https://github.com/Songmu/ecschedule/pull/110
+
 ## [v0.12.0](https://github.com/Songmu/ecschedule/compare/v0.11.4...v0.12.0) - 2024-07-04
 - Support CapacityProviderStrategy by @tomoasleep in https://github.com/Songmu/ecschedule/pull/104
 - feat: ssm plugin by @ch1aki in https://github.com/Songmu/ecschedule/pull/105
