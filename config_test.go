@@ -165,3 +165,25 @@ func TestLoadConfig_undefined(t *testing.T) {
 		t.Errorf("error should be nil, but: %v", c.Rules[0].PropagateTags)
 	}
 }
+
+func TestCronValidate(t *testing.T) {
+	c := &Config{
+		Rules: []*Rule{
+			{Name: "rule-1", ScheduleExpression: "cron(0 0 * * ? *)"},   // valid
+			{Name: "rule-2", ScheduleExpression: "rate(1 day)"},         // rate expressions are excluded from validation
+			{Name: "rule-3", ScheduleExpression: "cron(0 0 * * * *)"},   // missing '?'
+			{Name: "rule-4", ScheduleExpression: "cron(100 * * * * *)"}, // invalid minute
+		},
+	}
+	err := c.cronValidate()
+	if err == nil {
+		t.Errorf("error should be occurred, but nil")
+	}
+
+	e := "cron validation errors:\n" +
+		"\trule \"rule-3\": either day-of-month or day-of-week must be '?'\n" +
+		"\trule \"rule-4\": minute must be 0-59 (value=100)"
+	if g := err.Error(); g != e {
+		t.Errorf("error should be %q, but: %q", e, g)
+	}
+}

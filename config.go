@@ -7,11 +7,13 @@ import (
 	"io"
 	"io/ioutil"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/goccy/go-yaml"
 	"github.com/google/go-jsonnet"
 	gc "github.com/kayac/go-config"
+	"github.com/winebarrel/cronplan"
 )
 
 const defaultRole = "ecsEventsRole"
@@ -58,6 +60,28 @@ func (c *Config) setupPlugins(ctx context.Context) error {
 	return nil
 }
 
+func (c *Config) cronValidate() error {
+	var errMsgs []string
+	for _, r := range c.Rules {
+		exp := r.ScheduleExpression
+		if !strings.HasPrefix(exp, "cron") {
+			continue
+		}
+		_, err := cronplan.Parse(strings.TrimSuffix(strings.TrimPrefix(exp, "cron("), ")"))
+		if err != nil {
+			errMsg := err.Error()
+			if idx := strings.LastIndex(errMsg, ": "); idx != -1 {
+				errMsg = errMsg[idx+2:]
+			}
+			errMsgs = append(errMsgs, fmt.Sprintf("\trule %q: %s", r.Name, errMsg))
+		}
+	}
+	if len(errMsgs) > 0 {
+		return fmt.Errorf("cron validation errors:\n%s", strings.Join(errMsgs, "\n"))
+	}
+	return nil
+}
+
 // LoadConfig loads config
 func LoadConfig(ctx context.Context, r io.Reader, accountID string, confPath string) (*Config, error) {
 	c := Config{}
@@ -71,6 +95,9 @@ func LoadConfig(ctx context.Context, r io.Reader, accountID string, confPath str
 	}
 
 	if err := unmarshalConfig(bs, &c, ext); err != nil {
+		return nil, err
+	}
+	if err := c.cronValidate(); err != nil {
 		return nil, err
 	}
 	c.AccountID = accountID
