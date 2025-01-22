@@ -64,7 +64,11 @@ func (c *Config) cronValidate() error {
 	var errMsgs []string
 	for _, r := range c.Rules {
 		exp := r.ScheduleExpression
-		if !strings.HasPrefix(exp, "cron") {
+		if strings.HasPrefix(exp, "rate(") && strings.HasSuffix(exp, ")") {
+			continue
+		}
+		if !strings.HasPrefix(exp, "cron(") || !strings.HasSuffix(exp, ")") {
+			errMsgs = append(errMsgs, fmt.Sprintf("\trule %q: invalid expression", r.Name))
 			continue
 		}
 		_, err := cronplan.Parse(strings.TrimSuffix(strings.TrimPrefix(exp, "cron("), ")"))
@@ -77,7 +81,7 @@ func (c *Config) cronValidate() error {
 		}
 	}
 	if len(errMsgs) > 0 {
-		return fmt.Errorf("cron validation errors:\n%s", strings.Join(errMsgs, "\n"))
+		return fmt.Errorf("schedule expression validation errors:\n%s", strings.Join(errMsgs, "\n"))
 	}
 	return nil
 }

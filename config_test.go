@@ -171,8 +171,9 @@ func TestCronValidate(t *testing.T) {
 		Rules: []*Rule{
 			{Name: "rule-1", ScheduleExpression: "cron(0 0 * * ? *)"},   // valid
 			{Name: "rule-2", ScheduleExpression: "rate(1 day)"},         // rate expressions are excluded from validation
-			{Name: "rule-3", ScheduleExpression: "cron(0 0 * * * *)"},   // missing '?'
-			{Name: "rule-4", ScheduleExpression: "cron(100 * * * * *)"}, // invalid minute
+			{Name: "rule-3", ScheduleExpression: "invalid(0 0 * * *)"},  // invalid cron expression prefix
+			{Name: "rule-4", ScheduleExpression: "cron(0 0 * * * *)"},   // missing '?'
+			{Name: "rule-5", ScheduleExpression: "cron( 0 0 * * ? * )"}, // leading and trailing spaces are invalid but passes current cronplan.Parse()
 		},
 	}
 	err := c.cronValidate()
@@ -180,10 +181,10 @@ func TestCronValidate(t *testing.T) {
 		t.Errorf("error should be occurred, but nil")
 	}
 
-	e := "cron validation errors:\n" +
-		"\trule \"rule-3\": either day-of-month or day-of-week must be '?'\n" +
-		"\trule \"rule-4\": minute must be 0-59 (value=100)"
+	e := "schedule expression validation errors:\n" +
+		"\trule \"rule-3\": invalid expression\n" +
+		"\trule \"rule-4\": either day-of-month or day-of-week must be '?'"
 	if g := err.Error(); g != e {
-		t.Errorf("error should be %q, but: %q", e, g)
+		t.Errorf("unexpected error message\nwant:\n%s\n\ngot:\n%s", e, g)
 	}
 }
