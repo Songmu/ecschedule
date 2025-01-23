@@ -82,7 +82,6 @@ func LoadConfig(ctx context.Context, r io.Reader, accountID string, confPath str
 	for _, f := range c.templateFuncs {
 		loader.Funcs(f)
 	}
-
 	// recover tfstate variable
 	bs = tfstateRecover(bs)
 	// recover ssm variable
