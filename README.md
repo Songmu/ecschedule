@@ -186,6 +186,31 @@ This function is useful to build a resource address with environment variables.
 {{ tfstatef `aws_subnet.ecs['%s'].id` (must_env `SERVICE`) }}
 ```
 
+#### Multiple tfstate support
+
+You can specify multiple tfstate files. Specify the `func_prefix` option to avoid conflicts between functions.
+
+```yaml
+plugins:
+- name: tfstate
+  func_prefix: first_
+  config:
+    path: testdata/first_terraform.tfstate    # path to tfstate file
+- name: tfstate
+  func_prefix: second_
+  config:
+    path: testdata/second_terraform.tfstate    # path to tfstate file
+```
+
+In this case, the function must be called by the `plugin` function.
+
+The `plugin` function takes the prefixed function name as the first argument and the function arguments as the second or later arguments.
+
+```
+{{ plugin `first_tfstate` `aws_subnet.private-a.id` }}
+{{ plugin `second_tfstate` `aws_subnet.private-a.id` }}
+```
+
 ### ssm
 
 ssm plugin introduces a template function `ssm`.
