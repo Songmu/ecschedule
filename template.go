@@ -14,9 +14,10 @@ import (
 )
 
 var envRepTpl *template.Template
-var tfstateRepRegex = regexp.MustCompile("ecschedule::tfstate::<`(.*)`>")
-var tfstatefRepRegex = regexp.MustCompile("ecschedule::tfstatef::<`(.*)`>")
-var ssmRepRegex = regexp.MustCompile("ecschedule::ssm::<(.*)>")
+var tfstateRepRegex = regexp.MustCompile("ecschedule::(.*?tfstate)::<`(.*)`>")
+var tfstatefRepRegex = regexp.MustCompile("ecschedule::(.*?tfstatef)::<`(.*)`>")
+var ssmRepRegex = regexp.MustCompile("ecschedule::(.*?ssm)::<(.*)>")
+var pluginRepRegex = regexp.MustCompile("ecschedule::plugin::<(.*)>")
 
 func init() {
 	envRepTpl = template.New("conf").Funcs(template.FuncMap{
@@ -50,6 +51,9 @@ func init() {
 				return fmt.Sprintf("ecschedule::ssm::<`%s`>", key)
 			}
 		},
+		"plugin": func(name string, args ...string) string {
+			return fmt.Sprintf("ecschedule::%s::<`%s`>", name, strings.Join(args, "` `"))
+		},
 	})
 }
 
@@ -66,11 +70,15 @@ func envReplacer(data []byte) ([]byte, error) {
 }
 
 func tfstateRecover(data []byte) []byte {
-	s := tfstateRepRegex.ReplaceAllString(string(data), "{{ tfstate `$1` }}")
-	s = tfstatefRepRegex.ReplaceAllString(s, "{{ tfstatef `$1` }}")
+	s := tfstateRepRegex.ReplaceAllString(string(data), "{{ $1 `$2` }}")
+	s = tfstatefRepRegex.ReplaceAllString(s, "{{ $1 `$2` }}")
 	return []byte(s)
 }
 
 func ssmRecover(data []byte) []byte {
 	return []byte(ssmRepRegex.ReplaceAllString(string(data), "{{ ssm $1 }}"))
+}
+
+func pluginRecover(data []byte) []byte {
+	return []byte(pluginRepRegex.ReplaceAllString(string(data), "{{ plugin $1 }}"))
 }

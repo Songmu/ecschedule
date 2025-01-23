@@ -165,3 +165,36 @@ func TestLoadConfig_undefined(t *testing.T) {
 		t.Errorf("error should be nil, but: %v", c.Rules[0].PropagateTags)
 	}
 }
+
+func TestLoadConfig_tfstate_multi(t *testing.T) {
+	path := "testdata/sample5.yaml"
+	f, err := os.Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+
+	c, err := LoadConfig(context.Background(), f, "338", path)
+	if err != nil {
+		t.Errorf("error should be nil, but: %s", err)
+	}
+
+	if !reflect.DeepEqual(c.Plugins, []*Plugin{
+		{Name: "tfstate", Config: map[string]interface{}{"path": "testdata/terraform.tfstate"}, FuncPrefix: "first_"},
+		{Name: "tfstate", Config: map[string]interface{}{"path": "testdata/terraform.tfstate"}, FuncPrefix: "second_"},
+	}) {
+		t.Errorf("unexpected output: %#v", c)
+	}
+
+	as := c.Rules[0].NetworkConfiguration.AwsVpcConfiguration.Subnets
+	es := []string{"subnet-01234567", "subnet-12345678"}
+	if !reflect.DeepEqual(as, es) {
+		t.Errorf("error should be %v, but: %v", as, es)
+	}
+
+	asg := c.Rules[0].NetworkConfiguration.AwsVpcConfiguration.SecurityGroups
+	esg := []string{"sg-11111111", "sg-99999999"}
+	if !reflect.DeepEqual(asg, esg) {
+		t.Errorf("error should be %v, but: %v", asg, esg)
+	}
+}
