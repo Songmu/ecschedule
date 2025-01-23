@@ -17,7 +17,6 @@ var envRepTpl *template.Template
 var tfstateRepRegex = regexp.MustCompile("ecschedule::(.*?tfstate)::<`(.*)`>")
 var tfstatefRepRegex = regexp.MustCompile("ecschedule::(.*?tfstatef)::<`(.*)`>")
 var ssmRepRegex = regexp.MustCompile("ecschedule::(.*?ssm)::<(.*)>")
-var pluginRepRegex = regexp.MustCompile("ecschedule::plugin::<(.*)>")
 
 func init() {
 	envRepTpl = template.New("conf").Funcs(template.FuncMap{
@@ -76,9 +75,5 @@ func tfstateRecover(data []byte) []byte {
 }
 
 func ssmRecover(data []byte) []byte {
-	return []byte(ssmRepRegex.ReplaceAllString(string(data), "{{ ssm $1 }}"))
-}
-
-func pluginRecover(data []byte) []byte {
-	return []byte(pluginRepRegex.ReplaceAllString(string(data), "{{ plugin $1 }}"))
+	return []byte(ssmRepRegex.ReplaceAllString(string(data), "{{ $1 $2 }}"))
 }

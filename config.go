@@ -58,28 +58,6 @@ func (c *Config) setupPlugins(ctx context.Context) error {
 	return nil
 }
 
-func (c *Config) buildPluginFunc() template.FuncMap {
-	funcMap := template.FuncMap{}
-	for _, f := range c.templateFuncs {
-		for k, v := range f {
-			funcMap[k] = v
-		}
-	}
-	return template.FuncMap{
-		"plugin": func(name string, args ...string) string {
-			fn := funcMap[name]
-			switch fn := fn.(type) {
-			case func(string, ...string) string:
-				return fn(name, args...)
-			case func(string) string:
-				return fn(name)
-			default:
-				panic(fmt.Sprintf("plugin %s is not available", name))
-			}
-		},
-	}
-}
-
 // LoadConfig loads config
 func LoadConfig(ctx context.Context, r io.Reader, accountID string, confPath string) (*Config, error) {
 	c := Config{}
@@ -104,10 +82,7 @@ func LoadConfig(ctx context.Context, r io.Reader, accountID string, confPath str
 	for _, f := range c.templateFuncs {
 		loader.Funcs(f)
 	}
-	loader.Funcs(c.buildPluginFunc())
 
-	// recover plugin variable (must at first)
-	bs = pluginRecover(bs)
 	// recover tfstate variable
 	bs = tfstateRecover(bs)
 	// recover ssm variable
