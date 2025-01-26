@@ -1,5 +1,15 @@
 # Changelog
 
+## [v0.13.0](https://github.com/Songmu/ecschedule/compare/v0.12.0...v0.13.0) - 2025-01-26
+- build(deps): bump github.com/golang-jwt/jwt/v4 from 4.5.0 to 4.5.1 by @dependabot in https://github.com/Songmu/ecschedule/pull/110
+- build(deps): bump golang.org/x/crypto from 0.24.0 to 0.31.0 by @dependabot in https://github.com/Songmu/ecschedule/pull/113
+- add cron validator by @soh-kuranaga in https://github.com/Songmu/ecschedule/pull/115
+- Multiple tfstate support. by @fujiwara in https://github.com/Songmu/ecschedule/pull/117
+- build(deps): bump golang.org/x/net from 0.26.0 to 0.33.0 by @dependabot in https://github.com/Songmu/ecschedule/pull/114
+- build(deps): bump github.com/hashicorp/go-slug from 0.15.2 to 0.16.3 by @dependabot in https://github.com/Songmu/ecschedule/pull/116
+- Raise error the cron expression within leading or trailing spaces by @Songmu in https://github.com/Songmu/ecschedule/pull/118
+- udpate deps by @Songmu in https://github.com/Songmu/ecschedule/pull/119
+
 ## [v0.12.0](https://github.com/Songmu/ecschedule/compare/v0.11.4...v0.12.0) - 2024-07-04
 - Support CapacityProviderStrategy by @tomoasleep in https://github.com/Songmu/ecschedule/pull/104
 - feat: ssm plugin by @ch1aki in https://github.com/Songmu/ecschedule/pull/105
