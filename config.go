@@ -61,27 +61,36 @@ func (c *Config) setupPlugins(ctx context.Context) error {
 }
 
 func (c *Config) cronValidate() error {
+	// XXX: I'd like to use multiple errors here and format the error messages at the very end.
 	var errMsgs []string
 	for _, r := range c.Rules {
-		exp := r.ScheduleExpression
-		if strings.HasPrefix(exp, "rate(") && strings.HasSuffix(exp, ")") {
-			continue
-		}
-		if !strings.HasPrefix(exp, "cron(") || !strings.HasSuffix(exp, ")") {
-			errMsgs = append(errMsgs, fmt.Sprintf("\trule %q: invalid expression", r.Name))
-			continue
-		}
-		_, err := cronplan.Parse(strings.TrimSuffix(strings.TrimPrefix(exp, "cron("), ")"))
+		err := validateCronExpression(r.ScheduleExpression)
 		if err != nil {
-			errMsg := err.Error()
-			if idx := strings.LastIndex(errMsg, ": "); idx != -1 {
-				errMsg = errMsg[idx+2:]
-			}
-			errMsgs = append(errMsgs, fmt.Sprintf("\trule %q: %s", r.Name, errMsg))
+			errMsgs = append(errMsgs, fmt.Sprintf("\trule %q: %s", r.Name, err))
 		}
 	}
 	if len(errMsgs) > 0 {
 		return fmt.Errorf("schedule expression validation errors:\n%s", strings.Join(errMsgs, "\n"))
+	}
+	return nil
+}
+
+func validateCronExpression(exp string) error {
+	if strings.HasPrefix(exp, "rate(") && strings.HasSuffix(exp, ")") {
+		return nil
+	}
+	strippedExp := strings.TrimSuffix(strings.TrimPrefix(exp, "cron("), ")")
+	// 6 means `len("cron(") + len("(")`
+	if len(strippedExp)+6 != len(exp) {
+		return fmt.Errorf("invalid expression: %q", exp)
+	}
+	if strippedExp != strings.TrimSpace(strippedExp) {
+		return fmt.Errorf(
+			"trailing or leading spaces are not allowed inside parentheses: %q", exp)
+	}
+	_, err := cronplan.Parse(strippedExp)
+	if err != nil {
+		return err
 	}
 	return nil
 }
