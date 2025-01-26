@@ -22,6 +22,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.3.2 // indirect
 	github.com/Azure/go-autorest/autorest/mocks v0.4.2 // indirect
 	github.com/AzureAD/microsoft-authentication-library-for-go v1.2.2 // indirect
+	github.com/alecthomas/participle/v2 v2.1.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.52.1 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
@@ -30,6 +31,7 @@ require (
 	github.com/google/s2a-go v0.1.7 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c // indirect
+	github.com/winebarrel/cronplan v1.10.4 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.53.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.53.0 // indirect
 	go.opentelemetry.io/otel v1.28.0 // indirect
