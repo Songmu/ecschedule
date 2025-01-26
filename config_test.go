@@ -196,7 +196,7 @@ func TestLoadConfig_tfstate_multi(t *testing.T) {
 	esg := []string{"sg-11111111", "sg-99999999"}
 	if !reflect.DeepEqual(asg, esg) {
 		t.Errorf("error should be %v, but: %v", asg, esg)
-  }
+	}
 }
 
 func TestCronValidate(t *testing.T) {
@@ -215,8 +215,9 @@ func TestCronValidate(t *testing.T) {
 	}
 
 	e := "schedule expression validation errors:\n" +
-		"\trule \"rule-3\": invalid expression\n" +
-		"\trule \"rule-4\": either day-of-month or day-of-week must be '?'"
+		"\trule \"rule-3\": invalid expression: \"invalid(0 0 * * *)\"\n" +
+		"\trule \"rule-4\": either day-of-month or day-of-week must be '?'\n" +
+		"\trule \"rule-5\": trailing or leading spaces are not allowed inside parentheses: \"cron( 0 0 * * ? * )\""
 	if g := err.Error(); g != e {
 		t.Errorf("unexpected error message\nwant:\n%s\n\ngot:\n%s", e, g)
 	}

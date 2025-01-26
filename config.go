@@ -78,10 +78,16 @@ func validateCronExpression(exp string) error {
 	if strings.HasPrefix(exp, "rate(") && strings.HasSuffix(exp, ")") {
 		return nil
 	}
-	if !strings.HasPrefix(exp, "cron(") || !strings.HasSuffix(exp, ")") {
-		return fmt.Errorf("invalid expression")
+	strippedExp := strings.TrimSuffix(strings.TrimPrefix(exp, "cron("), ")")
+	// 6 means `len("cron(") + len("(")`
+	if len(strippedExp)+6 != len(exp) {
+		return fmt.Errorf("invalid expression: %q", exp)
 	}
-	_, err := cronplan.Parse(strings.TrimSuffix(strings.TrimPrefix(exp, "cron("), ")"))
+	if strippedExp != strings.TrimSpace(strippedExp) {
+		return fmt.Errorf(
+			"trailing or leading spaces are not allowed inside parentheses: %q", exp)
+	}
+	_, err := cronplan.Parse(strippedExp)
 	if err != nil {
 		return err
 	}
