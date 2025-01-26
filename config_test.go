@@ -196,5 +196,28 @@ func TestLoadConfig_tfstate_multi(t *testing.T) {
 	esg := []string{"sg-11111111", "sg-99999999"}
 	if !reflect.DeepEqual(asg, esg) {
 		t.Errorf("error should be %v, but: %v", asg, esg)
+  }
+}
+
+func TestCronValidate(t *testing.T) {
+	c := &Config{
+		Rules: []*Rule{
+			{Name: "rule-1", ScheduleExpression: "cron(0 0 * * ? *)"},   // valid
+			{Name: "rule-2", ScheduleExpression: "rate(1 day)"},         // rate expressions are excluded from validation
+			{Name: "rule-3", ScheduleExpression: "invalid(0 0 * * *)"},  // invalid cron expression prefix
+			{Name: "rule-4", ScheduleExpression: "cron(0 0 * * * *)"},   // missing '?'
+			{Name: "rule-5", ScheduleExpression: "cron( 0 0 * * ? * )"}, // leading and trailing spaces are invalid but passes current cronplan.Parse()
+		},
+	}
+	err := c.cronValidate()
+	if err == nil {
+		t.Errorf("error should be occurred, but nil")
+	}
+
+	e := "schedule expression validation errors:\n" +
+		"\trule \"rule-3\": invalid expression\n" +
+		"\trule \"rule-4\": either day-of-month or day-of-week must be '?'"
+	if g := err.Error(); g != e {
+		t.Errorf("unexpected error message\nwant:\n%s\n\ngot:\n%s", e, g)
 	}
 }
