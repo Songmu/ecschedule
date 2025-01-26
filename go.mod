@@ -3,10 +3,10 @@ module github.com/Songmu/ecschedule
 go 1.22.5
 
 require (
+	github.com/fujiwara/ssm-lookup v0.1.1
 	github.com/fujiwara/tfstate-lookup v1.3.2
 	github.com/goccy/go-yaml v1.11.3
 	github.com/google/go-jsonnet v0.20.0
-	github.com/kayac/ecspresso v1.99.3
 	github.com/kayac/go-config v0.7.0
 	github.com/pkg/errors v0.9.1
 	github.com/sergi/go-diff v1.3.1

@@ -13,7 +13,6 @@ cloud.google.com/go/longrunning v0.5.8 h1:QThI5BFSlYlS7K0wnABCdmKsXbG/htLc3nTPzr
 cloud.google.com/go/longrunning v0.5.8/go.mod h1:oJDErR/mm5h44gzsfjQlxd6jyjFvuBPOxR1TLy2+cQk=
 cloud.google.com/go/storage v1.43.0 h1:CcxnSohZwizt4LCzQHWvBf1/kvtHUn7gk9QERXPyXFs=
 cloud.google.com/go/storage v1.43.0/go.mod h1:ajvxEa7WmZS1PxvKRq4bq0tFT3vMd502JwstCcYv0Q0=
-github.com/Azure/azure-sdk-for-go v66.0.0+incompatible h1:bmmC38SlE8/E81nNADlgmVGurPWMHDX2YNXVQMrBpEE=
 github.com/Azure/azure-sdk-for-go/sdk/azcore v1.12.0 h1:1nGuui+4POelzDwI7RG56yfQJHCnKvwfMoU7VsEp+Zg=
 github.com/Azure/azure-sdk-for-go/sdk/azcore v1.12.0/go.mod h1:99EvauvlcJ1U06amZiksfYz/3aFGyIhWGHVyiZXtBAI=
 github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.7.0 h1:tfLQ34V6F7tVSwoTf/4lH5sE0o6eCJuNDTmH09nDpbc=
@@ -113,6 +112,8 @@ github.com/fatih/color v1.17.0 h1:GlRw1BRJxkpqUCBKzKOw098ed57fEsKeNjpTe3cSjK4=
 github.com/fatih/color v1.17.0/go.mod h1:YZ7TlrGPkiz6ku9fK3TLD/pl3CpsiFyu8N92HLgmosI=
 github.com/felixge/httpsnoop v1.0.4 h1:NFTV2Zj1bL4mc9sqWACXbQFVBBg2W3GPvqp8/ESS2Wg=
 github.com/felixge/httpsnoop v1.0.4/go.mod h1:m8KPJKqk1gH5J9DgRY2ASl2lWCfGKXixSwevea8zH2U=
+github.com/fujiwara/ssm-lookup v0.1.1 h1:Cwx7Y6A0HbIKyAzS60DYcf/TZ5KZHY/vTlCtUoythfQ=
+github.com/fujiwara/ssm-lookup v0.1.1/go.mod h1:ssVwS1FrHAKouOMEmYC6j07XRKqBGdABRmv6gBKewVg=
 github.com/fujiwara/tfstate-lookup v1.3.2 h1:jfPPRecZ9yzPI0epCnK5UCxY3CQAAF0Iq4L3osJ3d58=
 github.com/fujiwara/tfstate-lookup v1.3.2/go.mod h1:qYLO+8Ane5hF54BdvLQTbXiHWviq3uGCuW6Lz3fcWCM=
 github.com/go-logr/logr v1.2.2/go.mod h1:jdQByPbusPIv2/zmleS9BjJVeZ6kBagPoEUsqbVz/1A=
@@ -200,8 +201,6 @@ github.com/jmespath/go-jmespath v0.4.0 h1:BEgLn5cpjn8UN1mAw4NjwDrS35OdebyEtFe+9Y
 github.com/jmespath/go-jmespath v0.4.0/go.mod h1:T8mJZnbsbmF+m6zOOFylbeCJqk5+pHWvzYPziyZiYoo=
 github.com/jmespath/go-jmespath/internal/testify v1.5.1 h1:shLQSRRSCCPj3f2gpwzGwWFoC7ycTf1rcQZHOlsJ6N8=
 github.com/jmespath/go-jmespath/internal/testify v1.5.1/go.mod h1:L3OGu8Wl2/fWfCI6z80xFu9LTZmf1ZRjMHUOPmWr69U=
-github.com/kayac/ecspresso v1.99.3 h1:vxRLEjRmrkC71C6yP6DgmkJbw4hOvLpOJ+ETX6/1Fx0=
-github.com/kayac/ecspresso v1.99.3/go.mod h1:nmEy38MkGe3oEZwpT/t9bDhqPjkSOJMk9RTgXGW1r7o=
 github.com/kayac/go-config v0.7.0 h1:BeONaFFq/ILFiEzkCMpKarsjcc3YBgJ7QKg39hXU+nk=
 github.com/kayac/go-config v0.7.0/go.mod h1:Nfkw4LZOh/7HGepftBvD2lKEpPyl1Vp89yA7gDJS5r0=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
