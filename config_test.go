@@ -214,6 +214,8 @@ func TestCronValidate(t *testing.T) {
 		t.Errorf("error should be occurred, but nil")
 	}
 
+	// XXX: Handling or testing errors within the error message string is not a good approach,
+	//      but we leave it as it is now.
 	e := "schedule expression validation errors:\n" +
 		"\trule \"rule-3\": invalid expression: \"invalid(0 0 * * *)\"\n" +
 		"\trule \"rule-4\": either day-of-month or day-of-week must be '?'\n" +

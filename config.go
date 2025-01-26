@@ -61,6 +61,7 @@ func (c *Config) setupPlugins(ctx context.Context) error {
 }
 
 func (c *Config) cronValidate() error {
+	// XXX: I'd like to use multiple errors here and format the error messages at the very end.
 	var errMsgs []string
 	for _, r := range c.Rules {
 		err := validateCronExpression(r.ScheduleExpression)
