@@ -46,6 +46,10 @@ func TestLoadConfig(t *testing.T) {
 							AssignPublicIP: "ENABLED",
 						},
 					},
+					TaskOverride: &TaskOverride{
+						Cpu: "4096",
+						Memory: "16384",
+					},
 					ContainerOverrides: []*ContainerOverride{
 						{
 							Name: "container1",

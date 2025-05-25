@@ -34,6 +34,7 @@ type Target struct {
 	TargetID                 string                          `yaml:"targetId,omitempty" json:"targetId,omitempty"`
 	TaskDefinition           string                          `yaml:"taskDefinition" json:"taskDefinition"`
 	TaskCount                int32                           `yaml:"taskCount,omitempty" json:"taskCount,omitempty"`
+	TaskOverride             *TaskOverride                   `yaml:"taskOverride,omitempty" json:"taskOverride,omitempty"`
 	ContainerOverrides       []*ContainerOverride            `yaml:"containerOverrides,omitempty" json:"containerOverrides,omitempty"`
 	Role                     string                          `yaml:"role,omitempty" json:"role,omitempty"`
 	Group                    string                          `yaml:"group,omitempty" json:"group,omitempty"`
@@ -50,6 +51,15 @@ type CapacityProviderStrategyItem struct {
 	CapacityProvider string `yaml:"capacityProvider" json:"capacityProvider"`
 	Base             int32  `yaml:"base" json:"base"`
 	Weight           int32  `yaml:"weight" json:"weight"`
+}
+
+// NOTE: ContainerOverrides should conceptually be inside TaskOverride (cf. https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_TaskOverride.html).
+// For backward-compatibility, we keep ContainerOverrides and TaskOverride
+// as separate fields and merge them into a single struct at apply time.
+// Only Cpu and Memory fields are supported yet.
+type TaskOverride struct {
+	Cpu                string               `yaml:"cpu,omitempty" json:"cpu,omitempty"`
+	Memory             string               `yaml:"memory,omitempty" json:"memory,omitempty"`
 }
 
 // ContainerOverride overrides container
