@@ -547,6 +547,15 @@ func (r *Rule) Run(ctx context.Context, awsConf aws.Config, noWait bool) error {
 		})
 	}
 
+	var taskOverride ecsTypes.TaskOverride
+	if r.TaskOverride != nil {
+		taskOverride = ecsTypes.TaskOverride{
+			Cpu:    aws.String(r.TaskOverride.Cpu),
+			Memory: aws.String(r.TaskOverride.Memory),
+		}
+	}
+	taskOverride.ContainerOverrides = containerOverrides
+
 	var networkConfiguration *ecsTypes.NetworkConfiguration
 	if r.NetworkConfiguration != nil {
 		networkConfiguration = r.NetworkConfiguration.inputParameters()
@@ -558,11 +567,9 @@ func (r *Rule) Run(ctx context.Context, awsConf aws.Config, noWait bool) error {
 
 	out, err := svc.RunTask(ctx,
 		&ecs.RunTaskInput{
-			Cluster:        aws.String(r.Cluster),
-			TaskDefinition: aws.String(r.taskDefinitionArn(r)),
-			Overrides: &ecsTypes.TaskOverride{
-				ContainerOverrides: containerOverrides,
-			},
+			Cluster:              aws.String(r.Cluster),
+			TaskDefinition:       aws.String(r.taskDefinitionArn(r)),
+			Overrides:            &taskOverride,
 			Count:                aws.Int32(r.taskCount()),
 			LaunchType:           ecsTypes.LaunchType(r.Target.LaunchType),
 			NetworkConfiguration: networkConfiguration,
