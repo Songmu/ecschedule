@@ -58,8 +58,8 @@ type CapacityProviderStrategyItem struct {
 // as separate fields and merge them into a single struct at apply time.
 // Only Cpu and Memory fields are supported yet.
 type TaskOverride struct {
-	Cpu    string `yaml:"cpu,omitempty" json:"cpu,omitempty"`
-	Memory string `yaml:"memory,omitempty" json:"memory,omitempty"`
+	Cpu    *string `yaml:"cpu,omitempty" json:"cpu,omitempty"`
+	Memory *string `yaml:"memory,omitempty" json:"memory,omitempty"`
 }
 
 // ContainerOverride overrides container
@@ -329,8 +329,8 @@ func (r *Rule) TagResourceInput() *cloudwatchevents.TagResourceInput {
 }
 
 type taskOverrideJSON struct {
-	Cpu                string                   `json:"cpu,omitempty"`
-	Memory             string                   `json:"memory,omitempty"`
+	Cpu                *string                  `json:"cpu,omitempty"`
+	Memory             *string                  `json:"memory,omitempty"`
 	ContainerOverrides []*containerOverrideJSON `json:"containerOverrides"`
 }
 
@@ -353,9 +353,9 @@ func (r *Rule) target() *cweTypes.Target {
 		return nil
 	}
 	toj := &taskOverrideJSON{}
-	if r.TaskOverride != nil {
-		toj.Cpu = r.TaskOverride.Cpu
-		toj.Memory = r.TaskOverride.Memory
+	if to := r.TaskOverride; to != nil {
+		toj.Cpu = to.Cpu
+		toj.Memory = to.Memory
 	}
 	for _, co := range r.ContainerOverrides {
 		var kvPairs []*kvPair
@@ -548,11 +548,9 @@ func (r *Rule) Run(ctx context.Context, awsConf aws.Config, noWait bool) error {
 	}
 
 	var taskOverride ecsTypes.TaskOverride
-	if r.TaskOverride != nil {
-		taskOverride = ecsTypes.TaskOverride{
-			Cpu:    aws.String(r.TaskOverride.Cpu),
-			Memory: aws.String(r.TaskOverride.Memory),
-		}
+	if to := r.TaskOverride; to != nil {
+		taskOverride.Cpu = to.Cpu
+		taskOverride.Memory = to.Memory
 	}
 	taskOverride.ContainerOverrides = containerOverrides
 

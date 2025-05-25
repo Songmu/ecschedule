@@ -47,8 +47,8 @@ func TestLoadConfig(t *testing.T) {
 						},
 					},
 					TaskOverride: &TaskOverride{
-						Cpu: "4096",
-						Memory: "16384",
+						Cpu:    aws.String("4096"),
+						Memory: aws.String("16384"),
 					},
 					ContainerOverrides: []*ContainerOverride{
 						{

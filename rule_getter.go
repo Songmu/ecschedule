@@ -89,10 +89,10 @@ func (rg *ruleGetter) getRule(ctx context.Context, r *cweTypes.Rule) (*Rule, err
 				return nil, err
 			}
 			if taskOv.Cpu != nil {
-				target.TaskOverride.Cpu = *taskOv.Cpu
+				target.TaskOverride.Cpu = taskOv.Cpu
 			}
 			if taskOv.Memory != nil {
-				target.TaskOverride.Memory = *taskOv.Memory
+				target.TaskOverride.Memory = taskOv.Memory
 			}
 			var contOverrides []*ContainerOverride
 			for _, co := range taskOv.ContainerOverrides {
