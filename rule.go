@@ -58,8 +58,8 @@ type CapacityProviderStrategyItem struct {
 // as separate fields and merge them into a single struct at apply time.
 // Only Cpu and Memory fields are supported yet.
 type TaskOverride struct {
-	Cpu                string               `yaml:"cpu,omitempty" json:"cpu,omitempty"`
-	Memory             string               `yaml:"memory,omitempty" json:"memory,omitempty"`
+	Cpu    string `yaml:"cpu,omitempty" json:"cpu,omitempty"`
+	Memory string `yaml:"memory,omitempty" json:"memory,omitempty"`
 }
 
 // ContainerOverride overrides container
@@ -328,7 +328,9 @@ func (r *Rule) TagResourceInput() *cloudwatchevents.TagResourceInput {
 	}
 }
 
-type containerOverridesJSON struct {
+type taskOverrideJSON struct {
+	Cpu                string                   `json:"cpu,omitempty"`
+	Memory             string                   `json:"memory,omitempty"`
 	ContainerOverrides []*containerOverrideJSON `json:"containerOverrides"`
 }
 
@@ -350,7 +352,11 @@ func (r *Rule) target() *cweTypes.Target {
 	if r.Target == nil {
 		return nil
 	}
-	coj := &containerOverridesJSON{}
+	toj := &taskOverrideJSON{}
+	if r.TaskOverride != nil {
+		toj.Cpu = r.TaskOverride.Cpu
+		toj.Memory = r.TaskOverride.Memory
+	}
 	for _, co := range r.ContainerOverrides {
 		var kvPairs []*kvPair
 		for k, v := range co.Environment {
@@ -359,7 +365,7 @@ func (r *Rule) target() *cweTypes.Target {
 				Value: v,
 			})
 		}
-		coj.ContainerOverrides = append(coj.ContainerOverrides, &containerOverrideJSON{
+		toj.ContainerOverrides = append(toj.ContainerOverrides, &containerOverrideJSON{
 			Name:              co.Name,
 			Command:           co.Command,
 			Environment:       kvPairs,
@@ -368,7 +374,8 @@ func (r *Rule) target() *cweTypes.Target {
 			MemoryReservation: co.MemoryReservation,
 		})
 	}
-	bs, _ := json.Marshal(coj)
+	bs, _ := json.Marshal(toj)
+
 	return &cweTypes.Target{
 		Id:               aws.String(r.targetID(r)),
 		Arn:              aws.String(r.targetARN(r)),
