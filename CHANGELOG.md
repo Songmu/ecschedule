@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.13.1](https://github.com/Songmu/ecschedule/compare/v0.13.0...v0.13.1) - 2025-06-04
+- add retry option for better reliability by @bary822 in https://github.com/Songmu/ecschedule/pull/126
+- build(deps): bump golang.org/x/net from 0.34.0 to 0.38.0 by @dependabot in https://github.com/Songmu/ecschedule/pull/124
+- build(deps): bump github.com/golang-jwt/jwt/v5 from 5.2.1 to 5.2.2 by @dependabot in https://github.com/Songmu/ecschedule/pull/121
+- build(deps): bump github.com/golang-jwt/jwt/v4 from 4.5.1 to 4.5.2 by @dependabot in https://github.com/Songmu/ecschedule/pull/122
+
 ## [v0.13.0](https://github.com/Songmu/ecschedule/compare/v0.12.0...v0.13.0) - 2025-01-26
 - build(deps): bump github.com/golang-jwt/jwt/v4 from 4.5.0 to 4.5.1 by @dependabot in https://github.com/Songmu/ecschedule/pull/110
 - build(deps): bump golang.org/x/crypto from 0.24.0 to 0.31.0 by @dependabot in https://github.com/Songmu/ecschedule/pull/113
