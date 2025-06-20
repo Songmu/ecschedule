@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.14.0](https://github.com/Songmu/ecschedule/compare/v0.13.1...v0.14.0) - 2025-06-20
+- Add config of `trackingId` by @tomitamasa in https://github.com/Songmu/ecschedule/pull/93
+- update Go and dependencies to latest by @Songmu in https://github.com/Songmu/ecschedule/pull/129
+- build(deps): bump codecov/codecov-action from 1 to 5 by @dependabot in https://github.com/Songmu/ecschedule/pull/131
+- build(deps): bump actions/setup-go from 4 to 5 by @dependabot in https://github.com/Songmu/ecschedule/pull/130
+
 ## [v0.13.1](https://github.com/Songmu/ecschedule/compare/v0.13.0...v0.13.1) - 2025-06-04
 - add retry option for better reliability by @bary822 in https://github.com/Songmu/ecschedule/pull/126
 - build(deps): bump golang.org/x/net from 0.34.0 to 0.38.0 by @dependabot in https://github.com/Songmu/ecschedule/pull/124
