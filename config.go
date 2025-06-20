@@ -25,9 +25,10 @@ const (
 
 // BaseConfig baseconfig
 type BaseConfig struct {
-	Region    string `yaml:"region" json:"region"`
-	Cluster   string `yaml:"cluster" json:"cluster"`
-	AccountID string `yaml:"-" json:"-"`
+	Region     string `yaml:"region" json:"region"`
+	Cluster    string `yaml:"cluster" json:"cluster"`
+	AccountID  string `yaml:"-" json:"-"`
+	TrackingID string `yaml:"trackingId,omitempty" json:"trackingId,omitempty"`
 }
 
 // Config config
@@ -114,6 +115,9 @@ func LoadConfig(ctx context.Context, r io.Reader, accountID string, confPath str
 		return nil, err
 	}
 	c.AccountID = accountID
+	if c.TrackingID == "" {
+		c.TrackingID = c.Cluster
+	}
 	if err := c.setupPlugins(ctx); err != nil {
 		return nil, err
 	}

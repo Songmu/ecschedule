@@ -284,6 +284,9 @@ func (r *Rule) mergeBaseConfig(bc *BaseConfig, role string) {
 	if r.AccountID == "" {
 		r.AccountID = bc.AccountID
 	}
+	if r.TrackingID == "" {
+		r.TrackingID = bc.TrackingID
+	}
 }
 
 // PutRuleInput puts rule input
@@ -312,7 +315,7 @@ func (r *Rule) TagResourceInput() *cloudwatchevents.TagResourceInput {
 		Tags: []cweTypes.Tag{
 			{
 				Key:   aws.String("ecschedule:tracking-id"),
-				Value: aws.String(r.Cluster),
+				Value: aws.String(r.TrackingID),
 			},
 		},
 	}

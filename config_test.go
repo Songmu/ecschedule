@@ -15,9 +15,10 @@ func TestLoadConfig(t *testing.T) {
 	expect := &Config{
 		Role: "ecsEventsRole",
 		BaseConfig: &BaseConfig{
-			Region:    "us-east-1",
-			Cluster:   "api",
-			AccountID: "334",
+			Region:     "us-east-1",
+			Cluster:    "api",
+			AccountID:  "334",
+			TrackingID: "api",
 		},
 		Rules: []*Rule{
 			{
@@ -65,9 +66,10 @@ func TestLoadConfig(t *testing.T) {
 					Role:          "ecsEventsRole",
 				},
 				BaseConfig: &BaseConfig{
-					Region:    "us-east-1",
-					Cluster:   "api",
-					AccountID: "334",
+					Region:     "us-east-1",
+					Cluster:    "api",
+					AccountID:  "334",
+					TrackingID: "api",
 				},
 			},
 		},

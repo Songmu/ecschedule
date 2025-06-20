@@ -25,6 +25,7 @@ The ecschedule manages ECS Schedule tasks using a configuration file (YAML, JSON
 region: us-east-1
 cluster: clusterName
 rules:
+trackingId: trackingId1
 - name: taskName1
   description: task 1
   scheduleExpression: cron(30 15 ? * * *)
@@ -118,6 +119,9 @@ To see which rules would be deleted without actually removing them, combine with
 ```console
 % ecschedule -conf ecschedule.yaml apply -all -prune -dry-run
 ```
+
+A `trackingId` is an optional key in a configuration file. If the `trackingId` is not explicitly specified, the cluster name will be used as the `trackingId` by default.
+When you explicitly specify the `trackingId`, it enables you to detect rule deletions for each file when executing multiple configuration files at different times.
 
 ## Functions
 
