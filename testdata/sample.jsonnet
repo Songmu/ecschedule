@@ -21,6 +21,10 @@ local envs = import 'envs.libsonnet';
         }
       ],
       "network_configuration": envs.network_configuration,
+      "taskOverride": {
+        "cpu": "4096",
+        "memory": "16384"
+      },
       "containerOverrides": [
         {
           "name": "container1",

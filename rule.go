@@ -34,6 +34,7 @@ type Target struct {
 	TargetID                 string                          `yaml:"targetId,omitempty" json:"targetId,omitempty"`
 	TaskDefinition           string                          `yaml:"taskDefinition" json:"taskDefinition"`
 	TaskCount                int32                           `yaml:"taskCount,omitempty" json:"taskCount,omitempty"`
+	TaskOverride             *TaskOverride                   `yaml:"taskOverride,omitempty" json:"taskOverride,omitempty"`
 	ContainerOverrides       []*ContainerOverride            `yaml:"containerOverrides,omitempty" json:"containerOverrides,omitempty"`
 	Role                     string                          `yaml:"role,omitempty" json:"role,omitempty"`
 	Group                    string                          `yaml:"group,omitempty" json:"group,omitempty"`
@@ -50,6 +51,14 @@ type CapacityProviderStrategyItem struct {
 	CapacityProvider string `yaml:"capacityProvider" json:"capacityProvider"`
 	Base             int32  `yaml:"base" json:"base"`
 	Weight           int32  `yaml:"weight" json:"weight"`
+}
+
+// NOTE: ContainerOverrides should conceptually be inside TaskOverride (cf. https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_TaskOverride.html).
+// However, for backward-compatibility, we keep ContainerOverrides and TaskOverride as separate fields and merge them into a single struct in `apply` and `run`.
+// That's why containerOverrides field is not inside TaskOverride.
+type TaskOverride struct {
+	Cpu    *string `yaml:"cpu,omitempty" json:"cpu,omitempty"`
+	Memory *string `yaml:"memory,omitempty" json:"memory,omitempty"`
 }
 
 // ContainerOverride overrides container
@@ -321,7 +330,9 @@ func (r *Rule) TagResourceInput() *cloudwatchevents.TagResourceInput {
 	}
 }
 
-type containerOverridesJSON struct {
+type taskOverrideJSON struct {
+	Cpu                *string                  `json:"cpu,omitempty"`
+	Memory             *string                  `json:"memory,omitempty"`
 	ContainerOverrides []*containerOverrideJSON `json:"containerOverrides"`
 }
 
@@ -343,7 +354,11 @@ func (r *Rule) target() *cweTypes.Target {
 	if r.Target == nil {
 		return nil
 	}
-	coj := &containerOverridesJSON{}
+	toj := &taskOverrideJSON{}
+	if to := r.TaskOverride; to != nil {
+		toj.Cpu = to.Cpu
+		toj.Memory = to.Memory
+	}
 	for _, co := range r.ContainerOverrides {
 		var kvPairs []*kvPair
 		for k, v := range co.Environment {
@@ -352,7 +367,7 @@ func (r *Rule) target() *cweTypes.Target {
 				Value: v,
 			})
 		}
-		coj.ContainerOverrides = append(coj.ContainerOverrides, &containerOverrideJSON{
+		toj.ContainerOverrides = append(toj.ContainerOverrides, &containerOverrideJSON{
 			Name:              co.Name,
 			Command:           co.Command,
 			Environment:       kvPairs,
@@ -361,7 +376,8 @@ func (r *Rule) target() *cweTypes.Target {
 			MemoryReservation: co.MemoryReservation,
 		})
 	}
-	bs, _ := json.Marshal(coj)
+	bs, _ := json.Marshal(toj)
+
 	return &cweTypes.Target{
 		Id:               aws.String(r.targetID(r)),
 		Arn:              aws.String(r.targetARN(r)),
@@ -533,6 +549,13 @@ func (r *Rule) Run(ctx context.Context, awsConf aws.Config, noWait bool) error {
 		})
 	}
 
+	var taskOverride ecsTypes.TaskOverride
+	if to := r.TaskOverride; to != nil {
+		taskOverride.Cpu = to.Cpu
+		taskOverride.Memory = to.Memory
+	}
+	taskOverride.ContainerOverrides = containerOverrides
+
 	var networkConfiguration *ecsTypes.NetworkConfiguration
 	if r.NetworkConfiguration != nil {
 		networkConfiguration = r.NetworkConfiguration.inputParameters()
@@ -544,11 +567,9 @@ func (r *Rule) Run(ctx context.Context, awsConf aws.Config, noWait bool) error {
 
 	out, err := svc.RunTask(ctx,
 		&ecs.RunTaskInput{
-			Cluster:        aws.String(r.Cluster),
-			TaskDefinition: aws.String(r.taskDefinitionArn(r)),
-			Overrides: &ecsTypes.TaskOverride{
-				ContainerOverrides: containerOverrides,
-			},
+			Cluster:              aws.String(r.Cluster),
+			TaskDefinition:       aws.String(r.taskDefinitionArn(r)),
+			Overrides:            &taskOverride,
 			Count:                aws.Int32(r.taskCount()),
 			LaunchType:           ecsTypes.LaunchType(r.Target.LaunchType),
 			NetworkConfiguration: networkConfiguration,
