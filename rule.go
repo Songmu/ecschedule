@@ -54,9 +54,8 @@ type CapacityProviderStrategyItem struct {
 }
 
 // NOTE: ContainerOverrides should conceptually be inside TaskOverride (cf. https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_TaskOverride.html).
-// For backward-compatibility, we keep ContainerOverrides and TaskOverride
-// as separate fields and merge them into a single struct at apply time.
-// Only Cpu and Memory fields are supported yet.
+// However, for backward-compatibility, we keep ContainerOverrides and TaskOverride as separate fields and merge them into a single struct in `apply` and `run`.
+// That's why containerOverrides field is not inside TaskOverride.
 type TaskOverride struct {
 	Cpu    *string `yaml:"cpu,omitempty" json:"cpu,omitempty"`
 	Memory *string `yaml:"memory,omitempty" json:"memory,omitempty"`
