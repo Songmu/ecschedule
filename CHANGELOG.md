@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.15.0](https://github.com/Songmu/ecschedule/compare/v0.14.0...v0.15.0) - 2025-06-30
+- add taskOverride property (only supports `cpu` and `memory` field) by @menma-at-here in https://github.com/Songmu/ecschedule/pull/133
+- build(deps): bump github.com/aws/aws-sdk-go-v2/service/ecs from 1.57.6 to 1.58.1 by @dependabot in https://github.com/Songmu/ecschedule/pull/134
+- update deps by @Songmu in https://github.com/Songmu/ecschedule/pull/136
+
 ## [v0.14.0](https://github.com/Songmu/ecschedule/compare/v0.13.1...v0.14.0) - 2025-06-20
 - Add config of `trackingId` by @tomitamasa in https://github.com/Songmu/ecschedule/pull/93
 - update Go and dependencies to latest by @Songmu in https://github.com/Songmu/ecschedule/pull/129
