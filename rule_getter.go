@@ -82,11 +82,17 @@ func (rg *ruleGetter) getRule(ctx context.Context, r *cweTypes.Rule) (*Rule, err
 			}
 		}
 
+		// For backward-compatibility, ContainerOverrides and TaskOverride are held as separate fields.
 		taskOv := &ecsTypes.TaskOverride{}
 		if t.Input != nil {
 			if err := json.Unmarshal([]byte(*t.Input), taskOv); err != nil {
 				return nil, err
 			}
+			taskOverride := &TaskOverride{
+				Cpu:    taskOv.Cpu,
+				Memory: taskOv.Memory,
+			}
+			target.TaskOverride = taskOverride
 			var contOverrides []*ContainerOverride
 			for _, co := range taskOv.ContainerOverrides {
 				var cmd []string

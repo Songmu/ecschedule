@@ -47,6 +47,10 @@ func TestLoadConfig(t *testing.T) {
 							AssignPublicIP: "ENABLED",
 						},
 					},
+					TaskOverride: &TaskOverride{
+						Cpu:    aws.String("4096"),
+						Memory: aws.String("16384"),
+					},
 					ContainerOverrides: []*ContainerOverride{
 						{
 							Name: "container1",
