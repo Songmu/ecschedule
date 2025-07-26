@@ -49,6 +49,7 @@ func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 		AccountID: accountID,
 		AwsConf:   awsConf,
 	}
+	ctx = setApp(ctx, a)
 	if *conf != "" {
 		f, err := os.Open(*conf)
 		if err != nil {
