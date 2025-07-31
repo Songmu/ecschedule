@@ -126,10 +126,14 @@ func (rg *ruleGetter) getRule(ctx context.Context, r *cweTypes.Rule) (*Rule, err
 	if r.Description != nil {
 		desc = *r.Description
 	}
+	var expr string
+	if r.ScheduleExpression != nil {
+		expr = *r.ScheduleExpression
+	}
 	ru := &Rule{
 		Name:               *r.Name,
 		Description:        desc,
-		ScheduleExpression: *r.ScheduleExpression,
+		ScheduleExpression: expr,
 		Disabled:           string(r.State) == "DISABLED",
 	}
 	switch len(targets) {
