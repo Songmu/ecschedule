@@ -6,7 +6,7 @@ toolchain go1.24.4
 
 require (
 	github.com/fujiwara/ssm-lookup v0.1.1
-	github.com/fujiwara/tfstate-lookup v1.6.0
+	github.com/fujiwara/tfstate-lookup v1.7.0
 	github.com/goccy/go-yaml v1.18.0
 	github.com/google/go-jsonnet v0.21.0
 	github.com/kayac/go-config v0.7.0
@@ -23,7 +23,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.18.0 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.10.1 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.11.1 // indirect
-	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage v1.8.0 // indirect
+	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage v1.8.1 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.6.1 // indirect
 	github.com/Azure/go-autorest/autorest/mocks v0.4.2 // indirect
 	github.com/AzureAD/microsoft-authentication-library-for-go v1.4.2 // indirect
