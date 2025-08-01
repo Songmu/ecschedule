@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.15.1](https://github.com/Songmu/ecschedule/compare/v0.15.0...v0.15.1) - 2025-07-31
+- build(deps): bump github.com/aws/aws-sdk-go-v2/service/cloudwatchevents from 1.28.7 to 1.28.8 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/140
+- build(deps): bump github.com/aws/aws-sdk-go-v2 from 1.36.5 to 1.36.6 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/141
+- build(deps): bump github.com/fujiwara/tfstate-lookup from 1.6.0 to 1.7.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/139
+- build(deps): bump github.com/aws/aws-sdk-go-v2/config from 1.29.17 to 1.29.18 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/138
+- build(deps): bump github.com/aws/aws-sdk-go-v2/service/ecs from 1.58.1 to 1.60.1 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/142
+- fix: set app context before loading config to prevent nil pointer dereference by @jumpeiMano in https://github.com/Songmu/ecschedule/pull/137
+- fix: handle nil ScheduleExpression to prevent panic by @YOwatari in https://github.com/Songmu/ecschedule/pull/143
+
 ## [v0.15.0](https://github.com/Songmu/ecschedule/compare/v0.14.0...v0.15.0) - 2025-06-30
 - add taskOverride property (only supports `cpu` and `memory` field) by @menma-at-here in https://github.com/Songmu/ecschedule/pull/133
 - build(deps): bump github.com/aws/aws-sdk-go-v2/service/ecs from 1.57.6 to 1.58.1 by @dependabot in https://github.com/Songmu/ecschedule/pull/134
