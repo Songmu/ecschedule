@@ -107,8 +107,8 @@ github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.1 h1:ky79ysLMx
 github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.1/go.mod h1:+2MmkvFvPYM1vsozBWduoLJUi5maxFk5B7KJFECujhY=
 github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.18.17 h1:qcLWgdhq45sDM9na4cvXax9dyLitn8EYBRl8Ak4XtG4=
 github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.18.17/go.mod h1:M+jkjBFZ2J6DJrjMv2+vkBbuht6kxJYtJiwoVgX4p4U=
-github.com/aws/aws-sdk-go-v2/service/resourcegroups v1.29.3 h1:ydDDSNE36VbioP+xbfab1nYP5SDTOR5V8ZcUvZBImr4=
-github.com/aws/aws-sdk-go-v2/service/resourcegroups v1.29.3/go.mod h1:pXO3jDiaYQ49dzcDP/Mtz1VoTLEtqjnuINWeJXv+ktk=
+github.com/aws/aws-sdk-go-v2/service/resourcegroups v1.30.1 h1:KhIp2JHWuSUDXyJK7PDfAr30cko1YKDhbE6O1byejkE=
+github.com/aws/aws-sdk-go-v2/service/resourcegroups v1.30.1/go.mod h1:2zyaohdBXZBnLMMXhx0e3cd63JycCSl+X9YFNHP7gtY=
 github.com/aws/aws-sdk-go-v2/service/s3 v1.82.0 h1:JubM8CGDDFaAOmBrd8CRYNr49ZNgEAiLwGwgNMdS0nw=
 github.com/aws/aws-sdk-go-v2/service/s3 v1.82.0/go.mod h1:kUklwasNoCn5YpyAqC/97r6dzTA1SRKJfKq16SXeoDU=
 github.com/aws/aws-sdk-go-v2/service/ssm v1.59.3 h1:LU+VzAtElJqi84EBkMSGq6hhIMO3fuCDKRItQpaHBlw=
