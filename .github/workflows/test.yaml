@@ -24,7 +24,10 @@ jobs:
       with:
         go-version-file: go.mod
     - name: test
-      run: go test -coverprofile coverage.out -covermode atomic ./...
+      run: |
+        # avoid 'no such tool "covdata"' error
+        go env -w GOTOOLCHAIN=go1.25.0+auto
+        go test -coverprofile coverage.out -covermode atomic ./...
       env:
         GITHUB_TOKEN: ${{ secrets.github_token }}
     - name: Send coverage
