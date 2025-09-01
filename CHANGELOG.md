@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.15.2](https://github.com/Songmu/ecschedule/compare/v0.15.1...v0.15.2) - 2025-09-01
+- build(deps): bump actions/checkout from 4 to 5 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/157
+- build(deps): bump github.com/aws/aws-sdk-go-v2/service/sts from 1.35.1 to 1.38.2 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/163
+- build(deps): bump github.com/aws/aws-sdk-go-v2/service/cloudwatchevents from 1.28.8 to 1.32.2 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/166
+- build(deps): bump github.com/aws/aws-sdk-go-v2/config from 1.30.2 to 1.31.6 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/164
+- build(deps): bump github.com/aws/aws-sdk-go-v2/service/resourcegroups from 1.29.3 to 1.33.2 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/165
+- update deps by @Songmu in https://github.com/Songmu/ecschedule/pull/169
+
 ## [v0.15.1](https://github.com/Songmu/ecschedule/compare/v0.15.0...v0.15.1) - 2025-07-31
 - build(deps): bump github.com/aws/aws-sdk-go-v2/service/cloudwatchevents from 1.28.7 to 1.28.8 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/140
 - build(deps): bump github.com/aws/aws-sdk-go-v2 from 1.36.5 to 1.36.6 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/141
