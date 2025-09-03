@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.15.3](https://github.com/Songmu/ecschedule/compare/v0.15.2...v0.15.3) - 2025-09-03
+- Fix empty TaskOverride appearing in diffs by @lamanotrama in https://github.com/Songmu/ecschedule/pull/170
+
 ## [v0.15.2](https://github.com/Songmu/ecschedule/compare/v0.15.1...v0.15.2) - 2025-09-01
 - build(deps): bump actions/checkout from 4 to 5 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/157
 - build(deps): bump github.com/aws/aws-sdk-go-v2/service/sts from 1.35.1 to 1.38.2 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/163
