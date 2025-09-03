@@ -88,11 +88,13 @@ func (rg *ruleGetter) getRule(ctx context.Context, r *cweTypes.Rule) (*Rule, err
 			if err := json.Unmarshal([]byte(*t.Input), taskOv); err != nil {
 				return nil, err
 			}
-			taskOverride := &TaskOverride{
-				Cpu:    taskOv.Cpu,
-				Memory: taskOv.Memory,
+			// Only set TaskOverride if CPU or Memory is specified to avoid empty diffs
+			if taskOv.Cpu != nil || taskOv.Memory != nil {
+				target.TaskOverride = &TaskOverride{
+					Cpu:    taskOv.Cpu,
+					Memory: taskOv.Memory,
+				}
 			}
-			target.TaskOverride = taskOverride
 			var contOverrides []*ContainerOverride
 			for _, co := range taskOv.ContainerOverrides {
 				var cmd []string
