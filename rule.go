@@ -766,11 +766,14 @@ func selectDiffFormat(unified bool) diffFormat {
 	return diffFormatPrettyColored
 }
 
-// setupColor configures color output based on flag and environment variable
-// Priority: --no-color flag > ECSCHEDULE_COLOR env var > default (true)
+// setupColor configures color output based on flag and environment variables
+// Priority: --no-color flag > NO_COLOR env var > ECSCHEDULE_COLOR env var > default (true)
 func setupColor(noColor bool) {
 	colorEnabled := true
 	if noColor {
+		colorEnabled = false
+	} else if _, ok := os.LookupEnv("NO_COLOR"); ok {
+		// NO_COLOR is set (value doesn't matter)
 		colorEnabled = false
 	} else if envColor := os.Getenv("ECSCHEDULE_COLOR"); envColor != "" {
 		colorEnabled = envColor != "false" && envColor != "0"

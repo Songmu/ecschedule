@@ -152,15 +152,19 @@ The `apply` command includes progress logs even with `-u` flag.
 
 ### Color control
 
-Colored output can be disabled with `--no-color` flag or `ECSCHEDULE_COLOR` environment variable:
+Colored output can be disabled with `--no-color` flag or environment variables:
 
 ```console
 % ecschedule -conf ecschedule.yaml diff -all -u --no-color
+% NO_COLOR=1 ecschedule -conf ecschedule.yaml diff -all -u
 % ECSCHEDULE_COLOR=false ecschedule -conf ecschedule.yaml apply -all -dry-run -u
 ```
 
-Environment variable:
+Environment variables:
+- `NO_COLOR`: If set (value doesn't matter), disable colored output. Follows the [NO_COLOR standard](https://no-color.org/).
 - `ECSCHEDULE_COLOR`: Set to `false` or `0` to disable colored output (unified diff format only). Default is `true`.
+
+Priority: `--no-color` flag > `NO_COLOR` > `ECSCHEDULE_COLOR` > default (colored).
 
 **Note**: The `--no-color` flag is a subcommand-level flag and only affects unified diff format. The default pretty format always displays with colors.
 
