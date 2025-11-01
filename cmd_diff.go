@@ -20,12 +20,13 @@ var cmdDiff = &runnerImpl{
 		fs := flag.NewFlagSet("ecschedule diff", flag.ContinueOnError)
 		fs.SetOutput(errStream)
 		var (
-			conf    = fs.String("conf", "", "configuration")
-			rule    = fs.String("rule", "", "rule")
-			all     = fs.Bool("all", false, "diff all rules")
-			unified = fs.Bool("u", false, "output in unified diff format (colored, similar to git diff)")
-			noColor = fs.Bool("no-color", false, "disable colored output (Unified diff format only)")
-			prune   = fs.Bool("prune", false, "detect orphaned rules for deletion")
+			conf     = fs.String("conf", "", "configuration")
+			rule     = fs.String("rule", "", "rule")
+			all      = fs.Bool("all", false, "diff all rules")
+			unified  = fs.Bool("u", false, "output in unified diff format (colored, similar to git diff)")
+			noColor  = fs.Bool("no-color", false, "disable colored output (Unified diff format only)")
+			prune    = fs.Bool("prune", false, "detect orphaned rules for deletion")
+			validate = fs.Bool("validate", false, "perform validation (env, tfstate, ssm, task definition)")
 		)
 		if err := fs.Parse(argv); err != nil {
 			return err
@@ -66,12 +67,39 @@ var cmdDiff = &runnerImpl{
 		}
 
 		format := selectDiffFormat(*unified)
+		hasValidationError := false
 
 		for _, rule := range ruleNames {
 			ru := c.GetRuleByName(rule)
 			if ru == nil {
 				return fmt.Errorf("no rules found for %s", rule)
 			}
+
+			// Validation if -validate is specified
+			if *validate {
+				var validationErrors []string
+				if err := ru.validateEnv(); err != nil {
+					validationErrors = append(validationErrors, fmt.Sprintf("  env: %s", err))
+				}
+				if err := ru.validateTFstate(); err != nil {
+					validationErrors = append(validationErrors, fmt.Sprintf("  tfstate: %s", err))
+				}
+				if err := ru.validateSSM(); err != nil {
+					validationErrors = append(validationErrors, fmt.Sprintf("  ssm: %s", err))
+				}
+				if err := ru.validateTaskDefinition(ctx, a.AwsConf); err != nil {
+					validationErrors = append(validationErrors, fmt.Sprintf("  task definition: %s", err))
+				}
+
+				if len(validationErrors) > 0 {
+					log.Printf("❌ %q: validation failed", rule)
+					for _, verr := range validationErrors {
+						log.Println(verr)
+					}
+					hasValidationError = true
+				}
+			}
+
 			svc := cloudwatchevents.NewFromConfig(a.AwsConf, func(o *cloudwatchevents.Options) {
 				o.Region = c.Region
 			})
@@ -113,6 +141,10 @@ var cmdDiff = &runnerImpl{
 					log.Printf("🪓 orphaned rule will be deleted\n%s", diffOutput)
 				}
 			}
+		}
+
+		if hasValidationError {
+			return errors.New("validation failed for one or more rules")
 		}
 
 		return nil

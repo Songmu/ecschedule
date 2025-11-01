@@ -124,6 +124,18 @@ To see which rules would be deleted without actually removing them, you can use 
 A `trackingId` is an optional key in a configuration file. If the `trackingId` is not explicitly specified, the cluster name will be used as the `trackingId` by default.
 When you explicitly specify the `trackingId`, it enables you to detect rule deletions for each file when executing multiple configuration files at different times.
 
+### Validation
+
+The `apply` and `run` commands **always perform validation** (env, tfstate, ssm, task definition) before execution and cannot be disabled.
+
+The `diff` command **does not perform validation by default** for quick review. To enable validation (recommended for CI/CD pipelines), use the `-validate` flag:
+
+```console
+% ecschedule -conf ecschedule.yaml diff -all -prune -validate -u
+```
+
+This performs the same validation as `apply` and `run`, with a slight overhead, but ensures complete verification before applying changes.
+
 ## Log Format
 
 ### Unified diff format
