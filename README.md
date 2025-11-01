@@ -114,9 +114,10 @@ In version `v0.9.1` and earlier, when rules were renamed or deleted from the con
 % ecschedule -conf ecschedule.yaml apply -all -prune
 ```
 
-To see which rules would be deleted without actually removing them, combine with the `-dry-run` option.
+To see which rules would be deleted without actually removing them, you can use either `diff` or `apply` with `-dry-run` option:
 
 ```console
+% ecschedule -conf ecschedule.yaml diff -all -prune
 % ecschedule -conf ecschedule.yaml apply -all -prune -dry-run
 ```
 

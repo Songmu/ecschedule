@@ -10,6 +10,7 @@ import (
 	"os"
 
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatchevents"
+	"github.com/goccy/go-yaml"
 )
 
 var cmdDiff = &runnerImpl{
@@ -24,6 +25,7 @@ var cmdDiff = &runnerImpl{
 			all     = fs.Bool("all", false, "diff all rules")
 			unified = fs.Bool("u", false, "output in unified diff format (colored, similar to git diff)")
 			noColor = fs.Bool("no-color", false, "disable colored output (Unified diff format only)")
+			prune   = fs.Bool("prune", false, "detect orphaned rules for deletion")
 		)
 		if err := fs.Parse(argv); err != nil {
 			return err
@@ -33,6 +35,9 @@ var cmdDiff = &runnerImpl{
 
 		if !*all && *rule == "" {
 			return errors.New("-rule or -all option required")
+		}
+		if *prune && !*all {
+			return errors.New("-prune can only be used with -all flag")
 		}
 		a := getApp(ctx)
 		c := a.Config
@@ -86,6 +91,30 @@ var cmdDiff = &runnerImpl{
 				log.Printf("💡 diff of the rule %q\n%s", rule, diffOutput)
 			}
 		}
+
+		// Display orphaned rules if -prune is specified
+		if *prune {
+			orphanedRules, err := extractOrphanedRules(ctx, a.AwsConf, c.BaseConfig, ruleNames)
+			if err != nil {
+				return err
+			}
+
+			for _, rule := range orphanedRules {
+				remoteRuleYaml, err := yaml.Marshal(rule)
+				if err != nil {
+					return err
+				}
+
+				diffOutput := formatDiff(rule.Name, string(remoteRuleYaml), "", format)
+
+				if *unified {
+					fmt.Fprintln(errStream, diffOutput)
+				} else {
+					log.Printf("🪓 orphaned rule will be deleted\n%s", diffOutput)
+				}
+			}
+		}
+
 		return nil
 	},
 }
