@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"regexp"
 	"strings"
 
@@ -13,7 +14,11 @@ import (
 	cweTypes "github.com/aws/aws-sdk-go-v2/service/cloudwatchevents/types"
 	"github.com/aws/aws-sdk-go-v2/service/ecs"
 	ecsTypes "github.com/aws/aws-sdk-go-v2/service/ecs/types"
+	"github.com/fatih/color"
 	"github.com/goccy/go-yaml"
+	"github.com/hexops/gotextdiff"
+	"github.com/hexops/gotextdiff/myers"
+	"github.com/hexops/gotextdiff/span"
 	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
@@ -462,8 +467,13 @@ func (r *Rule) validateTaskDefinition(ctx context.Context, awsConf aws.Config) e
 	return nil
 }
 
-// Apply the rule
+// Apply the rule (maintained for backward compatibility)
 func (r *Rule) Apply(ctx context.Context, awsConf aws.Config, dryRun bool) error {
+	return r.applyInternal(ctx, awsConf, dryRun, diffFormatPrettyColored)
+}
+
+// applyInternal is the internal implementation with configurable diff format
+func (r *Rule) applyInternal(ctx context.Context, awsConf aws.Config, dryRun bool, format diffFormat) error {
 	if err := r.validateEnv(); err != nil {
 		return err
 	}
@@ -493,9 +503,10 @@ func (r *Rule) Apply(ctx context.Context, awsConf aws.Config, dryRun bool) error
 	if dryRun {
 		dryRunSuffix = " (dry-run)"
 	}
-	dmp := diffmatchpatch.New()
-	diffs := dmp.DiffMain(from, to, false)
-	log.Printf("💡 applying following changes%s\n%s", dryRunSuffix, dmp.DiffPrettyText(diffs))
+
+	diffOutput := formatDiff(r.Name, from, to, format)
+	log.Printf("💡 applying following changes%s\n%s", dryRunSuffix, diffOutput)
+
 	if dryRun {
 		return nil
 	}
@@ -587,8 +598,13 @@ func (r *Rule) Run(ctx context.Context, awsConf aws.Config, noWait bool) error {
 	return nil
 }
 
-// Delete the rule
+// Delete the rule (maintained for backward compatibility)
 func (r *Rule) Delete(ctx context.Context, awsConf aws.Config, dryRun bool) error {
+	return r.deleteInternal(ctx, awsConf, dryRun, diffFormatPrettyColored)
+}
+
+// deleteInternal is the internal implementation with configurable diff format
+func (r *Rule) deleteInternal(ctx context.Context, awsConf aws.Config, dryRun bool, format diffFormat) error {
 	svc := cloudwatchevents.NewFromConfig(awsConf, func(o *cloudwatchevents.Options) {
 		o.Region = r.Region
 	})
@@ -602,9 +618,8 @@ func (r *Rule) Delete(ctx context.Context, awsConf aws.Config, dryRun bool) erro
 		dryRunSuffix = " (dry-run)"
 	}
 
-	dmp := diffmatchpatch.New()
-	diffs := dmp.DiffMain(string(remoteRuleYaml), "", false)
-	log.Printf("🪓 deleting following rule%s\n%s", dryRunSuffix, dmp.DiffPrettyText(diffs))
+	diffOutput := formatDiff(r.Name, string(remoteRuleYaml), "", format)
+	log.Printf("🪓 deleting following rule%s\n%s", dryRunSuffix, diffOutput)
 
 	if dryRun {
 		return nil
@@ -676,4 +691,89 @@ func (r *Rule) diff(ctx context.Context, cw *cloudwatchevents.Client) (from, to 
 		}
 	}
 	return remoteRuleYaml, localRuleYaml, nil
+}
+
+// diffFormat represents the format of diff output
+type diffFormat int
+
+const (
+	diffFormatPrettyColored diffFormat = iota // Default (existing behavior)
+	diffFormatUnified                         // Unified format (color controlled by color.NoColor)
+)
+
+// formatDiff formats diff output in the specified format (without header for Unified)
+func formatDiff(ruleName, from, to string, format diffFormat) string {
+	if from == to {
+		return ""
+	}
+
+	switch format {
+	case diffFormatUnified:
+		var fromLabel, toLabel string
+		if from == "" {
+			fromLabel = "null"
+			toLabel = "b/" + ruleName
+		} else if to == "" {
+			fromLabel = "a/" + ruleName
+			toLabel = "null"
+		} else {
+			fromLabel = "a/" + ruleName
+			toLabel = "b/" + ruleName
+		}
+
+		edits := myers.ComputeEdits(span.URIFromPath(ruleName), from, to)
+		unified := fmt.Sprint(gotextdiff.ToUnified(fromLabel, toLabel, from, edits))
+		return colorizeUnifiedDiff(unified)
+
+	case diffFormatPrettyColored:
+		fallthrough
+	default:
+		dmp := diffmatchpatch.New()
+		diffs := dmp.DiffMain(from, to, false)
+		return dmp.DiffPrettyText(diffs)
+	}
+}
+
+// colorizeUnifiedDiff applies color to unified diff (git diff inspired)
+// Returns plain text when color.NoColor is true
+func colorizeUnifiedDiff(text string) string {
+	if color.NoColor {
+		return text
+	}
+
+	cyan := color.New(color.FgCyan)
+	var result strings.Builder
+	for _, line := range strings.Split(text, "\n") {
+		switch {
+		case strings.HasPrefix(line, "---") || strings.HasPrefix(line, "+++"):
+			result.WriteString(cyan.Sprint(line) + "\n")
+		case strings.HasPrefix(line, "-"):
+			result.WriteString(color.RedString(line) + "\n")
+		case strings.HasPrefix(line, "+"):
+			result.WriteString(color.GreenString(line) + "\n")
+		default:
+			result.WriteString(line + "\n")
+		}
+	}
+	return result.String()
+}
+
+// selectDiffFormat returns the appropriate diffFormat based on the unified flag
+func selectDiffFormat(unified bool) diffFormat {
+	if unified {
+		return diffFormatUnified
+	}
+	return diffFormatPrettyColored
+}
+
+// setupColor configures color output based on flag and environment variable
+// Priority: --no-color flag > ECSCHEDULE_COLOR env var > default (true)
+func setupColor(noColor bool) {
+	colorEnabled := true
+	if noColor {
+		colorEnabled = false
+	} else if envColor := os.Getenv("ECSCHEDULE_COLOR"); envColor != "" {
+		colorEnabled = envColor != "false" && envColor != "0"
+	}
+	color.NoColor = !colorEnabled
 }

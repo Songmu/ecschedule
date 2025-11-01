@@ -10,23 +10,27 @@ import (
 	"os"
 
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatchevents"
-	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
 var cmdDiff = &runnerImpl{
 	name:        "diff",
 	description: "diff of the rule with remote",
 	run: func(ctx context.Context, argv []string, outStream, errStream io.Writer) (err error) {
-		fs := flag.NewFlagSet("ecschedule apply", flag.ContinueOnError)
+		fs := flag.NewFlagSet("ecschedule diff", flag.ContinueOnError)
 		fs.SetOutput(errStream)
 		var (
-			conf = fs.String("conf", "", "configuration")
-			rule = fs.String("rule", "", "rule")
-			all  = fs.Bool("all", false, "apply all rules")
+			conf    = fs.String("conf", "", "configuration")
+			rule    = fs.String("rule", "", "rule")
+			all     = fs.Bool("all", false, "diff all rules")
+			unified = fs.Bool("u", false, "output in unified diff format (colored, similar to git diff)")
+			noColor = fs.Bool("no-color", false, "disable colored output (Unified diff format only)")
 		)
 		if err := fs.Parse(argv); err != nil {
 			return err
 		}
+
+		setupColor(*noColor)
+
 		if !*all && *rule == "" {
 			return errors.New("-rule or -all option required")
 		}
@@ -55,6 +59,9 @@ var cmdDiff = &runnerImpl{
 				ruleNames = append(ruleNames, r.Name)
 			}
 		}
+
+		format := selectDiffFormat(*unified)
+
 		for _, rule := range ruleNames {
 			ru := c.GetRuleByName(rule)
 			if ru == nil {
@@ -67,9 +74,17 @@ var cmdDiff = &runnerImpl{
 			if err != nil {
 				return err
 			}
-			dmp := diffmatchpatch.New()
-			diffs := dmp.DiffMain(from, to, false)
-			log.Printf("💡 diff of the rule %q\n%s", rule, dmp.DiffPrettyText(diffs))
+
+			diffOutput := formatDiff(rule, from, to, format)
+
+			if *unified {
+				if diffOutput == "" {
+					continue
+				}
+				fmt.Fprintln(errStream, diffOutput)
+			} else {
+				log.Printf("💡 diff of the rule %q\n%s", rule, diffOutput)
+			}
 		}
 		return nil
 	},

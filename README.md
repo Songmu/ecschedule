@@ -123,6 +123,34 @@ To see which rules would be deleted without actually removing them, combine with
 A `trackingId` is an optional key in a configuration file. If the `trackingId` is not explicitly specified, the cluster name will be used as the `trackingId` by default.
 When you explicitly specify the `trackingId`, it enables you to detect rule deletions for each file when executing multiple configuration files at different times.
 
+## Log Format
+
+### Unified diff format
+
+ecschedule supports unified diff format (similar to `git diff`) with `-u` flag for both `diff` and `apply` commands:
+
+```console
+% ecschedule -conf ecschedule.yaml diff -all -u
+% ecschedule -conf ecschedule.yaml apply -all -dry-run -u
+```
+
+The `diff` command with `-u` flag outputs pure diff content without log prefixes or headers, making it suitable for piping to other tools.
+The `apply` command includes progress logs even with `-u` flag.
+
+### Color control
+
+Colored output can be disabled with `--no-color` flag or `ECSCHEDULE_COLOR` environment variable:
+
+```console
+% ecschedule -conf ecschedule.yaml diff -all -u --no-color
+% ECSCHEDULE_COLOR=false ecschedule -conf ecschedule.yaml apply -all -dry-run -u
+```
+
+Environment variable:
+- `ECSCHEDULE_COLOR`: Set to `false` or `0` to disable colored output (unified diff format only). Default is `true`.
+
+**Note**: The `--no-color` flag is a subcommand-level flag and only affects unified diff format. The default pretty format always displays with colors.
+
 ## Functions
 
 You can use following functions in the configuration file.
