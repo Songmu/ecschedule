@@ -114,14 +114,59 @@ In version `v0.9.1` and earlier, when rules were renamed or deleted from the con
 % ecschedule -conf ecschedule.yaml apply -all -prune
 ```
 
-To see which rules would be deleted without actually removing them, combine with the `-dry-run` option.
+To see which rules would be deleted without actually removing them, you can use either `diff` or `apply` with `-dry-run` option:
 
 ```console
+% ecschedule -conf ecschedule.yaml diff -all -prune
 % ecschedule -conf ecschedule.yaml apply -all -prune -dry-run
 ```
 
 A `trackingId` is an optional key in a configuration file. If the `trackingId` is not explicitly specified, the cluster name will be used as the `trackingId` by default.
 When you explicitly specify the `trackingId`, it enables you to detect rule deletions for each file when executing multiple configuration files at different times.
+
+### Validation
+
+The `apply` and `run` commands **always perform validation** (env, tfstate, ssm, task definition) before execution and cannot be disabled.
+
+The `diff` command **does not perform validation by default** for quick review. To enable validation (recommended for CI/CD pipelines), use the `-validate` flag:
+
+```console
+% ecschedule -conf ecschedule.yaml diff -all -prune -validate -u
+```
+
+This performs the same validation as `apply` and `run`, with a slight overhead, but ensures complete verification before applying changes.
+
+## Log Format
+
+### Unified diff format
+
+ecschedule supports unified diff format (similar to `git diff`) with `-u` flag for both `diff` and `apply` commands:
+
+```console
+% ecschedule -conf ecschedule.yaml diff -all -u
+% ecschedule -conf ecschedule.yaml apply -all -dry-run -u
+```
+
+The `diff` command with `-u` flag outputs pure diff content without log prefixes or headers, making it suitable for piping to other tools.
+The `apply` command includes progress logs even with `-u` flag.
+
+### Color control
+
+Colored output can be disabled with `--no-color` flag or environment variables:
+
+```console
+% ecschedule -conf ecschedule.yaml diff -all -u --no-color
+% NO_COLOR=1 ecschedule -conf ecschedule.yaml diff -all -u
+% ECSCHEDULE_COLOR=false ecschedule -conf ecschedule.yaml apply -all -dry-run -u
+```
+
+Environment variables:
+- `NO_COLOR`: If set (value doesn't matter), disable colored output. Follows the [NO_COLOR standard](https://no-color.org/).
+- `ECSCHEDULE_COLOR`: Set to `false` or `0` to disable colored output (unified diff format only). Default is `true`.
+
+Priority: `--no-color` flag > `NO_COLOR` > `ECSCHEDULE_COLOR` > default (colored).
+
+**Note**: The `--no-color` flag is a subcommand-level flag and only affects unified diff format. The default pretty format always displays with colors.
 
 ## Functions
 

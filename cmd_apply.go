@@ -19,15 +19,20 @@ var cmdApply = &runnerImpl{
 		fs := flag.NewFlagSet("ecschedule apply", flag.ContinueOnError)
 		fs.SetOutput(errStream)
 		var (
-			conf   = fs.String("conf", "", "configuration")
-			rule   = fs.String("rule", "", "rule")
-			dryRun = fs.Bool("dry-run", false, "dry run")
-			all    = fs.Bool("all", false, "apply all rules")
-			prune  = fs.Bool("prune", false, "prune orphaned rules after apply")
+			conf    = fs.String("conf", "", "configuration")
+			rule    = fs.String("rule", "", "rule")
+			dryRun  = fs.Bool("dry-run", false, "dry run")
+			all     = fs.Bool("all", false, "apply all rules")
+			prune   = fs.Bool("prune", false, "prune orphaned rules after apply")
+			unified = fs.Bool("u", false, "output diff in unified format (colored, similar to git diff)")
+			noColor = fs.Bool("no-color", false, "disable colored output (Unified diff format only)")
 		)
 		if err := fs.Parse(argv); err != nil {
 			return err
 		}
+
+		setupColor(*noColor)
+
 		if !*all && *rule == "" {
 			return errors.New("-rule or -all option required")
 		}
@@ -62,13 +67,15 @@ var cmdApply = &runnerImpl{
 			dryRunSuffix = " (dry-run)"
 		}
 
+		format := selectDiffFormat(*unified)
+
 		for _, rule := range ruleNames {
 			ru := c.GetRuleByName(rule)
 			if ru == nil {
 				return fmt.Errorf("no rules found for %s", rule)
 			}
 			log.Printf("applying the rule %q%s", rule, dryRunSuffix)
-			if err := ru.Apply(ctx, a.AwsConf, *dryRun); err != nil {
+			if err := ru.applyInternal(ctx, a.AwsConf, *dryRun, format); err != nil {
 				return err
 			}
 			for _, v := range ru.ContainerOverrides {
@@ -88,7 +95,7 @@ var cmdApply = &runnerImpl{
 			if len(orphanedRules) > 0 {
 				log.Printf("orphaned rules will be deleted %s", dryRunSuffix)
 				for _, rule := range orphanedRules {
-					if err := rule.Delete(ctx, a.AwsConf, *dryRun); err != nil {
+					if err := rule.deleteInternal(ctx, a.AwsConf, *dryRun, format); err != nil {
 						return err
 					}
 				}

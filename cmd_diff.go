@@ -10,25 +10,35 @@ import (
 	"os"
 
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatchevents"
-	"github.com/sergi/go-diff/diffmatchpatch"
+	"github.com/goccy/go-yaml"
 )
 
 var cmdDiff = &runnerImpl{
 	name:        "diff",
 	description: "diff of the rule with remote",
 	run: func(ctx context.Context, argv []string, outStream, errStream io.Writer) (err error) {
-		fs := flag.NewFlagSet("ecschedule apply", flag.ContinueOnError)
+		fs := flag.NewFlagSet("ecschedule diff", flag.ContinueOnError)
 		fs.SetOutput(errStream)
 		var (
-			conf = fs.String("conf", "", "configuration")
-			rule = fs.String("rule", "", "rule")
-			all  = fs.Bool("all", false, "apply all rules")
+			conf     = fs.String("conf", "", "configuration")
+			rule     = fs.String("rule", "", "rule")
+			all      = fs.Bool("all", false, "diff all rules")
+			unified  = fs.Bool("u", false, "output in unified diff format (colored, similar to git diff)")
+			noColor  = fs.Bool("no-color", false, "disable colored output (Unified diff format only)")
+			prune    = fs.Bool("prune", false, "detect orphaned rules for deletion")
+			validate = fs.Bool("validate", false, "perform validation (env, tfstate, ssm, task definition)")
 		)
 		if err := fs.Parse(argv); err != nil {
 			return err
 		}
+
+		setupColor(*noColor)
+
 		if !*all && *rule == "" {
 			return errors.New("-rule or -all option required")
+		}
+		if *prune && !*all {
+			return errors.New("-prune can only be used with -all flag")
 		}
 		a := getApp(ctx)
 		c := a.Config
@@ -55,11 +65,41 @@ var cmdDiff = &runnerImpl{
 				ruleNames = append(ruleNames, r.Name)
 			}
 		}
+
+		format := selectDiffFormat(*unified)
+		hasValidationError := false
+
 		for _, rule := range ruleNames {
 			ru := c.GetRuleByName(rule)
 			if ru == nil {
 				return fmt.Errorf("no rules found for %s", rule)
 			}
+
+			// Validation if -validate is specified
+			if *validate {
+				var validationErrors []string
+				if err := ru.validateEnv(); err != nil {
+					validationErrors = append(validationErrors, fmt.Sprintf("  env: %s", err))
+				}
+				if err := ru.validateTFstate(); err != nil {
+					validationErrors = append(validationErrors, fmt.Sprintf("  tfstate: %s", err))
+				}
+				if err := ru.validateSSM(); err != nil {
+					validationErrors = append(validationErrors, fmt.Sprintf("  ssm: %s", err))
+				}
+				if err := ru.validateTaskDefinition(ctx, a.AwsConf); err != nil {
+					validationErrors = append(validationErrors, fmt.Sprintf("  task definition: %s", err))
+				}
+
+				if len(validationErrors) > 0 {
+					log.Printf("❌ %q: validation failed", rule)
+					for _, verr := range validationErrors {
+						log.Println(verr)
+					}
+					hasValidationError = true
+				}
+			}
+
 			svc := cloudwatchevents.NewFromConfig(a.AwsConf, func(o *cloudwatchevents.Options) {
 				o.Region = c.Region
 			})
@@ -67,10 +107,46 @@ var cmdDiff = &runnerImpl{
 			if err != nil {
 				return err
 			}
-			dmp := diffmatchpatch.New()
-			diffs := dmp.DiffMain(from, to, false)
-			log.Printf("💡 diff of the rule %q\n%s", rule, dmp.DiffPrettyText(diffs))
+
+			diffOutput := formatDiff(rule, from, to, format)
+
+			if *unified {
+				if diffOutput == "" {
+					continue
+				}
+				fmt.Fprintln(errStream, diffOutput)
+			} else {
+				log.Printf("💡 diff of the rule %q\n%s", rule, diffOutput)
+			}
 		}
+
+		// Display orphaned rules if -prune is specified
+		if *prune {
+			orphanedRules, err := extractOrphanedRules(ctx, a.AwsConf, c.BaseConfig, ruleNames)
+			if err != nil {
+				return err
+			}
+
+			for _, rule := range orphanedRules {
+				remoteRuleYaml, err := yaml.Marshal(rule)
+				if err != nil {
+					return err
+				}
+
+				diffOutput := formatDiff(rule.Name, string(remoteRuleYaml), "", format)
+
+				if *unified {
+					fmt.Fprintln(errStream, diffOutput)
+				} else {
+					log.Printf("🪓 orphaned rule will be deleted\n%s", diffOutput)
+				}
+			}
+		}
+
+		if hasValidationError {
+			return errors.New("validation failed for one or more rules")
+		}
+
 		return nil
 	},
 }
