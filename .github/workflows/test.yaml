@@ -19,6 +19,8 @@ jobs:
     steps:
     - name: checkout
       uses: actions/checkout@v5
+      with:
+        persist-credentials: false
     - name: setup go
       uses: actions/setup-go@v6
       with:
