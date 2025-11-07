@@ -1,5 +1,7 @@
 # Changelog
 
+## [v0.16.1](https://github.com/Songmu/ecschedule/compare/v0.16.0...v0.16.1) - 2025-11-07
+
 ## [v0.16.0](https://github.com/Songmu/ecschedule/compare/v0.15.3...v0.16.0) - 2025-11-07
 - feat: add unified diff format and enhance diff command by @lamanotrama in https://github.com/Songmu/ecschedule/pull/197
 - build(deps): bump github.com/aws/aws-sdk-go-v2/service/ecs from 1.63.4 to 1.65.4 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/196
