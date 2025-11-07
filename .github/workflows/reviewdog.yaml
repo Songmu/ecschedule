@@ -1,11 +1,12 @@
 name: reviewdog
 on: [pull_request]
-permissions:
-  contents: read
-  pull-requests: write
 jobs:
   staticcheck:
     name: staticcheck
+    permissions:
+      contents: read
+      pull-requests: write
+
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -21,6 +22,9 @@ jobs:
 
   misspell:
     name: misspell
+    permissions:
+      contents: read
+      pull-requests: write
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -37,6 +41,9 @@ jobs:
 
   actionlint:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
