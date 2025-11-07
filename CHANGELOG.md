@@ -1,5 +1,15 @@
 # Changelog
 
+## [v0.16.0](https://github.com/Songmu/ecschedule/compare/v0.15.3...v0.16.0) - 2025-11-07
+- feat: add unified diff format and enhance diff command by @lamanotrama in https://github.com/Songmu/ecschedule/pull/197
+- build(deps): bump github.com/aws/aws-sdk-go-v2/service/ecs from 1.63.4 to 1.65.4 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/196
+- build(deps): bump actions/setup-go from 5 to 6 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/174
+- build(deps): bump github.com/aws/aws-sdk-go-v2 from 1.38.3 to 1.39.4 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/192
+- build(deps): bump github.com/aws/aws-sdk-go-v2/service/resourcegroups from 1.33.2 to 1.33.10 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/193
+- build(deps): bump github.com/aws/aws-sdk-go-v2/service/cloudwatchevents from 1.32.2 to 1.32.9 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/195
+- build(deps): bump github.com/aws/aws-sdk-go-v2/config from 1.31.6 to 1.31.15 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/194
+- update toolchains by @Songmu in https://github.com/Songmu/ecschedule/pull/200
+
 ## [v0.15.3](https://github.com/Songmu/ecschedule/compare/v0.15.2...v0.15.3) - 2025-09-03
 - Fix empty TaskOverride appearing in diffs by @lamanotrama in https://github.com/Songmu/ecschedule/pull/170
 
