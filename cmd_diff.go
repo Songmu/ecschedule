@@ -8,10 +8,75 @@ import (
 	"io"
 	"log"
 	"os"
+	"runtime/debug"
+	"sync/atomic"
 
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatchevents"
 	"github.com/goccy/go-yaml"
+	"golang.org/x/sync/errgroup"
 )
+
+type diffResult struct {
+	ruleName         string
+	diffOutput       string
+	validationErrors []string
+}
+
+func executeDiffJobsInParallel(
+	ctx context.Context,
+	ruleNames []string,
+	parallelism int,
+	jobFunc func(ctx context.Context, ruleName string) (diffResult, error),
+) (<-chan diffResult, <-chan error) {
+	g, ctx := errgroup.WithContext(ctx)
+	g.SetLimit(parallelism)
+
+	results := make(chan diffResult, len(ruleNames))
+	errChan := make(chan error, 1)
+	var panicCount atomic.Int32
+
+	for _, ruleName := range ruleNames {
+		ruleName := ruleName
+		g.Go(func() error {
+			defer func() {
+				if rec := recover(); rec != nil {
+					panicCount.Add(1)
+					log.Printf("[ERROR] panic in worker for rule %q: %v\n%s",
+						ruleName, rec, debug.Stack())
+				}
+			}()
+
+			result, err := jobFunc(ctx, ruleName)
+			if err != nil {
+				return err
+			}
+
+			select {
+			case results <- result:
+			case <-ctx.Done():
+				return ctx.Err()
+			}
+
+			return nil
+		})
+	}
+
+	go func() {
+		err := g.Wait()
+		close(results)
+
+		if err != nil {
+			errChan <- err
+		} else if count := panicCount.Load(); count > 0 {
+			errChan <- fmt.Errorf("%d rule(s) failed due to panic (see logs above for details)", count)
+		} else {
+			errChan <- nil
+		}
+		close(errChan)
+	}()
+
+	return results, errChan
+}
 
 var cmdDiff = &runnerImpl{
 	name:        "diff",
@@ -20,13 +85,14 @@ var cmdDiff = &runnerImpl{
 		fs := flag.NewFlagSet("ecschedule diff", flag.ContinueOnError)
 		fs.SetOutput(errStream)
 		var (
-			conf     = fs.String("conf", "", "configuration")
-			rule     = fs.String("rule", "", "rule")
-			all      = fs.Bool("all", false, "diff all rules")
-			unified  = fs.Bool("u", false, "output in unified diff format (colored, similar to git diff)")
-			noColor  = fs.Bool("no-color", false, "disable colored output (Unified diff format only)")
-			prune    = fs.Bool("prune", false, "detect orphaned rules for deletion")
-			validate = fs.Bool("validate", false, "perform validation (env, tfstate, ssm, task definition)")
+			conf        = fs.String("conf", "", "configuration")
+			rule        = fs.String("rule", "", "rule")
+			all         = fs.Bool("all", false, "diff all rules")
+			unified     = fs.Bool("u", false, "output in unified diff format (colored, similar to git diff)")
+			noColor     = fs.Bool("no-color", false, "disable colored output (Unified diff format only)")
+			prune       = fs.Bool("prune", false, "detect orphaned rules for deletion")
+			validate    = fs.Bool("validate", false, "perform validation (env, tfstate, ssm, task definition)")
+			parallelism = fs.Int("parallelism", 1, "number of parallel workers (default: 1, recommended: 1-10 due to AWS API rate limits. Note: output order is not guaranteed when parallelism > 1)")
 		)
 		if err := fs.Parse(argv); err != nil {
 			return err
@@ -39,6 +105,9 @@ var cmdDiff = &runnerImpl{
 		}
 		if *prune && !*all {
 			return errors.New("-prune can only be used with -all flag")
+		}
+		if *parallelism < 1 {
+			return errors.New("-parallelism must be at least 1")
 		}
 		a := getApp(ctx)
 		c := a.Config
@@ -67,57 +136,72 @@ var cmdDiff = &runnerImpl{
 		}
 
 		format := selectDiffFormat(*unified)
-		hasValidationError := false
 
-		for _, rule := range ruleNames {
-			ru := c.GetRuleByName(rule)
+		// Create AWS client once before starting workers
+		svc := cloudwatchevents.NewFromConfig(a.AwsConf, func(o *cloudwatchevents.Options) {
+			o.Region = c.Region
+		})
+
+		var hasValidationError atomic.Bool
+
+		processDiffJob := func(ctx context.Context, ruleName string) (diffResult, error) {
+			result := diffResult{ruleName: ruleName}
+
+			ru := c.GetRuleByName(ruleName)
 			if ru == nil {
-				return fmt.Errorf("no rules found for %s", rule)
+				return result, fmt.Errorf("no rules found for %s", ruleName)
 			}
 
-			// Validation if -validate is specified
 			if *validate {
-				var validationErrors []string
 				if err := ru.validateEnv(); err != nil {
-					validationErrors = append(validationErrors, fmt.Sprintf("  env: %s", err))
+					result.validationErrors = append(result.validationErrors, fmt.Sprintf("  env: %s", err))
 				}
 				if err := ru.validateTFstate(); err != nil {
-					validationErrors = append(validationErrors, fmt.Sprintf("  tfstate: %s", err))
+					result.validationErrors = append(result.validationErrors, fmt.Sprintf("  tfstate: %s", err))
 				}
 				if err := ru.validateSSM(); err != nil {
-					validationErrors = append(validationErrors, fmt.Sprintf("  ssm: %s", err))
+					result.validationErrors = append(result.validationErrors, fmt.Sprintf("  ssm: %s", err))
 				}
 				if err := ru.validateTaskDefinition(ctx, a.AwsConf); err != nil {
-					validationErrors = append(validationErrors, fmt.Sprintf("  task definition: %s", err))
+					result.validationErrors = append(result.validationErrors, fmt.Sprintf("  task definition: %s", err))
 				}
 
-				if len(validationErrors) > 0 {
-					log.Printf("❌ %q: validation failed", rule)
-					for _, verr := range validationErrors {
-						log.Println(verr)
-					}
-					hasValidationError = true
+				if len(result.validationErrors) > 0 {
+					hasValidationError.Store(true)
 				}
 			}
 
-			svc := cloudwatchevents.NewFromConfig(a.AwsConf, func(o *cloudwatchevents.Options) {
-				o.Region = c.Region
-			})
 			from, to, err := ru.diff(ctx, svc)
 			if err != nil {
-				return err
+				return result, err
 			}
 
-			diffOutput := formatDiff(rule, from, to, format)
+			result.diffOutput = formatDiff(ruleName, from, to, format)
+			return result, nil
+		}
 
-			if *unified {
-				if diffOutput == "" {
-					continue
+		results, errChan := executeDiffJobsInParallel(ctx, ruleNames, *parallelism, processDiffJob)
+
+		for result := range results {
+			if len(result.validationErrors) > 0 {
+				log.Printf("❌ %q: validation failed", result.ruleName)
+				for _, verr := range result.validationErrors {
+					log.Println(verr)
 				}
-				fmt.Fprintln(errStream, diffOutput)
-			} else {
-				log.Printf("💡 diff of the rule %q\n%s", rule, diffOutput)
 			}
+
+			if result.diffOutput != "" {
+				if *unified {
+					fmt.Fprintln(errStream, result.diffOutput)
+				} else {
+					log.Printf("💡 diff of the rule %q\n%s", result.ruleName, result.diffOutput)
+				}
+			}
+		}
+
+		err = <-errChan
+		if err != nil {
+			return err
 		}
 
 		// Display orphaned rules if -prune is specified
@@ -143,7 +227,7 @@ var cmdDiff = &runnerImpl{
 			}
 		}
 
-		if hasValidationError {
+		if hasValidationError.Load() {
 			return errors.New("validation failed for one or more rules")
 		}
 

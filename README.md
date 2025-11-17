@@ -136,6 +136,18 @@ The `diff` command **does not perform validation by default** for quick review. 
 
 This performs the same validation as `apply` and `run`, with a slight overhead, but ensures complete verification before applying changes.
 
+### Parallel Execution
+
+The `diff` command supports parallel execution for improved performance with many rules:
+
+```console
+% ecschedule -conf ecschedule.yaml diff -all -parallelism 10
+```
+
+- Default: `parallelism=1` (sequential, backward compatible)
+- Recommended: 1-10 (due to AWS API rate limits)
+- Note: Output order is not guaranteed when parallelism > 1
+
 ## Log Format
 
 ### Unified diff format
