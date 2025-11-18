@@ -141,12 +141,12 @@ This performs the same validation as `apply` and `run`, with a slight overhead, 
 The `diff` command supports parallel execution for improved performance with many rules:
 
 ```console
-% ecschedule -conf ecschedule.yaml diff -all -parallelism 10
+% ecschedule -conf ecschedule.yaml diff -all -parallel 10
 ```
 
-- Default: `parallelism=1` (sequential, backward compatible)
+- Default: `parallel=1` (sequential, backward compatible)
 - Recommended: 1-10 (due to AWS API rate limits)
-- Note: Output order is not guaranteed when parallelism > 1
+- Note: Output order is not guaranteed when parallel > 1
 
 ## Log Format
 

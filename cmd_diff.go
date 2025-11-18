@@ -25,11 +25,11 @@ type diffResult struct {
 func executeDiffJobsInParallel(
 	ctx context.Context,
 	ruleNames []string,
-	parallelism int,
+	parallel int,
 	jobFunc func(ctx context.Context, ruleName string) (diffResult, error),
 ) (<-chan diffResult, <-chan error) {
 	g, ctx := errgroup.WithContext(ctx)
-	g.SetLimit(parallelism)
+	g.SetLimit(parallel)
 
 	results := make(chan diffResult, len(ruleNames))
 	errChan := make(chan error, 1)
@@ -85,14 +85,14 @@ var cmdDiff = &runnerImpl{
 		fs := flag.NewFlagSet("ecschedule diff", flag.ContinueOnError)
 		fs.SetOutput(errStream)
 		var (
-			conf        = fs.String("conf", "", "configuration")
-			rule        = fs.String("rule", "", "rule")
-			all         = fs.Bool("all", false, "diff all rules")
-			unified     = fs.Bool("u", false, "output in unified diff format (colored, similar to git diff)")
-			noColor     = fs.Bool("no-color", false, "disable colored output (Unified diff format only)")
-			prune       = fs.Bool("prune", false, "detect orphaned rules for deletion")
-			validate    = fs.Bool("validate", false, "perform validation (env, tfstate, ssm, task definition)")
-			parallelism = fs.Int("parallelism", 1, "number of parallel workers (default: 1, recommended: 1-10 due to AWS API rate limits. Note: output order is not guaranteed when parallelism > 1)")
+			conf     = fs.String("conf", "", "configuration")
+			rule     = fs.String("rule", "", "rule")
+			all      = fs.Bool("all", false, "diff all rules")
+			unified  = fs.Bool("u", false, "output in unified diff format (colored, similar to git diff)")
+			noColor  = fs.Bool("no-color", false, "disable colored output (Unified diff format only)")
+			prune    = fs.Bool("prune", false, "detect orphaned rules for deletion")
+			validate = fs.Bool("validate", false, "perform validation (env, tfstate, ssm, task definition)")
+			parallel = fs.Int("parallel", 1, "number of parallel workers (default: 1, recommended: 1-10 due to AWS API rate limits. Note: output order is not guaranteed when parallel > 1)")
 		)
 		if err := fs.Parse(argv); err != nil {
 			return err
@@ -106,8 +106,8 @@ var cmdDiff = &runnerImpl{
 		if *prune && !*all {
 			return errors.New("-prune can only be used with -all flag")
 		}
-		if *parallelism < 1 {
-			return errors.New("-parallelism must be at least 1")
+		if *parallel < 1 {
+			return errors.New("-parallel must be at least 1")
 		}
 		a := getApp(ctx)
 		c := a.Config
@@ -180,7 +180,7 @@ var cmdDiff = &runnerImpl{
 			return result, nil
 		}
 
-		results, errChan := executeDiffJobsInParallel(ctx, ruleNames, *parallelism, processDiffJob)
+		results, errChan := executeDiffJobsInParallel(ctx, ruleNames, *parallel, processDiffJob)
 
 		for result := range results {
 			if len(result.validationErrors) > 0 {

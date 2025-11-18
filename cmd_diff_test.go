@@ -11,7 +11,7 @@ import (
 )
 
 func TestExecuteDiffJobsInParallel(t *testing.T) {
-	t.Run("parallelism=1 executes jobs sequentially", func(t *testing.T) {
+	t.Run("parallel=1 executes jobs sequentially", func(t *testing.T) {
 		var executionOrder []string
 		var mu sync.Mutex
 
@@ -52,7 +52,7 @@ func TestExecuteDiffJobsInParallel(t *testing.T) {
 		}
 	})
 
-	t.Run("parallelism>1 executes jobs concurrently", func(t *testing.T) {
+	t.Run("parallel>1 executes jobs concurrently", func(t *testing.T) {
 		var executedCount atomic.Int32
 		jobCount := 20
 
