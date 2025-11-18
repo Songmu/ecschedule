@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.17.0](https://github.com/Songmu/ecschedule/compare/v0.16.0...v0.17.0) - 2025-11-18
+- build(deps): bump Songmu/tagpr from 1.8.4 to 1.9.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/202
+- build(deps): bump github.com/aws/aws-sdk-go-v2/service/ecs from 1.67.2 to 1.67.4 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/207
+- build(deps): bump github.com/aws/aws-sdk-go-v2/service/sts from 1.39.1 to 1.40.2 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/203
+- build(deps): bump github.com/aws/aws-sdk-go-v2/service/resourcegroups from 1.33.12 to 1.33.14 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/204
+- build(deps): bump github.com/aws/aws-sdk-go-v2/config from 1.31.17 to 1.31.20 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/206
+- build(deps): bump github.com/aws/aws-sdk-go-v2/service/cloudwatchevents from 1.32.11 to 1.32.13 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/205
+- Add parallel execution support to diff command by @lamanotrama in https://github.com/Songmu/ecschedule/pull/208
+
 ## [v0.16.0](https://github.com/Songmu/ecschedule/compare/v0.15.3...v0.16.0) - 2025-11-07
 - feat: add unified diff format and enhance diff command by @lamanotrama in https://github.com/Songmu/ecschedule/pull/197
 - build(deps): bump github.com/aws/aws-sdk-go-v2/service/ecs from 1.63.4 to 1.65.4 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/196
