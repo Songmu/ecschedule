@@ -4,7 +4,17 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    labels:
+      - dependencies
+      - go
+    groups:
+      aws:
+        patterns:
+        - "github.com/aws/aws-sdk-go-v2*"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    labels:
+      - dependencies
+      - github-actions
