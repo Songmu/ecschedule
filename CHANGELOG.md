@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.17.1](https://github.com/Songmu/ecschedule/compare/v0.17.0...v0.17.1) - 2025-11-24
+- build(deps): bump github.com/aws/aws-sdk-go-v2/service/sts from 1.40.2 to 1.41.1 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/213
+- build(deps): bump actions/setup-go from 6.0.0 to 6.1.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/216
+- build(deps): bump actions/checkout from 5.0.0 to 6.0.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/215
+- build(deps): bump github.com/fujiwara/tfstate-lookup from 1.7.1 to 1.8.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/211
+- build(deps): bump golang.org/x/crypto from 0.43.0 to 0.45.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/209
+- build(deps): bump golang.org/x/sync from 0.17.0 to 0.18.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/218
+- build(deps): bump the aws group with 4 updates by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/217
+
 ## [v0.17.0](https://github.com/Songmu/ecschedule/compare/v0.16.0...v0.17.0) - 2025-11-18
 - build(deps): bump Songmu/tagpr from 1.8.4 to 1.9.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/202
 - build(deps): bump github.com/aws/aws-sdk-go-v2/service/ecs from 1.67.2 to 1.67.4 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/207
