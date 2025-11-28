@@ -627,7 +627,7 @@ func (r *Rule) deleteInternal(ctx context.Context, awsConf aws.Config, dryRun bo
 
 	// Before deleting the rule, need to delete all targets.
 	if _, err := svc.RemoveTargets(ctx, &cloudwatchevents.RemoveTargetsInput{
-		Ids:  []string{r.Name},
+		Ids:  []string{r.targetID(r)},
 		Rule: aws.String(r.Name),
 	}); err != nil {
 		return err
