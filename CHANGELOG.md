@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.17.2](https://github.com/Songmu/ecschedule/compare/v0.17.1...v0.17.2) - 2025-12-02
+- build(deps): bump github.com/goccy/go-yaml from 1.18.0 to 1.19.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/221
+- build(deps): bump reviewdog/action-actionlint from 1.68.0 to 1.69.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/222
+- build(deps): bump the aws group with 5 updates by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/220
+- Allow deleting targets even when Target ID and Rule Name differ by @tn2222 in https://github.com/Songmu/ecschedule/pull/219
+
 ## [v0.17.1](https://github.com/Songmu/ecschedule/compare/v0.17.0...v0.17.1) - 2025-11-24
 - build(deps): bump github.com/aws/aws-sdk-go-v2/service/sts from 1.40.2 to 1.41.1 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/213
 - build(deps): bump actions/setup-go from 6.0.0 to 6.1.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/216
