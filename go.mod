@@ -7,7 +7,7 @@ toolchain go1.25.4
 require (
 	github.com/fatih/color v1.18.0
 	github.com/fujiwara/ssm-lookup v0.1.1
-	github.com/fujiwara/tfstate-lookup v1.8.0
+	github.com/fujiwara/tfstate-lookup v1.8.1
 	github.com/goccy/go-yaml v1.19.0
 	github.com/google/go-jsonnet v0.21.0
 	github.com/hexops/gotextdiff v1.0.3
