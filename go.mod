@@ -8,7 +8,7 @@ require (
 	github.com/fatih/color v1.18.0
 	github.com/fujiwara/ssm-lookup v0.1.1
 	github.com/fujiwara/tfstate-lookup v1.8.1
-	github.com/goccy/go-yaml v1.19.1
+	github.com/goccy/go-yaml v1.19.2
 	github.com/google/go-jsonnet v0.21.0
 	github.com/hexops/gotextdiff v1.0.3
 	github.com/kayac/go-config v0.7.0
