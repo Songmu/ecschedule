@@ -147,8 +147,8 @@ github.com/felixge/httpsnoop v1.0.4 h1:NFTV2Zj1bL4mc9sqWACXbQFVBBg2W3GPvqp8/ESS2
 github.com/felixge/httpsnoop v1.0.4/go.mod h1:m8KPJKqk1gH5J9DgRY2ASl2lWCfGKXixSwevea8zH2U=
 github.com/fujiwara/ssm-lookup v0.1.1 h1:Cwx7Y6A0HbIKyAzS60DYcf/TZ5KZHY/vTlCtUoythfQ=
 github.com/fujiwara/ssm-lookup v0.1.1/go.mod h1:ssVwS1FrHAKouOMEmYC6j07XRKqBGdABRmv6gBKewVg=
-github.com/fujiwara/tfstate-lookup v1.9.0 h1:OBy7jZN/Q45j9nTKLxKow2XMAy3eOwPZvm/lrJCiHHA=
-github.com/fujiwara/tfstate-lookup v1.9.0/go.mod h1:hBwXB7lKy4kPEM+szko7rzAq04TGpBzzNY8Wm8hG6UE=
+github.com/fujiwara/tfstate-lookup v1.10.0 h1:RtVV1PUO+C7hqmRKhecS/ed6XOZ4KDiJmbHPFvX7ZJE=
+github.com/fujiwara/tfstate-lookup v1.10.0/go.mod h1:hBwXB7lKy4kPEM+szko7rzAq04TGpBzzNY8Wm8hG6UE=
 github.com/go-jose/go-jose/v4 v4.1.3 h1:CVLmWDhDVRa6Mi/IgCgaopNosCaHz7zrMeF9MlZRkrs=
 github.com/go-jose/go-jose/v4 v4.1.3/go.mod h1:x4oUasVrzR7071A4TnHLGSPpNOm2a21K9Kf04k1rs08=
 github.com/go-logr/logr v1.2.2/go.mod h1:jdQByPbusPIv2/zmleS9BjJVeZ6kBagPoEUsqbVz/1A=
