@@ -88,7 +88,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.4 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.13 // indirect
 	github.com/aws/aws-sdk-go-v2/service/cloudwatchevents v1.32.19
-	github.com/aws/aws-sdk-go-v2/service/ecs v1.70.1
+	github.com/aws/aws-sdk-go-v2/service/ecs v1.71.0
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.4 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.9.4 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.17 // indirect
