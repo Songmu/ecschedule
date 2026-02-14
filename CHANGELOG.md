@@ -1,5 +1,27 @@
 # Changelog
 
+## [v0.17.3](https://github.com/Songmu/ecschedule/compare/v0.17.2...v0.17.3) - 2026-02-14
+- build(deps): bump actions/checkout from 6.0.0 to 6.0.1 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/226
+- build(deps): bump reviewdog/action-actionlint from 1.69.0 to 1.69.1 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/225
+- build(deps): bump the aws group with 6 updates by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/224
+- build(deps): bump Songmu/tagpr from 1.9.0 to 1.10.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/232
+- build(deps): bump codecov/codecov-action from 5.5.1 to 5.5.2 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/231
+- build(deps): bump github.com/fujiwara/tfstate-lookup from 1.8.0 to 1.8.1 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/230
+- build(deps): bump golang.org/x/sync from 0.18.0 to 0.19.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/229
+- build(deps): bump the aws group with 6 updates by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/228
+- build(deps): bump github.com/goccy/go-yaml from 1.19.0 to 1.19.1 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/234
+- build(deps): bump the aws group with 2 updates by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/233
+- build(deps): bump github.com/goccy/go-yaml from 1.19.1 to 1.19.2 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/237
+- build(deps): bump the aws group with 6 updates by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/236
+- build(deps): bump Songmu/tagpr from 1.10.0 to 1.11.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/235
+- build(deps): bump github.com/aws/aws-sdk-go-v2/service/ecs from 1.70.1 to 1.71.0 in the aws group by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/238
+- build(deps): bump actions/setup-go from 6.1.0 to 6.2.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/241
+- build(deps): bump github.com/fujiwara/tfstate-lookup from 1.8.1 to 1.9.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/239
+- build(deps): bump Songmu/tagpr from 1.11.0 to 1.11.1 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/240
+- build(deps): bump github.com/fujiwara/tfstate-lookup from 1.9.0 to 1.10.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/242
+- build(deps): bump actions/checkout from 6.0.1 to 6.0.2 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/244
+- build(deps): bump reviewdog/action-actionlint from 1.69.1 to 1.70.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/245
+
 ## [v0.17.2](https://github.com/Songmu/ecschedule/compare/v0.17.1...v0.17.2) - 2025-12-02
 - build(deps): bump github.com/goccy/go-yaml from 1.18.0 to 1.19.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/221
 - build(deps): bump reviewdog/action-actionlint from 1.68.0 to 1.69.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/222
