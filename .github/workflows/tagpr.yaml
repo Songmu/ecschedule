@@ -19,7 +19,7 @@ jobs:
         persist-credentials: false
     - name: tagpr
       id: tagpr
-      uses: Songmu/tagpr@fa7d23a4aada5ab0d15a76277a7e0b70d107a9c3 # v1.11.1
+      uses: Songmu/tagpr@da82ed6743aec90049892070edd5561335904a9e # v1.17.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - uses: ./.github/actions/release
