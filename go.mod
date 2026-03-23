@@ -1,11 +1,11 @@
 module github.com/Songmu/ecschedule
 
-go 1.25
+go 1.25.0
 
 toolchain go1.25.4
 
 require (
-	github.com/fatih/color v1.18.0
+	github.com/fatih/color v1.19.0
 	github.com/fujiwara/ssm-lookup v0.1.1
 	github.com/fujiwara/tfstate-lookup v1.10.0
 	github.com/goccy/go-yaml v1.19.2
@@ -119,7 +119,7 @@ require (
 	golang.org/x/exp v0.0.0-20251023183803-a4bb9ffd2546
 	golang.org/x/net v0.48.0 // indirect
 	golang.org/x/oauth2 v0.33.0 // indirect
-	golang.org/x/sys v0.40.0 // indirect
+	golang.org/x/sys v0.42.0 // indirect
 	golang.org/x/text v0.33.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
 	google.golang.org/api v0.256.0 // indirect
