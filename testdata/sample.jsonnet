@@ -1,8 +1,8 @@
 local envs = import 'envs.libsonnet';
 
 {
-  "region": "us-east-1",
-  "cluster": "api",
+  "region": std.extVar('REGION'),
+  "cluster": std.extVar('CLUSTER'),
   "role": "ecsEventsRole",
   "rules": [
     {
@@ -16,7 +16,7 @@ local envs = import 'envs.libsonnet';
       "capacityProviderStrategy": [
         {
           "capacityProvider": "FARGATE",
-          "base": 1,
+          "base": std.extVar('BASE'),
           "weight": 1
         }
       ],
