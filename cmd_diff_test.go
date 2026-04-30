@@ -26,7 +26,7 @@ func TestExecuteDiffJobsInParallel(t *testing.T) {
 			}, nil
 		}
 
-		results, errChan := executeDiffJobsInParallel(
+		results, errChan := executeJobsInParallel[diffResult](
 			context.Background(),
 			[]string{"rule1", "rule2", "rule3"},
 			1,
@@ -71,7 +71,7 @@ func TestExecuteDiffJobsInParallel(t *testing.T) {
 			ruleNames[i] = fmt.Sprintf("rule-%d", i)
 		}
 
-		results, errChan := executeDiffJobsInParallel(
+		results, errChan := executeJobsInParallel[diffResult](
 			context.Background(),
 			ruleNames,
 			5,
@@ -111,7 +111,7 @@ func TestExecuteDiffJobsInParallel(t *testing.T) {
 			}, nil
 		}
 
-		results, errChan := executeDiffJobsInParallel(
+		results, errChan := executeJobsInParallel[diffResult](
 			context.Background(),
 			[]string{"rule1", errorRuleName, "rule3"},
 			2,
@@ -147,7 +147,7 @@ func TestExecuteDiffJobsInParallel(t *testing.T) {
 			}, nil
 		}
 
-		results, errChan := executeDiffJobsInParallel(
+		results, errChan := executeJobsInParallel[diffResult](
 			context.Background(),
 			[]string{"rule1", panicRuleName, "rule3"},
 			2,
@@ -195,7 +195,7 @@ func TestExecuteDiffJobsInParallel(t *testing.T) {
 			}
 		}
 
-		results, errChan := executeDiffJobsInParallel(
+		results, errChan := executeJobsInParallel[diffResult](
 			ctx,
 			[]string{"rule1", "rule2", "rule3", "rule4", "rule5"},
 			2,
@@ -231,7 +231,7 @@ func TestExecuteDiffJobsInParallel(t *testing.T) {
 			return result, nil
 		}
 
-		results, errChan := executeDiffJobsInParallel(
+		results, errChan := executeJobsInParallel[diffResult](
 			context.Background(),
 			[]string{"rule1", "rule2-invalid", "rule3"},
 			2,
