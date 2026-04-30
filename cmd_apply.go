@@ -12,6 +12,11 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
+type applyDryRunResult struct {
+	ruleName string
+	ruleYaml string
+}
+
 var cmdApply = &runnerImpl{
 	name:        "apply",
 	description: "apply the rule",
@@ -19,13 +24,14 @@ var cmdApply = &runnerImpl{
 		fs := flag.NewFlagSet("ecschedule apply", flag.ContinueOnError)
 		fs.SetOutput(errStream)
 		var (
-			conf    = fs.String("conf", "", "configuration")
-			rule    = fs.String("rule", "", "rule")
-			dryRun  = fs.Bool("dry-run", false, "dry run")
-			all     = fs.Bool("all", false, "apply all rules")
-			prune   = fs.Bool("prune", false, "prune orphaned rules after apply")
-			unified = fs.Bool("u", false, "output diff in unified format (colored, similar to git diff)")
-			noColor = fs.Bool("no-color", false, "disable colored output (Unified diff format only)")
+			conf     = fs.String("conf", "", "configuration")
+			rule     = fs.String("rule", "", "rule")
+			dryRun   = fs.Bool("dry-run", false, "dry run")
+			all      = fs.Bool("all", false, "apply all rules")
+			prune    = fs.Bool("prune", false, "prune orphaned rules after apply")
+			unified  = fs.Bool("u", false, "output diff in unified format (colored, similar to git diff)")
+			noColor  = fs.Bool("no-color", false, "disable colored output (Unified diff format only)")
+			parallel = fs.Int("parallel", 1, "number of parallel workers for dry-run (default: 1, only effective with -dry-run, recommended: 1-10 due to AWS API rate limits. Note: output order is not guaranteed when parallel > 1)")
 		)
 		if err := fs.Parse(argv); err != nil {
 			return err
@@ -62,6 +68,13 @@ var cmdApply = &runnerImpl{
 			}
 		}
 
+		if *parallel < 1 {
+			return errors.New("-parallel must be at least 1")
+		}
+		if *parallel > 1 && !*dryRun {
+			return errors.New("-parallel can only be used with -dry-run (apply parallelization is not yet supported)")
+		}
+
 		var dryRunSuffix string
 		if *dryRun {
 			dryRunSuffix = " (dry-run)"
@@ -69,21 +82,46 @@ var cmdApply = &runnerImpl{
 
 		format := selectDiffFormat(*unified)
 
-		for _, rule := range ruleNames {
-			ru := c.GetRuleByName(rule)
-			if ru == nil {
-				return fmt.Errorf("no rules found for %s", rule)
+		if *dryRun {
+			processApplyDryRunJob := func(ctx context.Context, ruleName string) (applyDryRunResult, error) {
+				ru := c.GetRuleByName(ruleName)
+				if ru == nil {
+					return applyDryRunResult{}, fmt.Errorf("no rules found for %s", ruleName)
+				}
+				log.Printf("applying the rule %q%s", ruleName, dryRunSuffix)
+				if err := ru.applyInternal(ctx, a.AwsConf, true, format); err != nil {
+					return applyDryRunResult{}, err
+				}
+				for _, v := range ru.ContainerOverrides {
+					v.Environment = nil
+				}
+				bs, _ := yaml.Marshal(ru)
+				return applyDryRunResult{ruleName: ruleName, ruleYaml: string(bs)}, nil
 			}
-			log.Printf("applying the rule %q%s", rule, dryRunSuffix)
-			if err := ru.applyInternal(ctx, a.AwsConf, *dryRun, format); err != nil {
+
+			results, errChan := executeJobsInParallel[applyDryRunResult](ctx, ruleNames, *parallel, processApplyDryRunJob)
+			for result := range results {
+				log.Printf("✅ following rule applied%s\n%s", dryRunSuffix, result.ruleYaml)
+			}
+			if err := <-errChan; err != nil {
 				return err
 			}
-			for _, v := range ru.ContainerOverrides {
-				// mask environment variables
-				v.Environment = nil
+		} else {
+			for _, rule := range ruleNames {
+				ru := c.GetRuleByName(rule)
+				if ru == nil {
+					return fmt.Errorf("no rules found for %s", rule)
+				}
+				log.Printf("applying the rule %q", rule)
+				if err := ru.applyInternal(ctx, a.AwsConf, false, format); err != nil {
+					return err
+				}
+				for _, v := range ru.ContainerOverrides {
+					v.Environment = nil
+				}
+				bs, _ := yaml.Marshal(ru)
+				log.Printf("✅ following rule applied\n%s", string(bs))
 			}
-			bs, _ := yaml.Marshal(ru)
-			log.Printf("✅ following rule applied%s\n%s", dryRunSuffix, string(bs))
 		}
 
 		if *prune {
