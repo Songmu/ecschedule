@@ -12,8 +12,8 @@ import (
 )
 
 type ruleGetter struct {
-	svc                                                                               *cloudwatchevents.Client
-	clusterArn, ruleArnPrefix, taskDefArnPrefix, roleArnPrefix, roleArn, sqsArnPrefix string
+	svc                                                                      *cloudwatchevents.Client
+	clusterArn, ruleArnPrefix, taskDefArnPrefix, roleArnPrefix, sqsArnPrefix string
 }
 
 func (rg *ruleGetter) getRule(ctx context.Context, r *cweTypes.Rule) (*Rule, error) {
@@ -43,9 +43,10 @@ func (rg *ruleGetter) getRule(ctx context.Context, r *cweTypes.Rule) (*Rule, err
 		}
 		target := &Target{TargetID: targetID}
 
-		if role := *t.RoleArn; role != rg.roleArn {
-			target.Role = strings.TrimPrefix(role, rg.roleArnPrefix)
-		}
+		// Always populate Role to keep the dumped/remote YAML symmetric with
+		// the local configuration, which always specifies a role explicitly
+		// (or implicitly via the default).
+		target.Role = strings.TrimPrefix(*t.RoleArn, rg.roleArnPrefix)
 
 		taskCount := *ecsParams.TaskCount
 		if taskCount != 1 {
