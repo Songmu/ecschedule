@@ -218,6 +218,27 @@ func TestLoadConfig_tfstate_multi(t *testing.T) {
 	}
 }
 
+func TestLoadConfig_tfstate_multi_jsonnet(t *testing.T) {
+	path := "testdata/sample5.jsonnet"
+	f, err := os.Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+
+	c, err := LoadConfig(context.Background(), f, "338", path)
+	if err != nil {
+		t.Fatalf("error should be nil, but: %s", err)
+	}
+
+	if !reflect.DeepEqual(c.Plugins, []*Plugin{
+		{Name: "tfstate", Config: map[string]interface{}{"path": "testdata/terraform.tfstate"}, FuncPrefix: "first_"},
+		{Name: "tfstate", Config: map[string]interface{}{"path": "testdata/terraform.tfstate"}, FuncPrefix: "second_"},
+	}) {
+		t.Errorf("unexpected output: %#v", c.Plugins)
+	}
+}
+
 func TestLoadConfig_jsonnetExtVar_missing(t *testing.T) {
 	// std.extVar references in sample.jsonnet must be supplied; otherwise
 	// jsonnet should error rather than silently substituting an empty value.
