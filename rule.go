@@ -166,6 +166,7 @@ func NewRuleFromRemote(ctx context.Context, awsConf aws.Config, bc *BaseConfig, 
 			ruleArnPrefix:    fmt.Sprintf("arn:aws:events:%s:%s:rule/", bc.Region, bc.AccountID),
 			clusterArn:       fmt.Sprintf("arn:aws:ecs:%s:%s:cluster/%s", bc.Region, bc.AccountID, bc.Cluster),
 			taskDefArnPrefix: fmt.Sprintf("arn:aws:ecs:%s:%s:task-definition/", bc.Region, bc.AccountID),
+			roleArnPrefix:    fmt.Sprintf("arn:aws:iam::%s:role/", bc.AccountID),
 		}
 	)
 
@@ -638,22 +639,38 @@ func (r *Rule) deleteInternal(ctx context.Context, awsConf aws.Config, dryRun bo
 	return err
 }
 
+// localYAMLForDiff returns the YAML representation of r used as the "to" side
+// of (*Rule).diff. It strips BaseConfig and normalizes an empty Role to
+// defaultRole so the output stays symmetric with the YAML reconstructed from
+// the remote rule (which always carries a resolved role).
+func (r *Rule) localYAMLForDiff() (string, error) {
+	bc := r.BaseConfig
+	r.BaseConfig = nil
+	defer func() { r.BaseConfig = bc }()
+
+	origRole := r.Role
+	if r.Role == "" {
+		r.Role = defaultRole
+	}
+	defer func() { r.Role = origRole }()
+
+	bs, err := yaml.Marshal(r)
+	if err != nil {
+		return "", err
+	}
+	return string(bs), nil
+}
+
 func (r *Rule) diff(ctx context.Context, cw *cloudwatchevents.Client) (from, to string, err error) {
 	rule := aws.String(r.Name)
 
 	c := r.BaseConfig
-	r.BaseConfig = nil
-	defer func() { r.BaseConfig = c }()
-	bs, err := yaml.Marshal(r)
+
+	localRuleYaml, err := r.localYAMLForDiff()
 	if err != nil {
 		return "", "", err
 	}
-	localRuleYaml := string(bs)
 
-	role := r.Role
-	if role == "" {
-		role = defaultRole
-	}
 	ruleList, err := cw.ListRules(ctx, &cloudwatchevents.ListRulesInput{
 		NamePrefix: rule,
 	})
@@ -669,7 +686,6 @@ func (r *Rule) diff(ctx context.Context, cw *cloudwatchevents.Client) (from, to 
 			clusterArn:       fmt.Sprintf("arn:aws:ecs:%s:%s:cluster/%s", c.Region, c.AccountID, c.Cluster),
 			taskDefArnPrefix: fmt.Sprintf("arn:aws:ecs:%s:%s:task-definition/", c.Region, c.AccountID),
 			roleArnPrefix:    roleArnPrefix,
-			roleArn:          fmt.Sprintf("%s%s", roleArnPrefix, role),
 		}
 		remoteRuleYaml string
 	)

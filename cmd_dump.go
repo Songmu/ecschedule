@@ -97,7 +97,6 @@ var cmdDump = &runnerImpl{
 				clusterArn:       fmt.Sprintf("arn:aws:ecs:%s:%s:cluster/%s", *region, accountID, *cluster),
 				taskDefArnPrefix: fmt.Sprintf("arn:aws:ecs:%s:%s:task-definition/", *region, accountID),
 				roleArnPrefix:    roleArnPrefix,
-				roleArn:          fmt.Sprintf("%s%s", roleArnPrefix, *role),
 				sqsArnPrefix:     fmt.Sprintf("arn:aws:sqs:%s:%s:", *region, accountID),
 			}
 		)
