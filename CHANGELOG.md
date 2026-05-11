@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.18.2](https://github.com/Songmu/ecschedule/compare/v0.18.1...v0.18.2) - 2026-05-11
+- toolchain go1.26.4 by @Songmu in https://github.com/Songmu/ecschedule/pull/277
+
 ## [v0.18.1](https://github.com/Songmu/ecschedule/compare/v0.18.0...v0.18.1) - 2026-05-11
 - Revert "Release for v0.18.0" by @Songmu in https://github.com/Songmu/ecschedule/pull/273
 - Revert "Revert "Release for v0.18.0"" by @Songmu in https://github.com/Songmu/ecschedule/pull/275
