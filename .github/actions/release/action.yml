@@ -14,9 +14,12 @@ runs:
     uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
     with:
       go-version-file: go.mod
-  - name: release
-    run: |
-      make crossbuild upload
+  - name: crossbuild
+    run: make crossbuild
     shell: bash
-    env:
-      GITHUB_TOKEN: ${{ inputs.token }}
+  - name: upload
+    uses: tcnksm/ghr@766f869eacbbb086e8860cf0f0192dda6e8e67e1 # v0.18.3
+    with:
+      tag: ${{ inputs.tag || github.ref_name }}
+      path: dist
+      token: ${{ inputs.token }}

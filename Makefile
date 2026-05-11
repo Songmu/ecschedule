@@ -12,7 +12,6 @@ deps:
 
 .PHONY: devel-deps
 devel-deps:
-	go install github.com/tcnksm/ghr@latest
 	go install github.com/Songmu/godzil/cmd/godzil@latest
 
 .PHONY: test
@@ -37,7 +36,3 @@ crossbuild: go.sum devel-deps
 	godzil crossbuild -pv=v$(VERSION) -build-ldflags=$(BUILD_LDFLAGS) \
       -os=linux,darwin,windows -d=$(DIST_DIR) ./cmd/*
 	cd $(DIST_DIR) && shasum -a 256 $$(find * -type f -maxdepth 0) > SHA256SUMS
-
-.PHONY: upload
-upload:
-	ghr v$(VERSION) $(DIST_DIR)
