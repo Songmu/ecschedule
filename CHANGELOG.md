@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.18.1](https://github.com/Songmu/ecschedule/compare/v0.18.0...v0.18.1) - 2026-05-11
+- Revert "Release for v0.18.0" by @Songmu in https://github.com/Songmu/ecschedule/pull/273
+- Revert "Revert "Release for v0.18.0"" by @Songmu in https://github.com/Songmu/ecschedule/pull/275
+- Use tcnksm/ghr GitHub Action for release uploads by @Songmu in https://github.com/Songmu/ecschedule/pull/276
+
 ## [v0.18.0](https://github.com/Songmu/ecschedule/compare/v0.17.2...v0.18.0) - 2026-05-11
 - build(deps): bump actions/checkout from 6.0.0 to 6.0.1 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/226
 - build(deps): bump reviewdog/action-actionlint from 1.69.0 to 1.69.1 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/225
