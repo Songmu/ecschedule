@@ -10,30 +10,30 @@ import (
 	"time"
 )
 
-func TestExecuteDiffJobsInParallel(t *testing.T) {
+func TestExecuteApplyDryRunJobsInParallel(t *testing.T) {
 	t.Run("parallel=1 executes jobs sequentially", func(t *testing.T) {
 		var executionOrder []string
 		var mu sync.Mutex
 
-		mockJob := func(ctx context.Context, ruleName string) (diffResult, error) {
+		mockJob := func(ctx context.Context, ruleName string) (applyDryRunResult, error) {
 			mu.Lock()
 			executionOrder = append(executionOrder, ruleName)
 			mu.Unlock()
 
-			return diffResult{
-				ruleName:   ruleName,
-				diffOutput: fmt.Sprintf("diff for %s", ruleName),
+			return applyDryRunResult{
+				ruleName: ruleName,
+				ruleYaml: fmt.Sprintf("yaml for %s", ruleName),
 			}, nil
 		}
 
-		results, errChan := executeJobsInParallel[diffResult](
+		results, errChan := executeJobsInParallel[applyDryRunResult](
 			context.Background(),
 			[]string{"rule1", "rule2", "rule3"},
 			1,
 			mockJob,
 		)
 
-		var collected []diffResult
+		var collected []applyDryRunResult
 		for result := range results {
 			collected = append(collected, result)
 		}
@@ -56,13 +56,13 @@ func TestExecuteDiffJobsInParallel(t *testing.T) {
 		var executedCount atomic.Int32
 		jobCount := 20
 
-		mockJob := func(ctx context.Context, ruleName string) (diffResult, error) {
+		mockJob := func(ctx context.Context, ruleName string) (applyDryRunResult, error) {
 			executedCount.Add(1)
 			time.Sleep(10 * time.Millisecond)
 
-			return diffResult{
-				ruleName:   ruleName,
-				diffOutput: fmt.Sprintf("diff for %s", ruleName),
+			return applyDryRunResult{
+				ruleName: ruleName,
+				ruleYaml: fmt.Sprintf("yaml for %s", ruleName),
 			}, nil
 		}
 
@@ -71,14 +71,14 @@ func TestExecuteDiffJobsInParallel(t *testing.T) {
 			ruleNames[i] = fmt.Sprintf("rule-%d", i)
 		}
 
-		results, errChan := executeJobsInParallel[diffResult](
+		results, errChan := executeJobsInParallel[applyDryRunResult](
 			context.Background(),
 			ruleNames,
 			5,
 			mockJob,
 		)
 
-		var collected []diffResult
+		var collected []applyDryRunResult
 		for result := range results {
 			collected = append(collected, result)
 		}
@@ -100,25 +100,25 @@ func TestExecuteDiffJobsInParallel(t *testing.T) {
 	t.Run("handles job errors", func(t *testing.T) {
 		errorRuleName := "rule-error"
 
-		mockJob := func(ctx context.Context, ruleName string) (diffResult, error) {
+		mockJob := func(ctx context.Context, ruleName string) (applyDryRunResult, error) {
 			if ruleName == errorRuleName {
-				return diffResult{}, fmt.Errorf("simulated error for %s", ruleName)
+				return applyDryRunResult{}, fmt.Errorf("simulated error for %s", ruleName)
 			}
 
-			return diffResult{
-				ruleName:   ruleName,
-				diffOutput: fmt.Sprintf("diff for %s", ruleName),
+			return applyDryRunResult{
+				ruleName: ruleName,
+				ruleYaml: fmt.Sprintf("yaml for %s", ruleName),
 			}, nil
 		}
 
-		results, errChan := executeJobsInParallel[diffResult](
+		results, errChan := executeJobsInParallel[applyDryRunResult](
 			context.Background(),
 			[]string{"rule1", errorRuleName, "rule3"},
 			2,
 			mockJob,
 		)
 
-		var collected []diffResult
+		var collected []applyDryRunResult
 		for result := range results {
 			collected = append(collected, result)
 		}
@@ -131,30 +131,32 @@ func TestExecuteDiffJobsInParallel(t *testing.T) {
 		if !strings.Contains(err.Error(), "simulated error") {
 			t.Errorf("expected error to contain 'simulated error', got: %v", err)
 		}
+
+		_ = collected
 	})
 
 	t.Run("handles panic in jobs", func(t *testing.T) {
 		panicRuleName := "rule-panic"
 
-		mockJob := func(ctx context.Context, ruleName string) (diffResult, error) {
+		mockJob := func(ctx context.Context, ruleName string) (applyDryRunResult, error) {
 			if ruleName == panicRuleName {
 				panic("simulated panic")
 			}
 
-			return diffResult{
-				ruleName:   ruleName,
-				diffOutput: fmt.Sprintf("diff for %s", ruleName),
+			return applyDryRunResult{
+				ruleName: ruleName,
+				ruleYaml: fmt.Sprintf("yaml for %s", ruleName),
 			}, nil
 		}
 
-		results, errChan := executeJobsInParallel[diffResult](
+		results, errChan := executeJobsInParallel[applyDryRunResult](
 			context.Background(),
 			[]string{"rule1", panicRuleName, "rule3"},
 			2,
 			mockJob,
 		)
 
-		var collected []diffResult
+		var collected []applyDryRunResult
 		for result := range results {
 			collected = append(collected, result)
 		}
@@ -177,7 +179,7 @@ func TestExecuteDiffJobsInParallel(t *testing.T) {
 		ctx, cancel := context.WithCancel(context.Background())
 		var executedCount atomic.Int32
 
-		mockJob := func(ctx context.Context, ruleName string) (diffResult, error) {
+		mockJob := func(ctx context.Context, ruleName string) (applyDryRunResult, error) {
 			executedCount.Add(1)
 
 			if executedCount.Load() == 2 {
@@ -186,23 +188,23 @@ func TestExecuteDiffJobsInParallel(t *testing.T) {
 
 			select {
 			case <-ctx.Done():
-				return diffResult{}, ctx.Err()
+				return applyDryRunResult{}, ctx.Err()
 			case <-time.After(100 * time.Millisecond):
-				return diffResult{
-					ruleName:   ruleName,
-					diffOutput: fmt.Sprintf("diff for %s", ruleName),
+				return applyDryRunResult{
+					ruleName: ruleName,
+					ruleYaml: fmt.Sprintf("yaml for %s", ruleName),
 				}, nil
 			}
 		}
 
-		results, errChan := executeJobsInParallel[diffResult](
+		results, errChan := executeJobsInParallel[applyDryRunResult](
 			ctx,
 			[]string{"rule1", "rule2", "rule3", "rule4", "rule5"},
 			2,
 			mockJob,
 		)
 
-		var collected []diffResult
+		var collected []applyDryRunResult
 		for result := range results {
 			collected = append(collected, result)
 		}
@@ -217,32 +219,30 @@ func TestExecuteDiffJobsInParallel(t *testing.T) {
 		}
 	})
 
-	t.Run("validation errors are tracked", func(t *testing.T) {
-		mockJob := func(ctx context.Context, ruleName string) (diffResult, error) {
-			result := diffResult{
-				ruleName:   ruleName,
-				diffOutput: fmt.Sprintf("diff for %s", ruleName),
-			}
-
-			if strings.HasSuffix(ruleName, "-invalid") {
-				result.validationErrors = []string{"validation error 1", "validation error 2"}
-			}
-
-			return result, nil
+	t.Run("all rules are processed", func(t *testing.T) {
+		jobCount := 10
+		ruleNames := make([]string, jobCount)
+		for i := 0; i < jobCount; i++ {
+			ruleNames[i] = fmt.Sprintf("rule-%d", i)
 		}
 
-		results, errChan := executeJobsInParallel[diffResult](
+		mockJob := func(ctx context.Context, ruleName string) (applyDryRunResult, error) {
+			return applyDryRunResult{
+				ruleName: ruleName,
+				ruleYaml: fmt.Sprintf("yaml for %s", ruleName),
+			}, nil
+		}
+
+		results, errChan := executeJobsInParallel[applyDryRunResult](
 			context.Background(),
-			[]string{"rule1", "rule2-invalid", "rule3"},
-			2,
+			ruleNames,
+			3,
 			mockJob,
 		)
 
-		validationErrCount := 0
+		var collected []applyDryRunResult
 		for result := range results {
-			if len(result.validationErrors) > 0 {
-				validationErrCount++
-			}
+			collected = append(collected, result)
 		}
 
 		err := <-errChan
@@ -250,8 +250,8 @@ func TestExecuteDiffJobsInParallel(t *testing.T) {
 			t.Fatalf("unexpected error: %v", err)
 		}
 
-		if validationErrCount != 1 {
-			t.Errorf("expected 1 result with validation errors, got %d", validationErrCount)
+		if len(collected) != jobCount {
+			t.Errorf("expected %d results, got %d", jobCount, len(collected))
 		}
 	})
 }

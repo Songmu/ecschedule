@@ -138,15 +138,17 @@ This performs the same validation as `apply` and `run`, with a slight overhead, 
 
 ### Parallel Execution
 
-The `diff` command supports parallel execution for improved performance with many rules:
+The `diff` command and `apply -dry-run` support parallel execution for improved performance with many rules:
 
 ```console
 % ecschedule -conf ecschedule.yaml diff -all -parallel 10
+% ecschedule -conf ecschedule.yaml apply -all -dry-run -parallel 10
 ```
 
 - Default: `parallel=1` (sequential, backward compatible)
 - Recommended: 1-10 (due to AWS API rate limits)
 - Note: Output order is not guaranteed when parallel > 1
+- Note: `-parallel` is only effective with `-dry-run` for the `apply` command. Using it without `-dry-run` returns an error.
 
 ## Log Format
 

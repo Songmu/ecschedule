@@ -8,74 +8,16 @@ import (
 	"io"
 	"log"
 	"os"
-	"runtime/debug"
 	"sync/atomic"
 
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatchevents"
 	"github.com/goccy/go-yaml"
-	"golang.org/x/sync/errgroup"
 )
 
 type diffResult struct {
 	ruleName         string
 	diffOutput       string
 	validationErrors []string
-}
-
-func executeDiffJobsInParallel(
-	ctx context.Context,
-	ruleNames []string,
-	parallel int,
-	jobFunc func(ctx context.Context, ruleName string) (diffResult, error),
-) (<-chan diffResult, <-chan error) {
-	g, ctx := errgroup.WithContext(ctx)
-	g.SetLimit(parallel)
-
-	results := make(chan diffResult, len(ruleNames))
-	errChan := make(chan error, 1)
-	var panicCount atomic.Int32
-
-	for _, ruleName := range ruleNames {
-		ruleName := ruleName
-		g.Go(func() error {
-			defer func() {
-				if rec := recover(); rec != nil {
-					panicCount.Add(1)
-					log.Printf("[ERROR] panic in worker for rule %q: %v\n%s",
-						ruleName, rec, debug.Stack())
-				}
-			}()
-
-			result, err := jobFunc(ctx, ruleName)
-			if err != nil {
-				return err
-			}
-
-			select {
-			case results <- result:
-			case <-ctx.Done():
-				return ctx.Err()
-			}
-
-			return nil
-		})
-	}
-
-	go func() {
-		err := g.Wait()
-		close(results)
-
-		if err != nil {
-			errChan <- err
-		} else if count := panicCount.Load(); count > 0 {
-			errChan <- fmt.Errorf("%d rule(s) failed due to panic (see logs above for details)", count)
-		} else {
-			errChan <- nil
-		}
-		close(errChan)
-	}()
-
-	return results, errChan
 }
 
 var cmdDiff = &runnerImpl{
@@ -180,7 +122,7 @@ var cmdDiff = &runnerImpl{
 			return result, nil
 		}
 
-		results, errChan := executeDiffJobsInParallel(ctx, ruleNames, *parallel, processDiffJob)
+		results, errChan := executeJobsInParallel[diffResult](ctx, ruleNames, *parallel, processDiffJob)
 
 		for result := range results {
 			if len(result.validationErrors) > 0 {
