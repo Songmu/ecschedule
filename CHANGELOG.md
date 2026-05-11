@@ -1,39 +1,5 @@
 # Changelog
 
-## [v0.18.0](https://github.com/Songmu/ecschedule/compare/v0.17.2...v0.18.0) - 2026-05-11
-- build(deps): bump actions/checkout from 6.0.0 to 6.0.1 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/226
-- build(deps): bump reviewdog/action-actionlint from 1.69.0 to 1.69.1 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/225
-- build(deps): bump the aws group with 6 updates by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/224
-- build(deps): bump Songmu/tagpr from 1.9.0 to 1.10.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/232
-- build(deps): bump codecov/codecov-action from 5.5.1 to 5.5.2 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/231
-- build(deps): bump github.com/fujiwara/tfstate-lookup from 1.8.0 to 1.8.1 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/230
-- build(deps): bump golang.org/x/sync from 0.18.0 to 0.19.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/229
-- build(deps): bump the aws group with 6 updates by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/228
-- build(deps): bump github.com/goccy/go-yaml from 1.19.0 to 1.19.1 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/234
-- build(deps): bump the aws group with 2 updates by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/233
-- build(deps): bump github.com/goccy/go-yaml from 1.19.1 to 1.19.2 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/237
-- build(deps): bump the aws group with 6 updates by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/236
-- build(deps): bump Songmu/tagpr from 1.10.0 to 1.11.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/235
-- build(deps): bump github.com/aws/aws-sdk-go-v2/service/ecs from 1.70.1 to 1.71.0 in the aws group by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/238
-- build(deps): bump actions/setup-go from 6.1.0 to 6.2.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/241
-- build(deps): bump github.com/fujiwara/tfstate-lookup from 1.8.1 to 1.9.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/239
-- build(deps): bump Songmu/tagpr from 1.11.0 to 1.11.1 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/240
-- build(deps): bump github.com/fujiwara/tfstate-lookup from 1.9.0 to 1.10.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/242
-- build(deps): bump actions/checkout from 6.0.1 to 6.0.2 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/244
-- build(deps): bump reviewdog/action-actionlint from 1.69.1 to 1.70.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/245
-- Fix diff flapping when role is unchanged (#61) by @hirosi1900day in https://github.com/Songmu/ecschedule/pull/271
-- feat(apply): add `-parallel` flag for dry-run parallel execution by @snaka in https://github.com/Songmu/ecschedule/pull/269
-- build(deps): bump the aws group across 1 directory with 6 updates by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/253
-- build(deps): bump golang.org/x/sync from 0.19.0 to 0.20.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/254
-- build(deps): bump Songmu/tagpr from 1.11.1 to 1.18.3 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/267
-- build(deps): bump google.golang.org/grpc from 1.76.0 to 1.79.3 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/255
-- build(deps): bump actions/setup-go from 6.2.0 to 6.4.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/259
-- build(deps): bump codecov/codecov-action from 5.5.2 to 6.0.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/258
-- build(deps): bump github.com/go-jose/go-jose/v4 from 4.1.3 to 4.1.4 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/260
-- build(deps): bump reviewdog/action-actionlint from 1.70.0 to 1.72.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/262
-- build(deps): bump go.opentelemetry.io/otel from 1.39.0 to 1.41.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/268
-- update deps by @Songmu in https://github.com/Songmu/ecschedule/pull/272
-
 ## [v0.17.2](https://github.com/Songmu/ecschedule/compare/v0.17.1...v0.17.2) - 2025-12-02
 - build(deps): bump github.com/goccy/go-yaml from 1.18.0 to 1.19.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/221
 - build(deps): bump reviewdog/action-actionlint from 1.68.0 to 1.69.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/222
