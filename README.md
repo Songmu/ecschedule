@@ -45,6 +45,34 @@ trackingId: trackingId1
     command: [subcommand2, arg]
 ```
 
+### Environment variables in Jsonnet (native functions)
+
+When using a `.jsonnet` config, the following native functions are available at evaluation time:
+
+- `std.native('must_env')(name)` — returns the value of env var `name`; errors if the variable is not set.
+- `std.native('env')(name, default)` — returns the value of env var `name`, or `default` if unset.
+
+Use these when you need to derive a non-string field (e.g., `disabled: bool`) from an env variable. The Go template helper `{{ must_env "..." }}` only substitutes inside string values after Jsonnet evaluation, so it cannot set boolean / numeric fields.
+
+Example — disable all rules in production while keeping them enabled in development:
+
+```jsonnet
+local isProd = std.native('must_env')('ENV') == 'prod';
+{
+  region: 'ap-northeast-1',
+  cluster: '{{ must_env `ENV` }}-cluster',
+  rules: [
+    {
+      name: 'my-rule',
+      scheduleExpression: 'rate(1 hour)',
+      taskDefinition: 'my-task',
+      disabled: isProd,
+      containerOverrides: [],
+    },
+  ],
+}
+```
+
 ## Installation
 
 ```console

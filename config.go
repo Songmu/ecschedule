@@ -11,7 +11,6 @@ import (
 	"text/template"
 
 	"github.com/goccy/go-yaml"
-	"github.com/google/go-jsonnet"
 	gc "github.com/kayac/go-config"
 	"github.com/winebarrel/cronplan"
 )
@@ -156,7 +155,7 @@ func unmarshalConfig(bs []byte, c *Config, ext string) error {
 func readConfigFile(r io.Reader, confPath string) ([]byte, string, error) {
 	ext := filepath.Ext(confPath)
 	if ext == jsonnetExt {
-		vm := jsonnet.MakeVM()
+		vm := newJsonnetVM()
 		bs, err := vm.EvaluateFile(confPath)
 		if err != nil {
 			return nil, ext, fmt.Errorf("failed to evaluate jsonnet file: %w", err)
