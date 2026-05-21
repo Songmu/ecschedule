@@ -1,5 +1,5 @@
 package ecschedule
 
-const version = "0.18.2"
+const version = "0.19.0"
 
 var revision = "HEAD"
