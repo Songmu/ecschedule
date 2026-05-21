@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.19.0](https://github.com/Songmu/ecschedule/compare/v0.18.2...v0.19.0) - 2026-05-21
+- build(deps): bump Songmu/tagpr from 1.18.3 to 1.19.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/279
+- build(deps): bump github.com/fujiwara/tfstate-lookup from 1.11.0 to 1.12.1 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/281
+- Add must_env and env native functions for Jsonnet configs by @tzmfreedom in https://github.com/Songmu/ecschedule/pull/280
+
 ## [v0.18.2](https://github.com/Songmu/ecschedule/compare/v0.18.1...v0.18.2) - 2026-05-11
 - toolchain go1.26.4 by @Songmu in https://github.com/Songmu/ecschedule/pull/277
 
