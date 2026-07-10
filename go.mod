@@ -113,7 +113,7 @@ require (
 	github.com/itchyny/timefmt-go v0.1.8 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
-	golang.org/x/crypto v0.51.0 // indirect
+	golang.org/x/crypto v0.52.0 // indirect
 	golang.org/x/exp v0.0.0-20260508232706-74f9aab9d74a
 	golang.org/x/net v0.55.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
