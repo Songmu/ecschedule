@@ -1,5 +1,19 @@
 # Changelog
 
+## [v0.20.0](https://github.com/Songmu/ecschedule/compare/v0.19.0...v0.20.0) - 2026-07-14
+
+- Bump golang.org/x/net to v0.55.0 (CVE-2026-39821) by @rymiyamoto in https://github.com/Songmu/ecschedule/pull/286
+- build(deps): bump codecov/codecov-action from 6.0.0 to 6.0.1 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/285
+- build(deps): bump the aws group with 2 updates by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/284
+- build(deps): bump the actions group with 2 updates by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/298
+- build(deps): bump reviewdog/action-staticcheck from 1.28.0 to 1.29.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/294
+- build(deps): bump Songmu/tagpr from 1.19.0 to 1.20.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/288
+- build(deps): bump golang.org/x/crypto from 0.51.0 to 0.52.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/296
+- build(deps): bump the aws group with 6 updates by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/289
+- build(deps): bump golang.org/x/sync from 0.20.0 to 0.22.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/297
+- build(deps): bump codecov/codecov-action from 6.0.1 to 7.0.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/291
+- feat: support -ext-str and -ext-code flags for jsonnet std.extVar by @takaishi in https://github.com/Songmu/ecschedule/pull/283
+
 ## [v0.19.0](https://github.com/Songmu/ecschedule/compare/v0.18.2...v0.19.0) - 2026-05-21
 - build(deps): bump Songmu/tagpr from 1.18.3 to 1.19.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/279
 - build(deps): bump github.com/fujiwara/tfstate-lookup from 1.11.0 to 1.12.1 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/281
