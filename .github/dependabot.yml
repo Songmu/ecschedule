@@ -7,10 +7,15 @@ updates:
     labels:
       - dependencies
       - go
+    cooldown:
+      default-days: 2
     groups:
       aws:
         patterns:
         - "github.com/aws/aws-sdk-go-v2*"
+      golang-x:
+        patterns:
+        - "golang.org/x/*"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -18,3 +23,9 @@ updates:
     labels:
       - dependencies
       - github-actions
+    cooldown:
+      default-days: 2
+    groups:
+      actions:
+        patterns:
+        - "actions/*"
