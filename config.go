@@ -95,10 +95,46 @@ func validateCronExpression(exp string) error {
 	return nil
 }
 
+type loadConfigOptions struct {
+	extStr  map[string]string
+	extCode map[string]string
+}
+
+// LoadConfigOption configures LoadConfig
+type LoadConfigOption func(*loadConfigOptions)
+
+// WithExtStr binds Jsonnet std.extVar string variables
+func WithExtStr(vars map[string]string) LoadConfigOption {
+	return func(o *loadConfigOptions) {
+		if o.extStr == nil {
+			o.extStr = map[string]string{}
+		}
+		for k, v := range vars {
+			o.extStr[k] = v
+		}
+	}
+}
+
+// WithExtCode binds Jsonnet std.extVar code variables
+func WithExtCode(vars map[string]string) LoadConfigOption {
+	return func(o *loadConfigOptions) {
+		if o.extCode == nil {
+			o.extCode = map[string]string{}
+		}
+		for k, v := range vars {
+			o.extCode[k] = v
+		}
+	}
+}
+
 // LoadConfig loads config
-func LoadConfig(ctx context.Context, r io.Reader, accountID string, confPath string) (*Config, error) {
+func LoadConfig(ctx context.Context, r io.Reader, accountID string, confPath string, opts ...LoadConfigOption) (*Config, error) {
+	var o loadConfigOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
 	c := Config{}
-	bs, ext, err := readConfigFile(r, confPath)
+	bs, ext, err := readConfigFile(r, confPath, &o)
 	if err != nil {
 		return nil, err
 	}
@@ -152,10 +188,16 @@ func unmarshalConfig(bs []byte, c *Config, ext string) error {
 	return yaml.Unmarshal(bs, c)
 }
 
-func readConfigFile(r io.Reader, confPath string) ([]byte, string, error) {
+func readConfigFile(r io.Reader, confPath string, o *loadConfigOptions) ([]byte, string, error) {
 	ext := filepath.Ext(confPath)
 	if ext == jsonnetExt {
 		vm := newJsonnetVM()
+		for k, v := range o.extStr {
+			vm.ExtVar(k, v)
+		}
+		for k, v := range o.extCode {
+			vm.ExtCode(k, v)
+		}
 		bs, err := vm.EvaluateFile(confPath)
 		if err != nil {
 			return nil, ext, fmt.Errorf("failed to evaluate jsonnet file: %w", err)

@@ -14,9 +14,9 @@ import (
 
 // Plugin the plugin
 type Plugin struct {
-	Name       string                 `yaml:"name"`
-	Config     map[string]interface{} `yaml:"config"`
-	FuncPrefix string                 `yaml:"func_prefix,omitempty"`
+	Name       string                 `yaml:"name" json:"name"`
+	Config     map[string]interface{} `yaml:"config" json:"config"`
+	FuncPrefix string                 `yaml:"func_prefix,omitempty" json:"func_prefix,omitempty"`
 }
 
 func (p Plugin) setup(ctx context.Context, c *Config) error {

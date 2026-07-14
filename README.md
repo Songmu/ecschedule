@@ -210,6 +210,37 @@ Priority: `--no-color` flag > `NO_COLOR` > `ECSCHEDULE_COLOR` > default (colored
 
 **Note**: The `--no-color` flag is a subcommand-level flag and only affects unified diff format. The default pretty format always displays with colors.
 
+### Jsonnet external variables
+
+When the configuration file is a Jsonnet (`*.jsonnet`) file, you can pass values
+to `std.extVar` from the command line using top-level `-ext-str` / `-ext-code`
+flags, mirroring the upstream `jsonnet` CLI:
+
+```console
+% ecschedule -conf ecschedule.jsonnet \
+    -ext-str CLUSTER=api -ext-str REGION=us-east-1 \
+    -ext-code 'TASK_COUNT=2' \
+    apply -all
+```
+
+`-ext-str key=value` binds a string. `-ext-code key=value` binds a Jsonnet
+expression (numbers, arrays, objects, etc.). Either form may also be passed as
+just `-ext-str KEY` / `-ext-code KEY`, in which case the value is read from the
+environment variable of the same name. Both flags may be repeated.
+
+```jsonnet
+{
+  region: std.extVar('REGION'),
+  cluster: std.extVar('CLUSTER'),
+  rules: [
+    {
+      // ...
+      taskCount: std.extVar('TASK_COUNT'),  // -ext-code so it stays a number
+    },
+  ],
+}
+```
+
 ## Functions
 
 You can use following functions in the configuration file.

@@ -3,6 +3,7 @@ package ecschedule
 import (
 	"context"
 	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 	"text/template"
@@ -88,7 +89,19 @@ func TestLoadConfig(t *testing.T) {
 			t.Fatal(err)
 		}
 		defer f.Close()
-		c, err := LoadConfig(context.Background(), f, "334", path)
+		var opts []LoadConfigOption
+		if filepath.Ext(path) == jsonnetExt {
+			opts = append(opts,
+				WithExtStr(map[string]string{
+					"REGION":  "us-east-1",
+					"CLUSTER": "api",
+				}),
+				WithExtCode(map[string]string{
+					"BASE": "1",
+				}),
+			)
+		}
+		c, err := LoadConfig(context.Background(), f, "334", path, opts...)
 		if err != nil {
 			t.Errorf("error should be nil, but: %s", err)
 		}
@@ -202,6 +215,42 @@ func TestLoadConfig_tfstate_multi(t *testing.T) {
 	esg := []string{"sg-11111111", "sg-99999999"}
 	if !reflect.DeepEqual(asg, esg) {
 		t.Errorf("error should be %v, but: %v", asg, esg)
+	}
+}
+
+func TestLoadConfig_tfstate_multi_jsonnet(t *testing.T) {
+	path := "testdata/sample5.jsonnet"
+	f, err := os.Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+
+	c, err := LoadConfig(context.Background(), f, "338", path)
+	if err != nil {
+		t.Fatalf("error should be nil, but: %s", err)
+	}
+
+	if !reflect.DeepEqual(c.Plugins, []*Plugin{
+		{Name: "tfstate", Config: map[string]interface{}{"path": "testdata/terraform.tfstate"}, FuncPrefix: "first_"},
+		{Name: "tfstate", Config: map[string]interface{}{"path": "testdata/terraform.tfstate"}, FuncPrefix: "second_"},
+	}) {
+		t.Errorf("unexpected output: %#v", c.Plugins)
+	}
+}
+
+func TestLoadConfig_jsonnetExtVar_missing(t *testing.T) {
+	// std.extVar references in sample.jsonnet must be supplied; otherwise
+	// jsonnet should error rather than silently substituting an empty value.
+	path := "testdata/sample.jsonnet"
+	f, err := os.Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+
+	if _, err := LoadConfig(context.Background(), f, "334", path); err == nil {
+		t.Error("expected error when std.extVar bindings are missing, got nil")
 	}
 }
 
