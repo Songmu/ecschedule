@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.20.1](https://github.com/Songmu/ecschedule/compare/v0.20.0...v0.20.1) - 2026-07-26
+
+- build(deps): bump the aws group with 6 updates by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/299
+- build(deps): bump the actions group with 2 updates by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/300
+- build(deps): bump google.golang.org/grpc from 1.81.0 to 1.82.1 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/302
+- build(deps): bump Songmu/tagpr from 1.20.0 to 1.20.1 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/301
+
 ## [v0.20.0](https://github.com/Songmu/ecschedule/compare/v0.19.0...v0.20.0) - 2026-07-14
 
 - Bump golang.org/x/net to v0.55.0 (CVE-2026-39821) by @rymiyamoto in https://github.com/Songmu/ecschedule/pull/286
