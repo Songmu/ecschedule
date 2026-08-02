@@ -166,17 +166,37 @@ This performs the same validation as `apply` and `run`, with a slight overhead, 
 
 ### Parallel Execution
 
-The `diff` command and `apply -dry-run` support parallel execution for improved performance with many rules:
+The `diff` and `apply` commands support parallel execution for improved performance with many rules:
 
 ```console
 % ecschedule -conf ecschedule.yaml diff -all -parallel 10
 % ecschedule -conf ecschedule.yaml apply -all -dry-run -parallel 10
+% ecschedule -conf ecschedule.yaml apply -all -parallel 10
 ```
 
 - Default: `parallel=1` (sequential, backward compatible)
-- Recommended: 1-10 (due to AWS API rate limits)
+- Recommended: 1-10 (due to AWS API rate limits; quotas are per-account per-region and adjustable via Service Quotas — large rule sets should expect throttling-driven retries)
 - Note: Output order is not guaranteed when parallel > 1
-- Note: `-parallel` is only effective with `-dry-run` for the `apply` command. Using it without `-dry-run` returns an error.
+
+For real `apply`, the failure semantics depend on `-parallel`:
+
+| | behavior on a rule failure |
+|---|---|
+| `-parallel 1` (default) | stops at the first error (unchanged) |
+| `-parallel N` (N > 1) | all rules are validated **before any write**; every changed rule is then attempted; failures are aggregated into an end-of-run summary and the exit status is non-zero |
+
+Notes for parallel apply (`-parallel > 1`):
+
+- A rule that has started writing always completes its `PutRule` → `PutTargets` → `TagResource` sequence (bounded by a 2-minute per-rule timeout). The first Ctrl-C stops starting new rules and waits for in-flight ones; a second Ctrl-C force-quits. In CI, make sure the cancellation grace period exceeds the per-rule timeout or a hard kill may still interrupt a write.
+- Re-running `apply` after a partial failure converges, with two exceptions: changing a `targetId` leaves the old target attached remotely (the rule fires both targets and subsequently diffs as a new rule), and a rule whose tagging (`TagResource`) failed is NOT healed by re-run — the failure message prints the exact `aws events tag-resource` command to repair it.
+- If every rule retries for ~2 minutes and then fails with `LimitExceededException`, you hit the rules-per-bus quota — raise it via Service Quotas instead of waiting out retries.
+- Rule names must be unique: configurations containing duplicate rule names are rejected at load time (for every subcommand).
+- `-prune` orphan detection only searches the region of your ambient AWS configuration; rules in per-rule `region` overrides are outside its view.
+- With `-parallel > 1` the SDK retry budget is shared per region (not per rule), so under sustained failures some rules may fail fast with a rate-limit-token error instead of the underlying one — two error texts can appear for a single root cause.
+
+### Signal Handling
+
+Since the introduction of parallel apply, all subcommands handle SIGINT/SIGTERM gracefully: the first signal cancels in-progress work at API-call boundaries (for parallel apply, no new rules start and in-flight rules finish within the per-rule timeout) and the command exits through the normal error path (exit status 1 with a `💢` message) instead of dying to the signal (previously exit status ~130). A second signal restores default fatal handling and kills the process immediately.
 
 ## Log Format
 
@@ -190,7 +210,7 @@ ecschedule supports unified diff format (similar to `git diff`) with `-u` flag f
 ```
 
 The `diff` command with `-u` flag outputs pure diff content without log prefixes or headers, making it suitable for piping to other tools.
-The `apply` command includes progress logs even with `-u` flag.
+The `apply` command includes progress logs even with `-u` flag (with `-parallel > 1`, output is grouped into one block per rule).
 
 ### Color control
 

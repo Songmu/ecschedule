@@ -31,7 +31,7 @@ var cmdApply = &runnerImpl{
 			prune    = fs.Bool("prune", false, "prune orphaned rules after apply")
 			unified  = fs.Bool("u", false, "output diff in unified format (colored, similar to git diff)")
 			noColor  = fs.Bool("no-color", false, "disable colored output (Unified diff format only)")
-			parallel = fs.Int("parallel", 1, "number of parallel workers for dry-run (default: 1, only effective with -dry-run, recommended: 1-10 due to AWS API rate limits. Note: output order is not guaranteed when parallel > 1)")
+			parallel = fs.Int("parallel", 1, "number of parallel workers (default: 1, recommended: 1-10 due to AWS API rate limits. Note: output order is not guaranteed when parallel > 1)")
 		)
 		if err := fs.Parse(argv); err != nil {
 			return err
@@ -41,6 +41,9 @@ var cmdApply = &runnerImpl{
 
 		if !*all && *rule == "" {
 			return errors.New("-rule or -all option required")
+		}
+		if *parallel < 1 {
+			return errors.New("-parallel must be at least 1")
 		}
 		a := getApp(ctx)
 		c := a.Config
@@ -66,13 +69,6 @@ var cmdApply = &runnerImpl{
 			for _, r := range c.Rules {
 				ruleNames = append(ruleNames, r.Name)
 			}
-		}
-
-		if *parallel < 1 {
-			return errors.New("-parallel must be at least 1")
-		}
-		if *parallel > 1 && !*dryRun {
-			return errors.New("-parallel can only be used with -dry-run (apply parallelization is not yet supported)")
 		}
 
 		var dryRunSuffix string
@@ -104,6 +100,10 @@ var cmdApply = &runnerImpl{
 				log.Printf("✅ following rule applied%s\n%s", dryRunSuffix, result.ruleYaml)
 			}
 			if err := <-errChan; err != nil {
+				return err
+			}
+		} else if *parallel > 1 {
+			if err := runParallelApply(ctx, a.AwsConf, c, ruleNames, *parallel, format); err != nil {
 				return err
 			}
 		} else {
