@@ -3,11 +3,13 @@ package ecschedule
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"os"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatchevents"
@@ -463,7 +465,7 @@ func (r *Rule) validateTaskDefinition(ctx context.Context, awsConf aws.Config) e
 		TaskDefinition: aws.String(r.Target.TaskDefinition),
 	}
 	if _, err := svc.DescribeTaskDefinition(ctx, input); err != nil {
-		return fmt.Errorf("task definition %s is not defined: %s", r.Target.TaskDefinition, err.Error())
+		return fmt.Errorf("task definition %s is not defined: %w", r.Target.TaskDefinition, err)
 	}
 	return nil
 }
@@ -473,53 +475,126 @@ func (r *Rule) Apply(ctx context.Context, awsConf aws.Config, dryRun bool) error
 	return r.applyInternal(ctx, awsConf, dryRun, diffFormatPrettyColored)
 }
 
-// applyInternal is the internal implementation with configurable diff format
-func (r *Rule) applyInternal(ctx context.Context, awsConf aws.Config, dryRun bool, format diffFormat) error {
+// applyPlan is the read-only result of planning one rule: whether the local
+// and remote definitions differ, and the pre-rendered diff output.
+type applyPlan struct {
+	hasChange  bool
+	diffOutput string
+}
+
+// plan runs the validations and the remote diff for r. It performs no
+// writes and no logging; all output is returned as data.
+func (r *Rule) plan(ctx context.Context, awsConf aws.Config, svc *cloudwatchevents.Client, format diffFormat) (*applyPlan, error) {
 	if err := r.validateEnv(); err != nil {
-		return err
+		return nil, err
 	}
 	if err := r.validateTFstate(); err != nil {
-		return err
+		return nil, err
 	}
 	if err := r.validateSSM(); err != nil {
-		return err
+		return nil, err
 	}
 	if err := r.validateTaskDefinition(ctx, awsConf); err != nil {
+		return nil, err
+	}
+	from, to, err := r.diff(ctx, svc)
+	if err != nil {
+		return nil, err
+	}
+	p := &applyPlan{hasChange: from != to}
+	if p.hasChange {
+		p.diffOutput = formatDiff(r.Name, from, to, format)
+	}
+	return p, nil
+}
+
+// perRuleApplyTimeout bounds one rule's write sequence. The sequence is
+// shielded from external cancellation (a sibling's failure or the first
+// SIGINT must not interrupt it mid-way), so this timeout is the only thing
+// guaranteeing liveness when an AWS call stalls.
+const perRuleApplyTimeout = 2 * time.Minute
+
+// tagResourceError reports that the rule was applied (PutRule/PutTargets
+// succeeded) but tagging failed. Error() returns exactly the underlying
+// error string so error output on the sequential path is unchanged;
+// callers that want to warn about the missing tracking-id tag detect it
+// with errors.As.
+type tagResourceError struct {
+	err        error
+	ruleARN    string
+	trackingID string
+}
+
+func (e *tagResourceError) Error() string { return e.err.Error() }
+func (e *tagResourceError) Unwrap() error { return e.err }
+
+// execute performs the write sequence PutRule → PutTargets → TagResource.
+func (r *Rule) execute(ctx context.Context, svc *cloudwatchevents.Client) error {
+	ctx, cancel := context.WithTimeout(context.WithoutCancel(ctx), perRuleApplyTimeout)
+	defer cancel()
+	if _, err := svc.PutRule(ctx, r.PutRuleInput()); err != nil {
 		return err
 	}
+	if _, err := svc.PutTargets(ctx, r.PutTargetsInput()); err != nil {
+		return err
+	}
+	if err := r.tagResourceWithRetry(ctx, svc); err != nil {
+		return &tagResourceError{err: err, ruleARN: r.ruleARN(), trackingID: r.TrackingID}
+	}
+	return nil
+}
+
+// tagResourceWithRetry retries TagResource up to 3 attempts, but only for
+// transient error classes the SDK retryer does not handle
+// (ConcurrentModificationException under concurrent bus writes, and
+// ResourceNotFoundException right after PutRule). Throttling errors are
+// already retried inside the SDK; adding app-level attempts on top of an
+// exhausted SDK retry only adds load.
+func (r *Rule) tagResourceWithRetry(ctx context.Context, svc *cloudwatchevents.Client) error {
+	var err error
+	for attempt := 0; attempt < 3; attempt++ {
+		if attempt > 0 {
+			select {
+			case <-time.After(time.Duration(attempt) * 500 * time.Millisecond):
+			case <-ctx.Done():
+				return err
+			}
+		}
+		_, err = svc.TagResource(ctx, r.TagResourceInput())
+		if err == nil {
+			return nil
+		}
+		var concurrentMod *cweTypes.ConcurrentModificationException
+		var notFound *cweTypes.ResourceNotFoundException
+		if !errors.As(err, &concurrentMod) && !errors.As(err, &notFound) {
+			return err
+		}
+	}
+	return err
+}
+
+// applyInternal is the internal implementation with configurable diff format
+func (r *Rule) applyInternal(ctx context.Context, awsConf aws.Config, dryRun bool, format diffFormat) error {
 	svc := cloudwatchevents.NewFromConfig(awsConf, func(o *cloudwatchevents.Options) {
 		o.Region = r.Region
 	})
-
-	from, to, err := r.diff(ctx, svc)
+	p, err := r.plan(ctx, awsConf, svc, format)
 	if err != nil {
 		return err
 	}
-	if from == to {
+	if !p.hasChange {
 		log.Println("💡 skip applying. no differences")
 		return nil
 	}
-
 	var dryRunSuffix string
 	if dryRun {
 		dryRunSuffix = " (dry-run)"
 	}
-
-	diffOutput := formatDiff(r.Name, from, to, format)
-	log.Printf("💡 applying following changes%s\n%s", dryRunSuffix, diffOutput)
-
+	log.Printf("💡 applying following changes%s\n%s", dryRunSuffix, p.diffOutput)
 	if dryRun {
 		return nil
 	}
-	if _, err := svc.PutRule(ctx, r.PutRuleInput()); err != nil {
-		return err
-	}
-	if _, err = svc.PutTargets(ctx, r.PutTargetsInput()); err != nil {
-		return err
-	}
-	_, err = svc.TagResource(ctx, r.TagResourceInput())
-
-	return err
+	return r.execute(ctx, svc)
 }
 
 // Run the rule
