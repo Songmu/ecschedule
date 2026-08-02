@@ -86,6 +86,10 @@ var cmdDiff = &runnerImpl{
 
 		var hasValidationError atomic.Bool
 
+		// Shared across workers so rules pointing at the same task
+		// definition describe it once instead of once per rule.
+		tdv := newTaskDefValidator()
+
 		processDiffJob := func(ctx context.Context, ruleName string) (diffResult, error) {
 			result := diffResult{ruleName: ruleName}
 
@@ -104,7 +108,7 @@ var cmdDiff = &runnerImpl{
 				if err := ru.validateSSM(); err != nil {
 					result.validationErrors = append(result.validationErrors, fmt.Sprintf("  ssm: %s", err))
 				}
-				if err := ru.validateTaskDefinition(ctx, a.AwsConf); err != nil {
+				if err := tdv.validate(ctx, ru, a.AwsConf); err != nil {
 					result.validationErrors = append(result.validationErrors, fmt.Sprintf("  task definition: %s", err))
 				}
 

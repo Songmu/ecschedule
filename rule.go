@@ -9,6 +9,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -457,10 +458,10 @@ func (r *Rule) validateSSM() error {
 	return nil
 }
 
-func (r *Rule) validateTaskDefinition(ctx context.Context, awsConf aws.Config) error {
-	svc := ecs.NewFromConfig(awsConf, func(o *ecs.Options) {
+func (r *Rule) validateTaskDefinition(ctx context.Context, awsConf aws.Config, opts ...func(*ecs.Options)) error {
+	svc := ecs.NewFromConfig(awsConf, append([]func(*ecs.Options){func(o *ecs.Options) {
 		o.Region = r.Region
-	})
+	}}, opts...)...)
 	input := &ecs.DescribeTaskDefinitionInput{
 		TaskDefinition: aws.String(r.Target.TaskDefinition),
 	}
@@ -468,6 +469,42 @@ func (r *Rule) validateTaskDefinition(ctx context.Context, awsConf aws.Config) e
 		return fmt.Errorf("task definition %s is not defined: %w", r.Target.TaskDefinition, err)
 	}
 	return nil
+}
+
+// taskDefValidator memoizes validateTaskDefinition per region + task
+// definition. Configs commonly point many rules at a handful of task
+// definitions; without memoization, planning issues one identical
+// DescribeTaskDefinition per rule, which is enough to throttle ECS at
+// parallel > 1 and abort the whole run before any write happens.
+type taskDefValidator struct {
+	opts    []func(*ecs.Options)
+	mu      sync.Mutex
+	entries map[string]*taskDefValidation
+}
+
+// taskDefValidation caches one outcome. The context error of whichever
+// caller wins the race is cached too, which is intended: every caller
+// shares the run's context, so a cancellation applies to all of them.
+type taskDefValidation struct {
+	once sync.Once
+	err  error
+}
+
+func newTaskDefValidator(opts ...func(*ecs.Options)) *taskDefValidator {
+	return &taskDefValidator{opts: opts, entries: map[string]*taskDefValidation{}}
+}
+
+func (v *taskDefValidator) validate(ctx context.Context, r *Rule, awsConf aws.Config) error {
+	key := r.Region + "\x00" + r.Target.TaskDefinition
+	v.mu.Lock()
+	e, ok := v.entries[key]
+	if !ok {
+		e = &taskDefValidation{}
+		v.entries[key] = e
+	}
+	v.mu.Unlock()
+	e.once.Do(func() { e.err = r.validateTaskDefinition(ctx, awsConf, v.opts...) })
+	return e.err
 }
 
 // Apply the rule (maintained for backward compatibility)
@@ -484,7 +521,7 @@ type applyPlan struct {
 
 // plan runs the validations and the remote diff for r. It performs no
 // writes and no logging; all output is returned as data.
-func (r *Rule) plan(ctx context.Context, awsConf aws.Config, svc *cloudwatchevents.Client, format diffFormat) (*applyPlan, error) {
+func (r *Rule) plan(ctx context.Context, awsConf aws.Config, svc *cloudwatchevents.Client, format diffFormat, tdv *taskDefValidator) (*applyPlan, error) {
 	if err := r.validateEnv(); err != nil {
 		return nil, err
 	}
@@ -494,7 +531,7 @@ func (r *Rule) plan(ctx context.Context, awsConf aws.Config, svc *cloudwatcheven
 	if err := r.validateSSM(); err != nil {
 		return nil, err
 	}
-	if err := r.validateTaskDefinition(ctx, awsConf); err != nil {
+	if err := tdv.validate(ctx, r, awsConf); err != nil {
 		return nil, err
 	}
 	from, to, err := r.diff(ctx, svc)
@@ -575,10 +612,17 @@ func (r *Rule) tagResourceWithRetry(ctx context.Context, svc *cloudwatchevents.C
 
 // applyInternal is the internal implementation with configurable diff format
 func (r *Rule) applyInternal(ctx context.Context, awsConf aws.Config, dryRun bool, format diffFormat) error {
+	return r.applyInternalWith(ctx, awsConf, dryRun, format, newTaskDefValidator())
+}
+
+// applyInternalWith lets a caller that applies several rules share one
+// taskDefValidator. Fanning applyInternal out over workers without sharing
+// one describes the same task definition once per rule.
+func (r *Rule) applyInternalWith(ctx context.Context, awsConf aws.Config, dryRun bool, format diffFormat, tdv *taskDefValidator) error {
 	svc := cloudwatchevents.NewFromConfig(awsConf, func(o *cloudwatchevents.Options) {
 		o.Region = r.Region
 	})
-	p, err := r.plan(ctx, awsConf, svc, format)
+	p, err := r.plan(ctx, awsConf, svc, format, tdv)
 	if err != nil {
 		return err
 	}

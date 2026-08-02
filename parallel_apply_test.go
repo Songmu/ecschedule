@@ -3,6 +3,7 @@ package ecschedule
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"strings"
 	"testing"
@@ -186,6 +187,73 @@ func TestRunParallelApplyExecFailureAggregates(t *testing.T) {
 	}
 	if !strings.Contains(out, "✅ rule \"rule-good\" applied") {
 		t.Errorf("successful rule block missing:\n%s", out)
+	}
+}
+
+// TestRunParallelApplyValidatesEachTaskDefinitionOnce pins the memoization
+// of task-definition validation. Real configs point many rules at a handful
+// of task definitions; without this, planning issues one identical
+// DescribeTaskDefinition per rule and ECS throttles the run before any
+// write happens (observed against a 150-rule config at -parallel 10).
+func TestRunParallelApplyValidatesEachTaskDefinitionOnce(t *testing.T) {
+	stub := &stubHTTPClient{handlers: stubHandlers(listRulesEmpty)}
+	captureLog(t)
+	var rules []*Rule
+	var names []string
+	for i := 0; i < 20; i++ {
+		name := fmt.Sprintf("rule-%02d", i)
+		ru := parallelTestRule(name)
+		if i >= 10 {
+			ru.TaskDefinition = "task2"
+		}
+		rules = append(rules, ru)
+		names = append(names, name)
+	}
+	c := parallelTestConfig(rules...)
+	if err := runParallelApply(context.Background(), stubAwsConfig(stub),
+		c, names, 10, diffFormatPrettyColored); err != nil {
+		t.Fatalf("parallel apply should succeed, got: %s", err)
+	}
+	describes := 0
+	for _, req := range stub.recorded() {
+		if req.target == "AmazonEC2ContainerServiceV20141113.DescribeTaskDefinition" {
+			describes++
+		}
+	}
+	if describes != 2 {
+		t.Errorf("DescribeTaskDefinition calls = %d, want 2: 20 rules share 2 task definitions", describes)
+	}
+}
+
+// TestApplyDryRunParallelValidatesEachTaskDefinitionOnce covers the same
+// amplification on the dry-run path, which does not go through
+// runParallelApply: it fans applyInternal out over executeJobsInParallel,
+// so the memoization has to be shared by the caller rather than created
+// per rule.
+func TestApplyDryRunParallelValidatesEachTaskDefinitionOnce(t *testing.T) {
+	stub := &stubHTTPClient{handlers: stubHandlers(listRulesEmpty)}
+	captureLog(t)
+	var rules []*Rule
+	for i := 0; i < 20; i++ {
+		rules = append(rules, parallelTestRule(fmt.Sprintf("rule-%02d", i)))
+	}
+	ctx := setApp(context.Background(), &app{
+		AccountID: "334",
+		AwsConf:   stubAwsConfig(stub),
+		Config:    parallelTestConfig(rules...),
+	})
+	err := cmdApply.Run(ctx, []string{"-all", "-dry-run", "-parallel", "10"}, io.Discard, io.Discard)
+	if err != nil {
+		t.Fatalf("dry-run should succeed, got: %s", err)
+	}
+	describes := 0
+	for _, req := range stub.recorded() {
+		if req.target == "AmazonEC2ContainerServiceV20141113.DescribeTaskDefinition" {
+			describes++
+		}
+	}
+	if describes != 1 {
+		t.Errorf("DescribeTaskDefinition calls = %d, want 1: 20 rules share one task definition", describes)
 	}
 }
 

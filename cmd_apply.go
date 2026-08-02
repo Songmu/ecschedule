@@ -79,13 +79,16 @@ var cmdApply = &runnerImpl{
 		format := selectDiffFormat(*unified)
 
 		if *dryRun {
+			// Shared across workers so rules pointing at the same task
+			// definition describe it once instead of once per rule.
+			tdv := newTaskDefValidator()
 			processApplyDryRunJob := func(ctx context.Context, ruleName string) (applyDryRunResult, error) {
 				ru := c.GetRuleByName(ruleName)
 				if ru == nil {
 					return applyDryRunResult{}, fmt.Errorf("no rules found for %s", ruleName)
 				}
 				log.Printf("applying the rule %q%s", ruleName, dryRunSuffix)
-				if err := ru.applyInternal(ctx, a.AwsConf, true, format); err != nil {
+				if err := ru.applyInternalWith(ctx, a.AwsConf, true, format, tdv); err != nil {
 					return applyDryRunResult{}, err
 				}
 				for _, v := range ru.ContainerOverrides {

@@ -10,6 +10,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatchevents"
+	"github.com/aws/aws-sdk-go-v2/service/ecs"
 	"github.com/goccy/go-yaml"
 )
 
@@ -50,13 +51,21 @@ func runParallelApply(ctx context.Context, awsConf aws.Config, c *Config, ruleNa
 	// error lists every failure and blocks all writes. Interruption is
 	// classified separately so Ctrl-C doesn't masquerade as a wall of
 	// validation errors.
+	//
+	// The validator memoizes DescribeTaskDefinition across rules and gets
+	// the same raised retry budget as the EventBridge clients: planning is
+	// where the call volume peaks, so it is the phase most exposed to
+	// throttling.
+	tdv := newTaskDefValidator(func(o *ecs.Options) {
+		o.RetryMaxAttempts = parallelRetryMaxAttempts
+	})
 	plans := make(map[string]*applyPlan, len(ruleNames))
 	var planErrs []jobOutcome[*applyPlan]
 	interrupted := false
 	for out := range executeJobsInParallelContinueOnError(ctx, ruleNames, parallel,
 		func(ctx context.Context, name string) (*applyPlan, error) {
 			ru := rules[name]
-			return ru.plan(ctx, awsConf, clients[ru.Region], format)
+			return ru.plan(ctx, awsConf, clients[ru.Region], format, tdv)
 		}) {
 		switch {
 		case out.Skipped || (out.Err != nil && errors.Is(out.Err, context.Canceled)):
