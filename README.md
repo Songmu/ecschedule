@@ -196,7 +196,9 @@ Notes for parallel apply (`-parallel > 1`):
 
 ### Signal Handling
 
-Since the introduction of parallel apply, all subcommands handle SIGINT/SIGTERM gracefully: the first signal cancels in-progress work at API-call boundaries (for parallel apply, no new rules start and in-flight rules finish within the per-rule timeout) and the command exits through the normal error path (exit status 1 with a `💢` message) instead of dying to the signal (previously exit status ~130). A second signal restores default fatal handling and kills the process immediately.
+Since the introduction of parallel apply, all subcommands handle SIGINT/SIGTERM gracefully. The first signal stops work at API-call boundaries and the command exits through the normal error path (exit status 1 with a `💢` message) instead of dying to the signal (previously exit status ~130). A second signal restores default fatal handling and kills the process immediately.
+
+One part is deliberately exempt from that first signal: a rule whose write has already begun always completes its `PutRule` → `PutTargets` → `TagResource` sequence. That sequence is detached from the signal (it runs under `context.WithoutCancel`) and bounded only by the per-rule timeout, so no rule is ever left half-written. This holds for any real `apply`, with or without `-parallel`. What the first signal does stop in a parallel apply is admission: no further rules start, and the command waits for the in-flight ones.
 
 ## Log Format
 
@@ -210,7 +212,7 @@ ecschedule supports unified diff format (similar to `git diff`) with `-u` flag f
 ```
 
 The `diff` command with `-u` flag outputs pure diff content without log prefixes or headers, making it suitable for piping to other tools.
-The `apply` command includes progress logs even with `-u` flag (with `-parallel > 1`, output is grouped into one block per rule).
+The `apply` command includes progress logs even with `-u` flag. With `-parallel > 1`, each rule's *result* — the diff and the resulting YAML — is written as a single indivisible block, so it never interleaves with another rule's result. The short `applying rule "..."` progress lines are emitted as each rule starts, so those do appear between result blocks.
 
 ### Color control
 
