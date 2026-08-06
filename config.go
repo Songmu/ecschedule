@@ -75,6 +75,29 @@ func (c *Config) cronValidate() error {
 	return nil
 }
 
+// validateUniqueRuleNames rejects configurations containing multiple rules
+// with the same name. GetRuleByName resolves names to the first match, so
+// duplicates silently shadow each other and, worse, hand the same *Rule to
+// multiple parallel workers (a data race).
+func (c *Config) validateUniqueRuleNames() error {
+	seen := map[string]bool{}
+	reported := map[string]bool{}
+	var dups []string
+	for _, r := range c.Rules {
+		if seen[r.Name] && !reported[r.Name] {
+			dups = append(dups, r.Name)
+			reported[r.Name] = true
+		}
+		seen[r.Name] = true
+	}
+	if len(dups) > 0 {
+		return fmt.Errorf(
+			"duplicate rule name(s) in configuration: %s (rule names must be unique; regenerate a clean config with `ecschedule dump -region <region> -cluster <cluster>`)",
+			strings.Join(dups, ", "))
+	}
+	return nil
+}
+
 func validateCronExpression(exp string) error {
 	if strings.HasPrefix(exp, "rate(") && strings.HasSuffix(exp, ")") {
 		return nil
@@ -174,6 +197,9 @@ func LoadConfig(ctx context.Context, r io.Reader, accountID string, confPath str
 	}
 	for _, r := range c.Rules {
 		r.mergeBaseConfig(c.BaseConfig, c.Role)
+	}
+	if err := c.validateUniqueRuleNames(); err != nil {
+		return nil, err
 	}
 	return &c, nil
 }
