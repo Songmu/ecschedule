@@ -15,7 +15,7 @@ jobs:
         with:
           persist-credentials: false
       - name: staticcheck
-        uses: reviewdog/action-staticcheck@564f18c6297af36f7b10b6c7a72e814341bd813a # v1.29.0
+        uses: reviewdog/action-staticcheck@53efac7da6eead83fb445fc490fef0b7ea57eeb1 # v1.31.0
         with:
           reporter: github-pr-review
           level: warning
