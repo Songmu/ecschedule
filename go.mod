@@ -1,6 +1,6 @@
 module github.com/Songmu/ecschedule
 
-go 1.25.0
+go 1.26.0
 
 toolchain go1.26.3
 
@@ -15,7 +15,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/sergi/go-diff v1.4.0
 	github.com/winebarrel/cronplan v1.10.5
-	golang.org/x/sync v0.22.0
+	golang.org/x/sync v0.23.0
 )
 
 require (
