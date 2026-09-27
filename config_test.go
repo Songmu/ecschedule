@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 	"text/template"
 
@@ -277,5 +278,38 @@ func TestCronValidate(t *testing.T) {
 		"\trule \"rule-5\": trailing or leading spaces are not allowed inside parentheses: \"cron( 0 0 * * ? * )\""
 	if g := err.Error(); g != e {
 		t.Errorf("unexpected error message\nwant:\n%s\n\ngot:\n%s", e, g)
+	}
+}
+
+func TestLoadConfigDuplicateRuleNames(t *testing.T) {
+	conf := `region: us-east-1
+cluster: api
+rules:
+- name: dup-task
+  scheduleExpression: cron(0 0 * * ? *)
+  taskDefinition: task1
+- name: dup-task
+  scheduleExpression: cron(5 0 * * ? *)
+  taskDefinition: task2
+`
+	dir := t.TempDir()
+	path := filepath.Join(dir, "dup.yaml")
+	if err := os.WriteFile(path, []byte(conf), 0644); err != nil {
+		t.Fatal(err)
+	}
+	f, err := os.Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	_, err = LoadConfig(context.Background(), f, "334", path)
+	if err == nil {
+		t.Fatal("expected duplicate rule name error, got nil")
+	}
+	if !strings.Contains(err.Error(), "dup-task") {
+		t.Errorf("error should name the duplicate rule, got: %s", err)
+	}
+	if !strings.Contains(err.Error(), "ecschedule dump") {
+		t.Errorf("error should mention the dump escape hatch, got: %s", err)
 	}
 }
