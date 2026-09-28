@@ -172,11 +172,12 @@ func TestLoadConfig_tfstate(t *testing.T) {
 }
 
 func TestLoadConfig_tfstate_baseConfig(t *testing.T) {
+	t.Chdir(t.TempDir())
 	state := `{"version":4,"outputs":{"settings":{"value":{
 		"region":"us-east-1","cluster":"api","role":"ecsEventsRole",
 		"trackingId":"scheduled-tasks"
 	},"type":["object",{"region":"string","cluster":"string","role":"string","trackingId":"string"}]}}}`
-	statePath := filepath.Join(t.TempDir(), "terraform.tfstate")
+	statePath := "terraform.tfstate"
 	if err := os.WriteFile(statePath, []byte(state), 0600); err != nil {
 		t.Fatal(err)
 	}
