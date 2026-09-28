@@ -173,9 +173,6 @@ func LoadConfig(ctx context.Context, r io.Reader, accountID string, confPath str
 		return nil, err
 	}
 	c.AccountID = accountID
-	if c.TrackingID == "" {
-		c.TrackingID = c.Cluster
-	}
 	if err := c.setupPlugins(ctx); err != nil {
 		return nil, err
 	}
@@ -194,6 +191,10 @@ func LoadConfig(ctx context.Context, r io.Reader, accountID string, confPath str
 	}
 	if err := unmarshalConfig(bs, &c, ext); err != nil {
 		return nil, err
+	}
+	// Default only after plugin templates have resolved the cluster name.
+	if c.TrackingID == "" {
+		c.TrackingID = c.Cluster
 	}
 	for _, r := range c.Rules {
 		r.mergeBaseConfig(c.BaseConfig, c.Role)
