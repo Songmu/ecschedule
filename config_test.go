@@ -1,7 +1,9 @@
 package ecschedule
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -10,6 +12,7 @@ import (
 	"text/template"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/goccy/go-yaml"
 )
 
 func TestLoadConfig(t *testing.T) {
@@ -165,6 +168,90 @@ func TestLoadConfig_tfstate(t *testing.T) {
 	esg := []string{"sg-11111111", "sg-99999999"}
 	if !reflect.DeepEqual(asg, esg) {
 		t.Errorf("error should be %v, but: %v", asg, esg)
+	}
+}
+
+func TestLoadConfig_tfstate_baseConfig(t *testing.T) {
+	t.Chdir(t.TempDir())
+	state := `{"version":4,"outputs":{"settings":{"value":{
+		"region":"us-east-1","cluster":"api","role":"ecsEventsRole",
+		"trackingId":"scheduled-tasks"
+	},"type":["object",{"region":"string","cluster":"string","role":"string","trackingId":"string"}]}}}`
+	statePath := "terraform.tfstate"
+	if err := os.WriteFile(statePath, []byte(state), 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, ext := range []string{".yaml", ".json", ".jsonnet"} {
+		for _, explicitTrackingID := range []bool{false, true} {
+			name := "default_tracking_id"
+			if explicitTrackingID {
+				name = "explicit_tracking_id"
+			}
+			t.Run(ext+"/"+name, func(t *testing.T) {
+				conf := map[string]interface{}{
+					"region":  "{{ tfstate `output.settings.region` }}",
+					"cluster": "{{ tfstate `output.settings.cluster` }}",
+					"role":    "{{ tfstate `output.settings.role` }}",
+					"rules": []map[string]interface{}{
+						{"name": "inherited", "scheduleExpression": "rate(1 day)", "taskDefinition": "task1"},
+						{
+							"name": "overridden", "scheduleExpression": "rate(1 day)", "taskDefinition": "task2",
+							"region": "us-west-2", "cluster": "worker", "role": "workerRole", "trackingId": "worker-tasks",
+						},
+					},
+					"plugins": []map[string]interface{}{
+						{"name": "tfstate", "config": map[string]string{"path": statePath}},
+					},
+				}
+				wantTrackingID := "api"
+				if explicitTrackingID {
+					conf["trackingId"] = "{{ tfstate `output.settings.trackingId` }}"
+					wantTrackingID = "scheduled-tasks"
+				}
+				marshal := func(v interface{}) ([]byte, error) { return json.MarshalIndent(v, "", "  ") }
+				if ext == ".yaml" {
+					marshal = func(v interface{}) ([]byte, error) { return yaml.Marshal(v) }
+				}
+				data, err := marshal(conf)
+				if err != nil {
+					t.Fatal(err)
+				}
+				path := filepath.Join(t.TempDir(), "ecschedule"+ext)
+				if err := os.WriteFile(path, data, 0600); err != nil {
+					t.Fatal(err)
+				}
+				c, err := LoadConfig(context.Background(), bytes.NewReader(data), "334", path)
+				if err != nil {
+					t.Fatal(err)
+				}
+				wantBase := &BaseConfig{
+					Region: "us-east-1", Cluster: "api", AccountID: "334", TrackingID: wantTrackingID,
+				}
+				if !reflect.DeepEqual(c.BaseConfig, wantBase) {
+					t.Errorf("base config = %#v, want %#v", c.BaseConfig, wantBase)
+				}
+				if c.Role != "ecsEventsRole" {
+					t.Errorf("role = %q, want ecsEventsRole", c.Role)
+				}
+				for _, r := range c.Rules {
+					if err := r.validateTFstate(); err != nil {
+						t.Errorf("rule %s: %v", r.Name, err)
+					}
+					wantRole := "ecsEventsRole"
+					want := wantBase
+					if r.Name == "overridden" {
+						wantRole = "workerRole"
+						want = &BaseConfig{
+							Region: "us-west-2", Cluster: "worker", AccountID: "334", TrackingID: "worker-tasks",
+						}
+					}
+					if !reflect.DeepEqual(r.BaseConfig, want) || r.Role != wantRole {
+						t.Errorf("rule %s: base = %#v, role = %q; want %#v, %q", r.Name, r.BaseConfig, r.Role, want, wantRole)
+					}
+				}
+			})
+		}
 	}
 }
 
