@@ -1,5 +1,24 @@
 # Changelog
 
+## [v0.21.0](https://github.com/Songmu/ecschedule/compare/v0.20.0...v0.21.0) - 2026-09-28
+
+- build(deps): bump the aws group with 6 updates by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/299
+- build(deps): bump the actions group with 2 updates by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/300
+- build(deps): bump google.golang.org/grpc from 1.81.0 to 1.82.1 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/302
+- build(deps): bump Songmu/tagpr from 1.20.0 to 1.20.1 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/301
+- Support -parallel > 1 for real apply by @snaka in https://github.com/Songmu/ecschedule/pull/306
+- build(deps): bump the aws group with 6 updates by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/305
+- build(deps): bump reviewdog/action-misspell from 1.27.0 to 1.29.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/317
+- build(deps): bump google.golang.org/grpc from 1.82.1 to 1.83.1 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/311
+- build(deps): bump reviewdog/action-actionlint from 1.72.0 to 1.74.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/319
+- build(deps): bump Songmu/tagpr from 1.20.1 to 1.20.3 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/314
+- build(deps): bump codecov/codecov-action from 7.0.0 to 7.1.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/316
+- build(deps): bump reviewdog/action-staticcheck from 1.29.0 to 1.32.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/318
+- build(deps): bump golang.org/x/sync from 0.22.0 to 0.23.0 in the golang-x group by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/312
+- build(deps): bump google.golang.org/grpc from 1.83.1 to 1.83.2 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/321
+- Resolve cluster templates before defaulting tracking IDs by @bensynapse in https://github.com/Songmu/ecschedule/pull/322
+- build(deps): bump go.opentelemetry.io/otel/sdk from 1.44.0 to 1.45.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/320
+
 ## [v0.20.0](https://github.com/Songmu/ecschedule/compare/v0.19.0...v0.20.0) - 2026-07-14
 
 - Bump golang.org/x/net to v0.55.0 (CVE-2026-39821) by @rymiyamoto in https://github.com/Songmu/ecschedule/pull/286
