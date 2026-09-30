@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.21.1](https://github.com/Songmu/ecschedule/compare/v0.21.0...v0.21.1) - 2026-09-30
+
+- build(deps): bump reviewdog/action-misspell from 1.29.0 to 1.30.1 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/324
+- build(deps): bump Songmu/tagpr from 1.20.3 to 1.21.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/325
+- build(deps): bump the aws group with 6 updates by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/328
+- build(deps): bump reviewdog/action-actionlint from 1.74.0 to 1.77.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/327
+- build(deps): bump codecov/codecov-action from 7.1.0 to 7.1.1 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/323
+- build(deps): bump reviewdog/action-staticcheck from 1.32.0 to 1.32.1 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/326
+
 ## [v0.21.0](https://github.com/Songmu/ecschedule/compare/v0.20.0...v0.21.0) - 2026-09-28
 
 - build(deps): bump the aws group with 6 updates by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/299
