@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.21.2](https://github.com/Songmu/ecschedule/compare/v0.21.1...v0.21.2) - 2026-10-15
+
+- build(deps): bump the aws group across 1 directory with 6 updates by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/338
+- build(deps): bump golang.org/x/sync from 0.23.0 to 0.24.0 in the golang-x group by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/333
+- build(deps): bump reviewdog/action-misspell from 1.30.1 to 1.30.2 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/337
+- build(deps): bump reviewdog/action-staticcheck from 1.32.1 to 1.33.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/336
+- build(deps): bump reviewdog/action-actionlint from 1.77.0 to 1.80.0 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/335
+- build(deps): bump Songmu/tagpr from 1.21.0 to 1.21.2 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/334
+
 ## [v0.21.1](https://github.com/Songmu/ecschedule/compare/v0.21.0...v0.21.1) - 2026-09-30
 
 - build(deps): bump reviewdog/action-misspell from 1.29.0 to 1.30.1 by @dependabot[bot] in https://github.com/Songmu/ecschedule/pull/324
